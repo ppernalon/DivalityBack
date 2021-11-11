@@ -20,6 +20,7 @@ namespace Divality.Models
         public int Disciples { get; set; }
         public int Collection { get; set; }
         public string[] Friends{ get; set; }
+        public Team[] Teams { get; set; }
 
 
     }

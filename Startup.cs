@@ -35,7 +35,6 @@ namespace Divality
             services.AddSingleton<IDivalityDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<DivalityDatabaseSettings>>().Value);
             services.AddSingleton<UsersCRUDService>();
-            services.AddSingleton<TeamsCRUDService>();
             services.AddSingleton<CardsCRUDService>();
             services.AddSingleton<AuctionHousesCRUDService>();
             services.AddControllers();
