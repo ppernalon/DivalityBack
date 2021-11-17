@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Divality.Services;
 
 namespace Divality
 {
@@ -37,6 +38,7 @@ namespace Divality
             services.AddSingleton<UsersCRUDService>();
             services.AddSingleton<CardsCRUDService>();
             services.AddSingleton<AuctionHousesCRUDService>();
+            services.AddSingleton<UsersService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
