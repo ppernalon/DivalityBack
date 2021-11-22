@@ -1,8 +1,8 @@
 ﻿using MongoDB.Driver;
 using System.Collections.Generic;
-using Divality.Models;
+using DivalityBack.Models;
 
-namespace Divality.Services.CRUD
+namespace DivalityBack.Services.CRUD
 {
     public class UsersCRUDService
     {

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using Divality.Models;
-using Divality.Services.CRUD;
+using DivalityBack.Models;
+using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Divality.Controllers
+namespace DivalityBack.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

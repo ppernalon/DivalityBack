@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Divality.Models;
+using DivalityBack.Models;
 using MongoDB.Driver;
 
-namespace Divality.Services.CRUD
+namespace DivalityBack.Services.CRUD
 {
     public class CardsCRUDService
     {
