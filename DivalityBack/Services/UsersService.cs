@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using System.Text;
 
 namespace Divality.Services
 {
@@ -8,17 +8,10 @@ namespace Divality.Services
     {
         public string HashPassword(String password)
         {
-            byte[] salt = new byte[128 / 8];
-            using (var rngCsp = new RNGCryptoServiceProvider())
-            {
-                rngCsp.GetNonZeroBytes(salt);
-            }
-            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: password,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 100000,
-                numBytesRequested: 256 / 8));
+            byte[] passwordBytes = ASCIIEncoding.ASCII.GetBytes(password);
+            byte[] passwordBytesHash = new MD5CryptoServiceProvider().ComputeHash(passwordBytes);
+            string passwordHash = Encoding.Default.GetString(passwordBytesHash);
+            return passwordHash;
         }
     }
 }
