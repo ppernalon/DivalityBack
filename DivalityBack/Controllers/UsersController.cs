@@ -1,19 +1,23 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json;
+using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/user")]
     [ApiController]
     public class UsersController : ControllerBase
     {
         private readonly UsersCRUDService _usersCRUDService;
+        private readonly UsersService _usersService; 
 
         public UsersController(UsersCRUDService usersCRUDService)
         {
             _usersCRUDService = usersCRUDService;
+            _usersService = new UsersService(); 
         }
 
         [HttpGet]
@@ -33,13 +37,18 @@ namespace DivalityBack.Controllers
             return user;
         }
 
-        [HttpPost]
-        public ActionResult<User> Create(User user)
+        [HttpPost("signup")]
+        public ActionResult<User> Create([FromBody] JsonElement userJson)
         {
-            _usersCRUDService.Create(user);
-
-            return CreatedAtRoute("GetUser", new { id = user.Id.ToString() }, user);
-        }
+            User newUser = new User();
+            //On remplit l'username et le password depuis le body de la requête POST;
+            newUser.Username = userJson.GetProperty("username").GetString();
+            //On hash le password
+            newUser.Password = _usersService.HashPassword(userJson.GetProperty("password").GetString());
+        
+            //On créé l'entrée en base
+            _usersCRUDService.Create(newUser);
+            return CreatedAtRoute("GetUser", new { id = newUser.Id.ToString() }, newUser);        }
 
         [HttpPut("{id:length(24)}")]
         public IActionResult Update(string id, User userIn)
