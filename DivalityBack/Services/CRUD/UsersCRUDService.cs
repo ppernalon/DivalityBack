@@ -7,7 +7,6 @@ namespace DivalityBack.Services.CRUD
     public class UsersCRUDService
     {
         private readonly IMongoCollection<User> _users ;
-
         public UsersCRUDService(IDivalityDatabaseSettings settings)
         {
             var client = new MongoClient(settings.ConnectionString);

@@ -1,3 +1,4 @@
+using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Builder;
@@ -28,6 +29,7 @@ namespace DivalityBack
             services.AddSingleton<IDivalityDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<DivalityDatabaseSettings>>().Value);
             services.AddSingleton<UsersCRUDService>();
+            services.AddSingleton<UsersService>();
             services.AddSingleton<CardsCRUDService>();
             services.AddSingleton<AuctionHousesCRUDService>();
             services.AddControllers();

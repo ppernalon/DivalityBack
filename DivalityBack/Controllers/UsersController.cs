@@ -14,10 +14,10 @@ namespace DivalityBack.Controllers
         private readonly UsersCRUDService _usersCRUDService;
         private readonly UsersService _usersService; 
 
-        public UsersController(UsersCRUDService usersCRUDService)
+        public UsersController(UsersCRUDService usersCRUDService, UsersService usersService)
         {
             _usersCRUDService = usersCRUDService;
-            _usersService = new UsersService(); 
+            _usersService = usersService; 
         }
 
         [HttpGet]
@@ -40,14 +40,7 @@ namespace DivalityBack.Controllers
         [HttpPost("signup")]
         public ActionResult<User> Create([FromBody] JsonElement userJson)
         {
-            User newUser = new User();
-            //On remplit l'username et le password depuis le body de la requête POST;
-            newUser.Username = userJson.GetProperty("username").GetString();
-            //On hash le password
-            newUser.Password = _usersService.HashPassword(userJson.GetProperty("password").GetString());
-        
-            //On créé l'entrée en base
-            _usersCRUDService.Create(newUser);
+            User newUser = _usersService.SignUp(userJson);
             return CreatedAtRoute("GetUser", new { id = newUser.Id.ToString() }, newUser);        }
 
         [HttpPut("{id:length(24)}")]
