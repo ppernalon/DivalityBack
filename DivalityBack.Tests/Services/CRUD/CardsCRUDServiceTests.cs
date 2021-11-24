@@ -130,7 +130,7 @@ namespace DivalityBack.Tests
         }
 
         [TestMethod]
-        public void Remove_One_User_From_Database()
+        public void Remove_One_Card_From_Database_By_Passing_Object()
         {
             //On créé une Carte pour le test
             Card newCard = new Card();
@@ -150,6 +150,30 @@ namespace DivalityBack.Tests
             Assert.IsNotNull(cardInDb, "La carte de Test n'a pas été créée en base de données");
             
             _cardsCrudService.Remove(cardInDb);
+            Assert.IsNull(_cardsCrudService.Get(cardInDb.Id), "La carte n'a pas été supprimée de la base de données");
+        }
+        
+        [TestMethod]
+        public void Remove_One_Card_From_Database_By_Passing_Id()
+        {
+            //On créé une Carte pour le test
+            Card newCard = new Card();
+            
+            newCard.Armor = 10; 
+            newCard.Available = 20;
+            newCard.Distributed = 5;
+            newCard.isLimited = true;
+            newCard.Life = 40;
+            newCard.Name = "CardTestRemove";
+            newCard.Pantheon = "PantheonTest";
+            newCard.Power = 15;
+            newCard.Rarity = "Commune";
+            newCard.Speed = 20;
+
+            Card cardInDb = _cardsCrudService.Create(newCard);
+            Assert.IsNotNull(cardInDb, "La carte de Test n'a pas été créée en base de données");
+            
+            _cardsCrudService.Remove(cardInDb.Id);
             Assert.IsNull(_cardsCrudService.Get(cardInDb.Id), "La carte n'a pas été supprimée de la base de données");
         } 
     }

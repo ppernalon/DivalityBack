@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -112,7 +111,7 @@ namespace DivalityBack.Tests
         }
 
         [TestMethod]
-        public void Remove_One_User_From_Database()
+        public void Remove_One_User_From_Database_By_Passing_Object()
         {
             //On créé un User pour le test
             User newUser = new User();
@@ -125,6 +124,23 @@ namespace DivalityBack.Tests
             Assert.IsNotNull(userInDb, "L'User de Test n'a pas été créé en base de données");
             
             _usersCrudService.Remove(userInDb);
+            Assert.IsNull(_usersCrudService.Get(userInDb.Id), "L'User n'a pas été supprimé de la base de données");
+        }
+        
+        [TestMethod]
+        public void Remove_One_User_From_Database_By_Passing_Id()
+        {
+            //On créé un User pour le test
+            User newUser = new User();
+            newUser.Username = "UserTestRemove";
+            newUser.Password = "PasswordTest";
+            newUser.Victory = 10;
+            newUser.Defeat = 5;
+            User userInDb = _usersCrudService.Create(newUser);
+            
+            Assert.IsNotNull(userInDb, "L'User de Test n'a pas été créé en base de données");
+            
+            _usersCrudService.Remove(userInDb.Id);
             Assert.IsNull(_usersCrudService.Get(userInDb.Id), "L'User n'a pas été supprimé de la base de données");
         }
     }
