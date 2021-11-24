@@ -16,7 +16,7 @@ namespace DivalityBack.Tests
         }
         
         [TestMethod]
-        public void HashTwoSamePasswordsSameResult()
+        public void Hash_Two_Same_Passwords_Same_Result()
         {
             string passwordHash1 = _usersService.HashPassword("passwordTest");
             string passwordHash2 = _usersService.HashPassword("passwordTest");
@@ -24,7 +24,7 @@ namespace DivalityBack.Tests
         }
         
         [TestMethod]
-        public void HashTwoDifferentPasswordsDifferentResult()
+        public void Hash_Two_Different_Passwords_Different_Result()
         {
             string passwordHash1 = _usersService.HashPassword("passwordTest1");
             string passwordHash2 = _usersService.HashPassword("passwordTest2");
@@ -32,7 +32,7 @@ namespace DivalityBack.Tests
         }
         
         [TestMethod]
-        public void HashedPasswordDifferentFromOriginalPassword()
+        public void Hashed_Password_Different_From_Original_Password()
         {
             Assert.IsFalse(_usersService.HashPassword("passwordTest").Equals("passwordTest"), "Hashing a password does return the same value as the password given");
         }
