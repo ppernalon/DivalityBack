@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Divality.Services;
 using DivalityBack.Models;
@@ -12,17 +13,27 @@ namespace DivalityBack.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UsersCRUDService _usersCRUDService;
-        private readonly UsersService _usersService; 
+        private readonly UsersService _usersService;
 
         public UsersController(UsersCRUDService usersCRUDService, UsersService usersService)
         {
             _usersCRUDService = usersCRUDService;
-            _usersService = usersService; 
+            _usersService = usersService;
         }
 
-        [HttpGet]
-        public ActionResult<List<User>> Get() =>
-            _usersCRUDService.Get();
+        [HttpPost("signup")]
+        public ActionResult<User> Create([FromBody] JsonElement userJson)
+        {
+            User newUser = _usersService.SignUp(userJson);
+            return CreatedAtRoute("GetUser", new {id = newUser.Id.ToString()}, newUser);
+        }
+
+        [HttpGet("signin/{username}/{password}")]
+        public ActionResult<User> GetByUsername([FromRoute] String username, [FromRoute] String password)
+        { 
+            User user = _usersService.SignIn(username, password); 
+           return user; 
+        }
 
         [HttpGet("{id:length(24)}", Name = "GetUser")]
         public ActionResult<User> Get(string id)
@@ -36,13 +47,7 @@ namespace DivalityBack.Controllers
 
             return user;
         }
-
-        [HttpPost("signup")]
-        public ActionResult<User> Create([FromBody] JsonElement userJson)
-        {
-            User newUser = _usersService.SignUp(userJson);
-            return CreatedAtRoute("GetUser", new { id = newUser.Id.ToString() }, newUser);        }
-
+        
         [HttpPut("{id:length(24)}")]
         public IActionResult Update(string id, User userIn)
         {

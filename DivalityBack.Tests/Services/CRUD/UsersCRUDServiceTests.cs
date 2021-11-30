@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,7 +12,7 @@ namespace DivalityBack.Tests
     {
         private static UsersCRUDService _usersCrudService = null;
         private static IDivalityDatabaseSettings _settings = null;
-        
+        private static UsersService _usersService = null; 
         [ClassInitialize]
         public static void SetUp(TestContext context)
         {
@@ -24,6 +25,7 @@ namespace DivalityBack.Tests
             _settings.UsersCollectionName = "Users";
             
             _usersCrudService = new UsersCRUDService(_settings);
+            _usersService = new UsersService(_usersCrudService);
         }
 
         [TestMethod]

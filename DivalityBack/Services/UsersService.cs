@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Divality.Services
 {
@@ -32,6 +33,13 @@ namespace Divality.Services
         
             //On créé l'entrée en base
             return _usersCRUDService.Create(newUser);
+        }
+
+        public User SignIn(string username, string password)
+        {
+            password = HashPassword(password);
+            User user = _usersCRUDService.GetByUsernameAndPassword(username, password);
+            return user;
         }
     }
 }

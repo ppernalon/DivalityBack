@@ -1,6 +1,8 @@
-﻿using MongoDB.Driver;
+﻿using System;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using DivalityBack.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Services.CRUD
 {
@@ -35,5 +37,19 @@ namespace DivalityBack.Services.CRUD
 
         public void Remove(string id) =>
             _users.DeleteOne(user => user.Id == id);
+
+        public User GetByUsername(String username)
+        {
+            User user = _users.Find(_users => _users.Username.Equals(username)).FirstOrDefault();
+            return user;
+        }
+
+        public User GetByUsernameAndPassword(String username, String password)
+        {
+            User user = _users.Find(_users => _users.Username.Equals(username) && _users.Password.Equals(password))
+                .FirstOrDefault();
+            return user; 
+        }
+        
     }
 }
