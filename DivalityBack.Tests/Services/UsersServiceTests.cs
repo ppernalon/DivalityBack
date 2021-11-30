@@ -58,8 +58,8 @@ namespace DivalityBack.Tests
             newUser.Defeat = 5;
             _usersCrudService.Create(newUser);
 
-            User userInDb = _usersService.SignIn("UserTestSignIn", "PasswordTest");
-            Assert.IsNotNull(userInDb);
+            String userInDbInfo = _usersService.SignIn("UserTestSignIn", "PasswordTest");
+            Assert.IsNotNull(userInDbInfo);
         }
         
         [TestMethod]
@@ -73,14 +73,14 @@ namespace DivalityBack.Tests
             newUser.Defeat = 5;
             _usersCrudService.Create(newUser);
 
-            User userInDbWrongPassword = _usersService.SignIn("UserTestSignIn", "Wrong");
-            Assert.IsNull(userInDbWrongPassword);
+            String userInDbWrongPasswordInfo = _usersService.SignIn("UserTestSignIn", "Wrong");
+            Assert.IsNull(userInDbWrongPasswordInfo);
             
-            User userInDbWrongUsername = _usersService.SignIn("Wrong", "PasswordTest");
-            Assert.IsNull(userInDbWrongUsername);
+            String userInDbWrongUsernameInfo = _usersService.SignIn("Wrong", "PasswordTest");
+            Assert.IsNull(userInDbWrongUsernameInfo);
             
-            User userInDbWrongUsernameAndPassword = _usersService.SignIn("Wrong", "Wrong");
-            Assert.IsNull(userInDbWrongUsernameAndPassword);
+            String userInDbWrongUsernameAndPasswordInfo = _usersService.SignIn("Wrong", "Wrong");
+            Assert.IsNull(userInDbWrongUsernameAndPasswordInfo);
         }
         
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -26,20 +27,39 @@ namespace Divality.Services
         public User SignUp(JsonElement userJson)
         {
             User newUser = new User();
+            Console.Write("USERJSON : "+userJson.ToString());
             //On remplit l'username et le password depuis le body de la requête POST;
             newUser.Username = userJson.GetProperty("username").GetString();
+            Console.Write(newUser.Username);
+            Console.Write(userJson.GetProperty("username").ToString());
             //On hash le password
             newUser.Password = HashPassword(userJson.GetProperty("password").GetString());
         
+            // On vérifie que l'username n'existe pas déjà en base, sinon on renvoie null
+            if (_usersCRUDService.GetByUsername(newUser.Username) != null)
+            {
+                return null;
+            }
+            //Sinon
             //On créé l'entrée en base
             return _usersCRUDService.Create(newUser);
         }
 
-        public User SignIn(string username, string password)
+        public String SignIn(string username, string password)
         {
             password = HashPassword(password);
             User user = _usersCRUDService.GetByUsernameAndPassword(username, password);
-            return user;
+            Console.Write(user);
+            if (user == null)
+            {
+                return null;
+            }
+            
+            Dictionary<String, String> dictRes = new Dictionary<string, string>();
+            dictRes.Add("disciples", user.Disciples.ToString());
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            
+            return jsonString;
         }
     }
 }

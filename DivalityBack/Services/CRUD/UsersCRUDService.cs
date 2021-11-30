@@ -40,7 +40,9 @@ namespace DivalityBack.Services.CRUD
 
         public User GetByUsername(String username)
         {
+            Console.Write(username);
             User user = _users.Find(_users => _users.Username.Equals(username)).FirstOrDefault();
+            Console.Write(user);
             return user;
         }
 
