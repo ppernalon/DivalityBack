@@ -55,6 +55,8 @@ namespace DivalityBack
 
             app.UseAuthorization();
 
+            app.UseWebSockets();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
