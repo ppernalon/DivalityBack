@@ -40,13 +40,13 @@ namespace DivalityBack.Models
 
         public static IEqualityComparer<User> UserComparer { get; } = new UserEqualityComparer();
 
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public String Username { get; set; }
+        public String Password { get; set; }
         public int Victory { get; set; }
         public int Defeat { get; set; }
         public int Disciples { get; set; }
         public int Collection { get; set; }
-        public string[] Friends{ get; set; }
+        public List<String> Friends{ get; set; }
         public Team[] Teams { get; set; }
 
 

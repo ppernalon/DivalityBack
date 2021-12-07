@@ -32,6 +32,7 @@ namespace DivalityBack
             services.AddSingleton<UsersService>();
             services.AddSingleton<CardsCRUDService>();
             services.AddSingleton<AuctionHousesCRUDService>();
+            services.AddSingleton<WebsocketService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

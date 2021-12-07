@@ -1,6 +1,7 @@
 ﻿using System;
 using MongoDB.Driver;
 using System.Collections.Generic;
+using Divality.Services;
 using DivalityBack.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,9 +41,7 @@ namespace DivalityBack.Services.CRUD
 
         public User GetByUsername(String username)
         {
-            Console.Write(username);
             User user = _users.Find(_users => _users.Username.Equals(username)).FirstOrDefault();
-            Console.Write(user);
             return user;
         }
 
@@ -53,5 +52,9 @@ namespace DivalityBack.Services.CRUD
             return user; 
         }
         
+        public List<User> GetUsersById(List<String> listId)
+        {
+            return _users.Find(_users => listId.Contains(_users.Id)).ToList();
+        }
     }
 }
