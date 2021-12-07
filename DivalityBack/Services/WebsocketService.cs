@@ -14,7 +14,7 @@ namespace Divality.Services
 {
     public class WebsocketService
     {
-        private List<User> listActivePlayers = new List<User>();
+        private Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
         private readonly UsersCRUDService _usersCrudService;
 
         public WebsocketService(UsersCRUDService usersCrudService)
@@ -62,27 +62,48 @@ namespace Divality.Services
         public async Task HandleConnexion(WebSocket webSocket, MemoryStream memoryStream, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             List<String> listUsernameFriendsUserConnected = new List<string>();
-            byte[] dataAsBytes = new byte[4096]; 
             
             String username = msgJson.RootElement.GetProperty("username").ToString();
             //On met à jour une liste globale des utilisateurs connectés
             User userConnected =
                 _usersCrudService.GetByUsername(username);
-            listActivePlayers.Add(userConnected);
+            mapActivePlayersWebsocket.Add(username, webSocket);
 
-            List<User> listFriendsUser = new List<User>();
-            if (userConnected.Friends != null)
-            {
-                listFriendsUser = _usersCrudService.GetUsersById(userConnected.Friends);
-                List<String> listUsernameFriendsUser = listFriendsUser.Select(s => s.Username).ToList();
+            //On recupère la liste des usernames des amis connectés 
+            List<String> listUsernameFriends =
+                _usersCrudService.GetUsersById(userConnected.Friends).Select(s => s.Username).ToList();
+            List<String> listUsernameUsersConnected = new List<string>(mapActivePlayersWebsocket.Keys);
+            List<String> listUsernameFriendsConnected =
+                listUsernameFriends.Intersect(listUsernameUsersConnected).ToList();
+    
             
-                //On renvoie à l'utilisateur la liste de ses amis connectés
-                listUsernameFriendsUserConnected =
-                    listUsernameFriendsUser.Intersect(listActivePlayers.Select(s => s.Username)).ToList();
+            byte[] bytesUsernamesFriends = listUsernameFriendsConnected
+                .SelectMany(s => Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
+            
+            //On envoie au nouveau user la liste de ses amis connectés
+            await webSocket.SendAsync(bytesUsernamesFriends, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
+
+            //On envoie à tous ses amis la liste de leurs amis mise à jour
+            foreach (String usernameFriendUserConnected in listUsernameFriendsConnected)
+            {
+                User user = _usersCrudService.GetByUsername(usernameFriendUserConnected);
+                
+                //On récupère la liste des amis connectés de l'User
+                listUsernameFriends =
+                    _usersCrudService.GetUsersById(user.Friends).Select(s => s.Username).ToList();
+                listUsernameUsersConnected = new List<string>(mapActivePlayersWebsocket.Keys);
+                listUsernameFriendsConnected =
+                    listUsernameFriends.Intersect(listUsernameUsersConnected).ToList(); 
+                
+                
+                bytesUsernamesFriends = listUsernameFriendsConnected
+                    .SelectMany(s => Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
+                
+                WebSocket websocketFriendUserConnected = mapActivePlayersWebsocket[usernameFriendUserConnected];
+                await websocketFriendUserConnected.SendAsync(bytesUsernamesFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);
+
             }
-            dataAsBytes = listUsernameFriendsUserConnected.SelectMany(s =>
-                Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();   
-            await webSocket.SendAsync(dataAsBytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
         
         private async Task HandleDeconnexion(WebSocket websocket, MemoryStream ms, WebSocketReceiveResult result, JsonDocument msgJson)
@@ -91,7 +112,7 @@ namespace Divality.Services
             //On met à jour une liste globale des utilisateurs connectés
             User userDisconnected =
                 _usersCrudService.GetByUsername(username);
-            listActivePlayers.Remove(userDisconnected);
+            mapActivePlayersWebsocket.Remove(username);
             
             //On initialise une liste de pseudos des joueurs ayant cet utilisateur dans leur liste d'ami
             List<String> listUsersHavingUserDisconnectedAsFriend = new List<String>();
