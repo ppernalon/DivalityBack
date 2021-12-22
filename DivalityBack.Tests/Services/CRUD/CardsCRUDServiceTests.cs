@@ -11,20 +11,11 @@ namespace DivalityBack.Tests
     public class CardsCRUDServiceTests
     {
         private static CardsCRUDService _cardsCrudService = null;
-        private static IDivalityDatabaseSettings _settings = null;
         
         [ClassInitialize]
         public static void SetUp(TestContext context)
         {
-            _settings = new DivalityDatabaseSettings();
-            
-            // C'est pas propre mais j'ai pas trouvé de moyen pour accéder aux properties depuis le projet de test
-            _settings.ConnectionString =
-                "mongodb+srv://App:Sc7DflVYPuqlTel4@divality.gouyd.mongodb.net/Divality?retryWrites=true&w=majority";
-            _settings.DatabaseName = "DivalityTest";
-            _settings.CardsCollectionName = "Cards";
-            
-            _cardsCrudService = new CardsCRUDService(_settings);
+            _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
         }
 
         [TestMethod]
@@ -69,7 +60,7 @@ namespace DivalityBack.Tests
             
             //On  vérifie que les informations remontées sont correctes
             Assert.IsTrue(cardInDb.Name.Equals("CardTestGetOne"), "Le nom de la carte en base n'est pas celui attendu");
-            Assert.IsTrue(cardInDb.Pantheon.Equals("PantheonTest"), "Le pantheon de la carte en base n'est pas celui attendu");
+            Assert.IsTrue(cardInDb.Pantheon.ToUpper().Trim().Equals("NORDIQUE"), "Le pantheon de la carte en base n'est pas celui attendu");
             Assert.IsTrue(cardInDb.Rarity.Equals("Rare"), "La rareté de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.Life.Equals(40), "La vie de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.Speed.Equals(20), "La vitesse de la carte en base n'est pas celle attendue");

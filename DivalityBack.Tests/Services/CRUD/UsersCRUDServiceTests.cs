@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Divality.Services;
 using DivalityBack.Models;
+using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,22 +11,14 @@ namespace DivalityBack.Tests
     [TestClass]
     public class UsersCRUDServiceTests
     {
-        private static UsersCRUDService _usersCrudService = null;
-        private static IDivalityDatabaseSettings _settings = null;
-        private static UsersService _usersService = null; 
+        private static UsersCRUDService _usersCrudService;
+        private static UsersService _usersService;
+        private static CardsService _cardsService; 
         [ClassInitialize]
         public static void SetUp(TestContext context)
         {
-            _settings = new DivalityDatabaseSettings();
-            
-            // C'est pas propre mais j'ai pas trouvé de moyen pour accéder aux properties depuis le projet de test
-            _settings.ConnectionString =
-                "mongodb+srv://App:Sc7DflVYPuqlTel4@divality.gouyd.mongodb.net/Divality?retryWrites=true&w=majority";
-            _settings.DatabaseName = "DivalityTest";
-            _settings.UsersCollectionName = "Users";
-            
-            _usersCrudService = new UsersCRUDService(_settings);
-            _usersService = new UsersService(_usersCrudService);
+            _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
+            _usersService = new UsersService(_usersCrudService, _cardsService);
         }
 
         [TestMethod]
