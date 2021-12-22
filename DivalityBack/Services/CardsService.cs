@@ -30,28 +30,32 @@ namespace DivalityBack.Services
             int randomNumberRarity = new Random().Next(1, 101);
             if (randomNumberRarity <= mapRarityPurcentage["commune"])
             {
-                return "commune";
+                return "Commune";
             }
             if (randomNumberRarity <= mapRarityPurcentage["rare"])
             {
-                return "rare";
+                return "Rare";
             }
-            return "legendaire";
+            return "Légendaire";
         }
 
         public Card GenerateNewCard(string pantheon)
         {
             String rarity = GenerateRarity();
             List<Card> listOfCards = _cardsCrudService.GetCardsByPantheonAndRarity(pantheon, rarity);
-            Card cardGenerated = listOfCards[new Random().Next(listOfCards.Count)];
-
-            if (cardGenerated.isLimited)
+            if (listOfCards.Count > 0 )
             {
-                cardGenerated.Available -= 1;
-                _cardsCrudService.Update(cardGenerated.Id, cardGenerated);
+                Card cardGenerated = listOfCards[new Random().Next(listOfCards.Count)];
+
+                if (cardGenerated.isLimited)
+                {
+                    cardGenerated.Distributed += 1;
+                    _cardsCrudService.Update(cardGenerated.Id, cardGenerated);
+                }
+
+                return cardGenerated;
             }
-            
-            return cardGenerated; 
+            return null; 
         }
     }
 }
