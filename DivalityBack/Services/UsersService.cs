@@ -124,15 +124,25 @@ namespace Divality.Services
             if (CanAffordCard(user))
             {
                 //On génère la carte aléatoire en fonction du pantheon choisi
-                Card card = _cardsService.GenerateNewCard(pantheon); 
+                Card card = _cardsService.GenerateNewCard(pantheon);
                 //On met à jour le nombre de disciples et la collection
                 user.Disciples -= _cardsService.priceOfCard;
                 user.Collection.Add(card.Id);
-                
+
                 _usersCRUDService.Update(user.Id, user);
 
-                await WarnUserPurchaseCard(webSocket, result, card.Id); 
+                await WarnUserPurchaseCard(webSocket, result, card.Id);
             }
+            else
+            {
+                await WarnUserNotEnoughDisciples(webSocket, result); 
+            }
+        }
+
+        private async Task WarnUserNotEnoughDisciples(WebSocket webSocket, WebSocketReceiveResult result)
+        {
+            byte[] byteNotEnoughDisciples = Encoding.UTF8.GetBytes("L'utilisateur ne possède pas assez de disciples");
+            await webSocket.SendAsync(byteNotEnoughDisciples, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         public Boolean CanAffordCard(User user)
