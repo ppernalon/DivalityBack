@@ -36,5 +36,12 @@ namespace DivalityBack.Services.CRUD
 
         public void Remove(string id) =>
             _cards.DeleteOne(card => card.Id == id);
+
+        public List<Card> GetCardsByPantheonAndRarity(string pantheon, string rarity)
+        {
+            return _cards.Find(card =>
+                card.Pantheon.Equals(pantheon) && card.Rarity.Equals(rarity) &&
+                ((card.isLimited && card.Available > 0) || !card.isLimited)).ToList(); 
+        }
     }
 }

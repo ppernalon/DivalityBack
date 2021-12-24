@@ -45,9 +45,9 @@ namespace DivalityBack.Models
         public int Victory { get; set; }
         public int Defeat { get; set; }
         public int Disciples { get; set; }
-        public int Collection { get; set; }
+        public List<String> Collection { get; set; }
         public List<String> Friends{ get; set; }
-        public Team[] Teams { get; set; }
+        public List<Team> Teams { get; set; }
 
 
     }

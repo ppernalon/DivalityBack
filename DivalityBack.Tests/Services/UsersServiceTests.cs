@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Divality.Services;
 using DivalityBack.Models;
+using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 
 namespace DivalityBack.Tests
@@ -9,20 +11,16 @@ namespace DivalityBack.Tests
     [TestClass]
     public class UsersServiceTests
     {
-        private static UsersService _usersService = null;
-        private static UsersCRUDService _usersCrudService = null; 
-        private static IDivalityDatabaseSettings _settings = null;
+        private static UsersService _usersService;
+        private static CardsService _cardsService; 
+        private static UsersCRUDService _usersCrudService; 
 
         [ClassInitialize]
         public static void SetUp(TestContext context)
         {
-            _settings = new DivalityDatabaseSettings();
-            _settings.ConnectionString =
-                "mongodb+srv://App:Sc7DflVYPuqlTel4@divality.gouyd.mongodb.net/Divality?retryWrites=true&w=majority";
-            _settings.DatabaseName = "DivalityTest";
-            _settings.UsersCollectionName = "Users";
-            _usersCrudService = new UsersCRUDService(_settings);
-            _usersService = new UsersService(_usersCrudService);
+            _cardsService = new CardsService(new CardsCRUDService(SetupAssemblyInitializer._settings));
+            _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings); 
+            _usersService = new UsersService(_usersCrudService, _cardsService);
         }
         
         [TestMethod]
@@ -60,6 +58,8 @@ namespace DivalityBack.Tests
 
             String userInDbInfo = _usersService.SignIn("UserTestSignIn", "PasswordTest");
             Assert.IsNotNull(userInDbInfo);
+            
+            _usersCrudService.Remove(newUser);
         }
         
         [TestMethod]
@@ -82,7 +82,19 @@ namespace DivalityBack.Tests
             String userInDbWrongUsernameAndPasswordInfo = _usersService.SignIn("Wrong", "Wrong");
             Assert.IsNull(userInDbWrongUsernameAndPasswordInfo);
         }
-        
-    }
 
+        [TestMethod]
+        public void Can_Afford_Card_Returns_True_When_User_Can_Afford_A_Card()
+        {
+            User user = _usersCrudService.Get("61c346cfead236cba80ecec5");
+            Assert.IsTrue(_usersService.CanAffordCard(user), "La méthode CanAffordCard renvoie false alors que l'user peut acheter une carte");
+        }
+        
+        [TestMethod]
+        public void Can_Afford_Card_Returns_False_When_User_Cannot_Afford_A_Card()
+        {
+            User user = _usersCrudService.Get("61c34840ead236cba80ecec6");
+            Assert.IsFalse(_usersService.CanAffordCard(user), "La méthode CanAffordCard renvoie true alors que l'user ne peut pas acheter de carte");
+        }
+    }
 }

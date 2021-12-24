@@ -1,5 +1,6 @@
 using Divality.Services;
 using DivalityBack.Models;
+using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +32,7 @@ namespace DivalityBack
             services.AddSingleton<UsersCRUDService>();
             services.AddSingleton<UsersService>();
             services.AddSingleton<CardsCRUDService>();
+            services.AddSingleton<CardsService>(); 
             services.AddSingleton<AuctionHousesCRUDService>();
             services.AddSingleton<WebsocketService>();
             services.AddControllers();
