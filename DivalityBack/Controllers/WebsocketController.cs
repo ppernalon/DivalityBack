@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Divality.Services;
 namespace DivalityBack.Controllers
 {
-    [Route("/connexion")]
+    [Route("/connection")]
     [ApiController]
     public class WebsocketController : ControllerBase
     {

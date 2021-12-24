@@ -1,9 +1,7 @@
 ﻿using System;
 using MongoDB.Driver;
 using System.Collections.Generic;
-using Divality.Services;
 using DivalityBack.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Services.CRUD
 {
