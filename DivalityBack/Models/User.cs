@@ -10,36 +10,6 @@ namespace DivalityBack.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-
-        private sealed class UserEqualityComparer : IEqualityComparer<User>
-        {
-            public bool Equals(User x, User y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                if (x.GetType() != y.GetType()) return false;
-                return x.Id == y.Id && x.Username == y.Username && x.Password == y.Password && x.Victory == y.Victory && x.Defeat == y.Defeat && x.Disciples == y.Disciples && x.Collection == y.Collection && Equals(x.Friends, y.Friends) && Equals(x.Teams, y.Teams);
-            }
-
-            public int GetHashCode(User obj)
-            {
-                var hashCode = new HashCode();
-                hashCode.Add(obj.Id);
-                hashCode.Add(obj.Username);
-                hashCode.Add(obj.Password);
-                hashCode.Add(obj.Victory);
-                hashCode.Add(obj.Defeat);
-                hashCode.Add(obj.Disciples);
-                hashCode.Add(obj.Collection);
-                hashCode.Add(obj.Friends);
-                hashCode.Add(obj.Teams);
-                return hashCode.ToHashCode();
-            }
-        }
-
-        public static IEqualityComparer<User> UserComparer { get; } = new UserEqualityComparer();
-
         public String Username { get; set; }
         public String Password { get; set; }
         public int Victory { get; set; }
@@ -49,6 +19,32 @@ namespace DivalityBack.Models
         public List<String> Friends{ get; set; }
         public List<Team> Teams { get; set; }
 
+        protected bool Equals(User other)
+        {
+            return Id == other.Id && Username == other.Username && Password == other.Password && Victory == other.Victory && Defeat == other.Defeat && Disciples == other.Disciples && Equals(Collection, other.Collection) && Equals(Friends, other.Friends) && Equals(Teams, other.Teams);
+        }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((User) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(Id);
+            hashCode.Add(Username);
+            hashCode.Add(Password);
+            hashCode.Add(Victory);
+            hashCode.Add(Defeat);
+            hashCode.Add(Disciples);
+            hashCode.Add(Collection);
+            hashCode.Add(Friends);
+            hashCode.Add(Teams);
+            return hashCode.ToHashCode();
+        }
     }
 }

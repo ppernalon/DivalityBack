@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.13.2" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 

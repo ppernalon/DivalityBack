@@ -24,6 +24,7 @@ namespace DivalityBack.Tests
         public void Generate_Card_With_Good_Pantheon_Returns_A_Card()
         {
             Card card = _cardsService.GenerateNewCard("Nordique");
+            card.Distributed--; 
             Assert.IsNotNull(card, "Aucune carte n'a été remontée");
         }
 

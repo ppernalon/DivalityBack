@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Divality.Services
 {
@@ -17,12 +19,15 @@ namespace Divality.Services
     {
         private readonly UsersCRUDService _usersCRUDService;
         private readonly CardsService _cardsService;
+        private readonly UtilServices _utilService; 
+        
         public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
 
-        public UsersService(UsersCRUDService usersCRUDService, CardsService cardsService)
+        public UsersService(UsersCRUDService usersCRUDService, CardsService cardsService, UtilServices utilService)
         {
             _usersCRUDService = usersCRUDService;
-            _cardsService = cardsService; 
+            _cardsService = cardsService;
+            _utilService = utilService; 
         }
 
         public string HashPassword(String password)
@@ -131,7 +136,7 @@ namespace Divality.Services
 
                 _usersCRUDService.Update(user.Id, user);
 
-                await WarnUserPurchaseCard(webSocket, result, card.Id);
+                await WarnUserPurchaseCard(webSocket, result, card);
             }
             else
             {
@@ -150,10 +155,25 @@ namespace Divality.Services
             return user.Disciples >= _cardsService.priceOfCard;
         }
 
-        public async Task WarnUserPurchaseCard(WebSocket webSocket, WebSocketReceiveResult result, String cardId)
-        {
-            byte[] byteCardObtained = Encoding.UTF8.GetBytes(cardId);
+        public async Task WarnUserPurchaseCard(WebSocket webSocket, WebSocketReceiveResult result, Card card)
+        { 
+            string jsonCard = _utilService.CardToJson(card);
+            byte[] byteCardObtained = Encoding.UTF8.GetBytes(jsonCard);
             await webSocket.SendAsync(byteCardObtained, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
+
+        public async Task GetCollection(string username, WebSocket webSocket, WebSocketReceiveResult result)
+        {
+            User user = _usersCRUDService.GetByUsername(username);
+            List<String> collection = user.Collection;
+            String jsonCollection = _utilService.CollectionToJson(collection);
+            await WarnUserCollection(webSocket,result, jsonCollection);
+        }
+
+        public async Task WarnUserCollection(WebSocket webSocket, WebSocketReceiveResult result, String jsonCollection)
+        {
+            byte[] byteCollection = Encoding.UTF8.GetBytes(jsonCollection);
+            await webSocket.SendAsync(byteCollection, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
     }
 }

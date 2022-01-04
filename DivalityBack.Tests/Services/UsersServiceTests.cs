@@ -12,15 +12,19 @@ namespace DivalityBack.Tests
     public class UsersServiceTests
     {
         private static UsersService _usersService;
-        private static CardsService _cardsService; 
+        private static CardsService _cardsService;
+        private static UtilServices _utilService;
+        private static CardsCRUDService _cardsCrudService; 
         private static UsersCRUDService _usersCrudService; 
 
         [ClassInitialize]
         public static void SetUp(TestContext context)
         {
             _cardsService = new CardsService(new CardsCRUDService(SetupAssemblyInitializer._settings));
-            _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings); 
-            _usersService = new UsersService(_usersCrudService, _cardsService);
+            _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
+            _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
+            _utilService = new UtilServices(_cardsCrudService); 
+            _usersService = new UsersService(_usersCrudService, _cardsService, _utilService);
         }
         
         [TestMethod]
@@ -81,6 +85,8 @@ namespace DivalityBack.Tests
             
             String userInDbWrongUsernameAndPasswordInfo = _usersService.SignIn("Wrong", "Wrong");
             Assert.IsNull(userInDbWrongUsernameAndPasswordInfo);
+            
+            _usersCrudService.Remove(newUser);
         }
 
         [TestMethod]

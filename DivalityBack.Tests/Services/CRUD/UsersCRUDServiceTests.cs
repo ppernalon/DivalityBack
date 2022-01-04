@@ -4,6 +4,7 @@ using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DivalityBack.Tests
@@ -13,12 +14,16 @@ namespace DivalityBack.Tests
     {
         private static UsersCRUDService _usersCrudService;
         private static UsersService _usersService;
-        private static CardsService _cardsService; 
+        private static UtilServices _utilService; 
+        private static CardsService _cardsService;
+        private static CardsCRUDService _cardsCrudService; 
         [ClassInitialize]
         public static void SetUp(TestContext context)
         {
             _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
-            _usersService = new UsersService(_usersCrudService, _cardsService);
+            _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
+            _utilService = new UtilServices(_cardsCrudService);
+            _usersService = new UsersService(_usersCrudService, _cardsService, _utilService);
         }
 
         [TestMethod]
@@ -137,6 +142,17 @@ namespace DivalityBack.Tests
             
             _usersCrudService.Remove(userInDb.Id);
             Assert.IsNull(_usersCrudService.Get(userInDb.Id), "L'User n'a pas été supprimé de la base de données");
+        }
+
+        [TestMethod]
+        public void Get_Users_By_Id_Returns_Correct_Information()
+        {
+            List<String> listId = new List<string>(); 
+            listId.Add("619d14e4494e6d757649e48d");
+            listId.Add("619de7a37c00c8a09bed8bc3");
+
+            List<User> listUsers = _usersCrudService.GetUsersById(listId);
+            Assert.IsNotNull(listUsers, "Aucun User n'a été remonté");
         }
     }
 }

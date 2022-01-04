@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using DivalityBack.Models;
 using DivalityBack.Services;
-using DivalityBack.Services.CRUD;
-using MongoDB.Driver;
 
 namespace Divality.Services
 {
@@ -44,7 +40,10 @@ namespace Divality.Services
                                     break;
                                 case "buyCard":
                                     await HandleGenerateCard(websocket, result, msgJson);
-                                    break; 
+                                    break;
+                                case "collection":
+                                    await HandleCollection(websocket, result, msgJson);
+                                    break;
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -77,12 +76,20 @@ namespace Divality.Services
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
             
+     
             //On met à jour une map globale des utilisateurs connectés avec leur websocket
             _usersService.mapActivePlayersWebsocket.Add(username, webSocket);
-
+            
             await _usersService.WarnUserOfFriendsConnected(username, result);
             await _usersService.WarnFriendsOfUserOfConnection(username, result);
-            
+         
+        }
+
+        public async Task HandleCollection(WebSocket webSocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+
+            await _usersService.GetCollection(username, webSocket, result); 
         }
         
         private async Task HandleDeconnection(WebSocket webSocket)
