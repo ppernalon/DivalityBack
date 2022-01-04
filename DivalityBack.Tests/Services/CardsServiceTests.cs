@@ -25,6 +25,7 @@ namespace DivalityBack.Tests
         {
             Card card = _cardsService.GenerateNewCard("Nordique");
             card.Distributed--; 
+            _cardsCrudService.Update(card.Id, card);
             Assert.IsNotNull(card, "Aucune carte n'a été remontée");
         }
 
