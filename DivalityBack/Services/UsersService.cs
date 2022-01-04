@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
-using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Divality.Services
@@ -41,11 +40,8 @@ namespace Divality.Services
         public User SignUp(JsonElement userJson)
         {
             User newUser = new User();
-            Console.Write("USERJSON : " + userJson.ToString());
             //On remplit l'username et le password depuis le body de la requête POST;
             newUser.Username = userJson.GetProperty("username").GetString();
-            Console.Write(newUser.Username);
-            Console.Write(userJson.GetProperty("username").ToString());
             //On hash le password
             newUser.Password = HashPassword(userJson.GetProperty("password").GetString());
 
@@ -64,7 +60,6 @@ namespace Divality.Services
         {
             password = HashPassword(password);
             User user = _usersCRUDService.GetByUsernameAndPassword(username, password);
-            Console.Write(user);
             if (user == null)
             {
                 return null;
@@ -77,20 +72,7 @@ namespace Divality.Services
             return jsonString;
         }
 
-        public async Task WarnFriendsOfUserOfConnection(String username, WebSocketReceiveResult result)
-        {
-            User userConnected = _usersCRUDService.GetByUsername(username);
-            List<String> listOfFriendsConnected = _usersCRUDService.GetUsersById(userConnected.Friends)
-                .Select(s => s.Username)
-                .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
-
-            foreach (String friendConnected in listOfFriendsConnected)
-            {
-                await WarnUserOfFriendsConnected(friendConnected, result);
-            }
-        }
-
-        public async Task WarnFriendsOfUserOfDisconnection(String username, WebSocketReceiveResult result)
+        public async Task WarnFriendsOfUserOfDisconnection(String username, WebSocket webSocket, WebSocketReceiveResult result)
         {
             User userDisconnected = _usersCRUDService.GetByUsername(username);
             List<String> listOfFriendsConnected = _usersCRUDService.GetUsersById(userDisconnected.Friends)
@@ -99,29 +81,9 @@ namespace Divality.Services
 
             foreach (String friendConnected in listOfFriendsConnected)
             {
-                await WarnUserOfFriendsConnected(friendConnected, result);
+                await WarnUsersOfConnection(friendConnected, webSocket, result);
             }
         }
-
-        public async Task WarnUserOfFriendsConnected(string username, WebSocketReceiveResult result)
-        {
-            User userFriendConnected = _usersCRUDService.GetByUsername(username);
-            if (userFriendConnected != null)
-            {
-                //On récupère la liste des amis connectés de l'User
-                List<String> listOfFriendsConnected = _usersCRUDService.GetUsersById(userFriendConnected.Friends)
-                    .Select(s => s.Username)
-                    .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
-
-                byte[] bytesFriendsConnected = listOfFriendsConnected
-                    .SelectMany(s => Encoding.UTF8.GetBytes(s + Environment.NewLine)).ToArray();
-
-                WebSocket websocketFriendUserConnected = mapActivePlayersWebsocket[username];
-                await websocketFriendUserConnected.SendAsync(bytesFriendsConnected, result.MessageType,
-                    result.EndOfMessage, CancellationToken.None);
-            }
-        }
-
 
         public async Task BuyCard(string username, string pantheon, WebSocket webSocket, WebSocketReceiveResult result)
         {
@@ -174,6 +136,46 @@ namespace Divality.Services
         {
             byte[] byteCollection = Encoding.UTF8.GetBytes(jsonCollection);
             await webSocket.SendAsync(byteCollection, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
+
+        public async Task WarnUsersOfConnection(string username, WebSocket webSocket, WebSocketReceiveResult result)
+        {
+            User user = _usersCRUDService.GetByUsername(username);
+
+            //On récupère la liste des amis connectés de l'User
+            List<String> listFriendsConnected = _usersCRUDService.GetUsersById(user.Friends)
+                .Select(s => s.Username)
+                .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
+            
+            //On récupère la liste des amis déconnectés de l'User
+            List<String> listFriendsDisconnected = _usersCRUDService.GetUsersById(user.Friends)
+                .Select(s => s.Username)
+                .Except(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
+
+            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected); 
+            
+            byte[] byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
+            await webSocket.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);
+            
+            foreach (string friendUsername in listFriendsConnected)
+            {
+                user = _usersCRUDService.GetByUsername(friendUsername);
+                //On récupère la liste des amis connectés de l'User
+                List<String> FriendConnected = _usersCRUDService.GetUsersById(user.Friends)
+                    .Select(s => s.Username)
+                    .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
+            
+                //On récupère la liste des amis déconnectés de l'User
+                List<String> listDisconnected = _usersCRUDService.GetUsersById(user.Friends)
+                    .Select(s => s.Username)
+                    .Except(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
+
+                jsonFriends = _utilService.FriendsToJson(FriendConnected, listDisconnected);
+                byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
+
+                webSocket = mapActivePlayersWebsocket[user.Username];
+                await webSocket.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);
+            }
         }
     }
 }

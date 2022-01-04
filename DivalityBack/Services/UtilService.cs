@@ -55,5 +55,33 @@ namespace Divality.Services
             return jsonCard; 
 
         }
+
+        public String FriendsToJson(List<String> listUsernameConnected, List<String> listUsernameDisconnected)
+        {
+            String jsonUsernames = "";
+            jsonUsernames += "{";
+                jsonUsernames += "\"type\":\"friends\",";
+                jsonUsernames += "\"connected\":";
+                jsonUsernames += ListUsernameToJson(listUsernameConnected);
+                jsonUsernames += ",";
+                jsonUsernames += "\"disconnected\":";
+                jsonUsernames += ListUsernameToJson(listUsernameDisconnected);
+            jsonUsernames += "}";
+            return jsonUsernames; 
+        }
+
+        private string ListUsernameToJson(List<string> listUsername)
+        {
+            String jsonUsernames = "{"; 
+            if (listUsername.Count > 0){
+                foreach (String username in listUsername)
+                {
+                    jsonUsernames += "\"username\":\"" + username + "\",";
+                }
+                jsonUsernames = jsonUsernames.Remove(jsonUsernames.Length -1);
+            }
+            jsonUsernames += "}"; 
+            return jsonUsernames; 
+        }
     }
 }

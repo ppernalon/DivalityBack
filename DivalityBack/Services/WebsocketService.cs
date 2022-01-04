@@ -75,13 +75,11 @@ namespace Divality.Services
         public async Task HandleConnection(WebSocket webSocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
-            
-     
+
             //On met à jour une map globale des utilisateurs connectés avec leur websocket
             _usersService.mapActivePlayersWebsocket.Add(username, webSocket);
-            
-            await _usersService.WarnUserOfFriendsConnected(username, result);
-            await _usersService.WarnFriendsOfUserOfConnection(username, result);
+
+            await _usersService.WarnUsersOfConnection(username,webSocket, result);
          
         }
 
