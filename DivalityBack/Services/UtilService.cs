@@ -8,10 +8,11 @@ namespace Divality.Services
     public class UtilServices
     {
         private readonly CardsCRUDService _cardsCrudService;
-
-        public UtilServices(CardsCRUDService cardsCrudService)
+        private readonly UsersCRUDService _usersCrudService;
+        public UtilServices(CardsCRUDService cardsCrudService, UsersCRUDService usersCrudService)
         {
-            _cardsCrudService = cardsCrudService; 
+            _cardsCrudService = cardsCrudService;
+            _usersCrudService = usersCrudService; 
         }
         
         public string CollectionToJson(List<String> collection)
@@ -82,6 +83,39 @@ namespace Divality.Services
             }
             jsonUsernames += "}"; 
             return jsonUsernames; 
+        }
+
+        private string AuctionToJson(AuctionHouse auction)
+        {
+            String cardName = _cardsCrudService.Get(auction.CardId).Name;
+            String ownerName = _usersCrudService.Get(auction.OwnerId).Username;
+            
+            String jsonAuction = "";
+            jsonAuction += "{";
+            jsonAuction += "\"type\":\"auction\",";
+            jsonAuction += "\"cardName\": \"" + cardName + "\",";
+            jsonAuction += "\"ownerName\": \"" + ownerName + "\",";
+            jsonAuction += "\"price\":\"" + auction.Price + "\""; 
+            jsonAuction += "}";
+            return jsonAuction;
+        }
+
+        public string listAuctionToJson(List<AuctionHouse> listAuctionHouse)
+        {
+            String jsonListAuctionHouse = "";
+
+            jsonListAuctionHouse += "{";
+            jsonListAuctionHouse += "\"type\":\"auctionHouse\",";
+            foreach (AuctionHouse auction in listAuctionHouse)
+            {
+                jsonListAuctionHouse += "\"auction\" :";
+                jsonListAuctionHouse += AuctionToJson(auction) + ",";
+            }
+            jsonListAuctionHouse = jsonListAuctionHouse.Remove(jsonListAuctionHouse.Length - 1);
+
+            jsonListAuctionHouse += "}";
+
+            return jsonListAuctionHouse; 
         }
     }
 }

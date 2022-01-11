@@ -34,6 +34,7 @@ namespace DivalityBack
             services.AddSingleton<CardsCRUDService>();
             services.AddSingleton<CardsService>(); 
             services.AddSingleton<AuctionHousesCRUDService>();
+            services.AddSingleton<AuctionHouseService>(); 
             services.AddSingleton<UtilServices>();
             services.AddSingleton<WebsocketService>();
             services.AddControllers();

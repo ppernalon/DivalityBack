@@ -12,11 +12,13 @@ namespace Divality.Services
     {
         private readonly UsersService _usersService;
         private readonly CardsService _cardsService;
-
-        public WebsocketService(UsersService usersService, CardsService cardsService)
+        private readonly AuctionHouseService _auctionHouseService; 
+        
+        public WebsocketService(UsersService usersService, CardsService cardsService, AuctionHouseService auctionHouseService)
         {
             _usersService = usersService;
-            _cardsService = cardsService; 
+            _cardsService = cardsService;
+            _auctionHouseService = auctionHouseService; 
         }
         
         public async Task HandleMessages(WebSocket websocket){
@@ -44,6 +46,9 @@ namespace Divality.Services
                                 case "collection":
                                     await HandleCollection(websocket, result, msgJson);
                                     break;
+                                case "auctionHouse":
+                                    await HandleAuctionHouse(websocket, result, msgJson);
+                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -62,6 +67,11 @@ namespace Divality.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            await _auctionHouseService.GetAuctionHouse(websocket, result); 
         }
 
         private async Task HandleGenerateCard(WebSocket webSocket, WebSocketReceiveResult result, JsonDocument msgJson)
