@@ -147,20 +147,22 @@ namespace DivalityBack.Tests
         [TestMethod]
         public void Pray_With_Not_Enough_Disciples_Does_Not_Add_The_Card_To_Collection_Neither_Affect_Disciples()
         { 
-            _usersService.Pray("UserTestUpdateModified", "NotLimited", null, null);
-            User user = _usersCrudService.GetByUsername("UserTestUpdateModified"); 
+            User backup = _usersCrudService.GetByUsername("UserTestCanAffordCardFalse");
+            _usersService.Pray("UserTestCanAffordCardFalse", "NotLimited", null, null);
+            User user = _usersCrudService.GetByUsername("UserTestCanAffordCardFalse"); 
             Assert.IsTrue(user.Disciples.Equals(0), "Le nombre de disciples a été modifié");
             Assert.IsTrue(user.Collection.Count.Equals(0), "La collection a été modifiée");
+            _usersCrudService.Update(user.Id, backup);
         }
         
         [TestMethod]
         public void Pray_With_Enough_Disciples_Add_The_Card_To_Collection_And_Affect_Disciples()
         {
-            User backup = _usersCrudService.GetByUsername("UserTestGetOneUser");
-            _usersService.Pray("UserTestGetOneUser", "NotLimited", null, null);
-            User user = _usersCrudService.GetByUsername("UserTestGetOneUser"); 
-            Assert.IsTrue(user.Disciples.Equals(101), "Le nombre de disciples n'est pas celui attendu");
-            Assert.IsTrue(user.Collection.Count.Equals(3), "La collection n'a pas été modifiée");
+            User backup = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");
+            _usersService.Pray("UserTestCanAffordCardTrue", "NotLimited", null, null);
+            User user = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue"); 
+            Assert.IsTrue(user.Disciples.Equals(90), "Le nombre de disciples n'est pas celui attendu");
+            Assert.IsTrue(user.Collection.Count.Equals(1), "La collection n'a pas été modifiée");
             _usersCrudService.Update(user.Id, backup);
         }
     }

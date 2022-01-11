@@ -53,8 +53,8 @@ namespace DivalityBack.Tests
             
             //On  vérifie que les informations remontées sont correctes
             Assert.IsTrue(auctionHouseInDb.Price.Equals(100), "Le prix trouvé en base n'est pas celui attendu");
-            Assert.IsTrue(auctionHouseInDb.CardId.Equals("CardIdTest"), "Le CardId trouvé en base n'est pas celui attendu");
-            Assert.IsTrue(auctionHouseInDb.OwnerId.Equals("OwnerIdTest"), "Le OwnerId trouvé en base n'est pas celui attendu");
+            Assert.IsTrue(auctionHouseInDb.CardId.Equals("619dea7a9d2400c0e324547b"), "Le CardId trouvé en base n'est pas celui attendu");
+            Assert.IsTrue(auctionHouseInDb.OwnerId.Equals("619d14e4494e6d757649e48d"), "Le OwnerId trouvé en base n'est pas celui attendu");
         }
 
         [TestMethod]
@@ -132,7 +132,7 @@ namespace DivalityBack.Tests
         [TestMethod]
         public void Get_By_Card_Id_And_Owner_Id_And_Price_With_Correct_Informations_Returns_An_Auction()
         {
-            AuctionHouse auction = _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice("CardIdTest", "OwnerIdTest", "100");
+            AuctionHouse auction = _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice("619dea7a9d2400c0e324547b", "619d14e4494e6d757649e48d", "100");
             Assert.IsNotNull(auction, "Aucune vente n'a été trouvée dans la base de données");
         }
         

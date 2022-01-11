@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -24,6 +25,7 @@ namespace DivalityBack.Services
             _utilServices = utilServices; 
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task GetAuctionHouse(WebSocket websocket, WebSocketReceiveResult result)
         {
             List<AuctionHouse> listAuctionHouse = _auctionHousesCrudService.Get();
@@ -32,6 +34,7 @@ namespace DivalityBack.Services
             await WarnUserOfAuctionHouse(websocket, result, jsonAuctionHouse);
         }
 
+        [ExcludeFromCodeCoverage]
         private async Task WarnUserOfAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string jsonAuctionHouse)
         {
             byte[] byteAuctionHouse = Encoding.UTF8.GetBytes(jsonAuctionHouse);
