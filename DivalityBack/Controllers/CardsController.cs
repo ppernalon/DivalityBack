@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Controllers
 {
+    [ExcludeFromCodeCoverage]
     [Route("api/[controller]")]
     [ApiController]
     public class CardsController : ControllerBase

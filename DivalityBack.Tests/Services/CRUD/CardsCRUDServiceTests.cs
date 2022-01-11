@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -166,6 +165,20 @@ namespace DivalityBack.Tests
             
             _cardsCrudService.Remove(cardInDb.Id);
             Assert.IsNull(_cardsCrudService.Get(cardInDb.Id), "La carte n'a pas été supprimée de la base de données");
-        } 
+        }
+
+        [TestMethod]
+        public void Get_Card_By_Name_With_Correct_Informations_Returns_A_Card()
+        {
+            Card card = _cardsCrudService.GetCardByName("CardTestGetOne");
+            Assert.IsNotNull(card, "Aucune carte n'a été remontée de la base");
+        }
+        
+        [TestMethod]
+        public void Get_Card_By_Name_With_Wrong_Informations_Returns_Null()
+        {
+            Card card = _cardsCrudService.GetCardByName("CardTestGetOneWrongInfos");
+            Assert.IsNull(card, "Une carte a été remontée de la base");
+        }
     }
 }

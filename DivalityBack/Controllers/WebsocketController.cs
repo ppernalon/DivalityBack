@@ -1,10 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
+using DivalityBack.Services;
 using Microsoft.AspNetCore.Mvc;
-using Divality.Services;
 namespace DivalityBack.Controllers
 {
+    [ExcludeFromCodeCoverage]
     [Route("/connection")]
     [ApiController]
     public class WebsocketController : ControllerBase

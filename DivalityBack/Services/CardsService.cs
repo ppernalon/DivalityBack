@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using MongoDB.Driver;

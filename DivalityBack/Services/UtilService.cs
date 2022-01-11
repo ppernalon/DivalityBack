@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 
-namespace Divality.Services
+namespace DivalityBack.Services
 {
     public class UtilServices
     {

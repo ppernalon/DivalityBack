@@ -1,10 +1,12 @@
 ﻿using DivalityBack.Models;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Controllers
 {
+    [ExcludeFromCodeCoverage ]
     [Route("api/[controller]")]
     [ApiController]
     public class AuctionHousesController : ControllerBase

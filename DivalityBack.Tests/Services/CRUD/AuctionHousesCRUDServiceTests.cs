@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -128,6 +127,20 @@ namespace DivalityBack.Tests
             
             _auctionHousesCrudService.Remove(auctionHouseInDb.Id);
             Assert.IsNull(_auctionHousesCrudService.Get(auctionHouseInDb.Id), "L'offre n'a pas été supprimée de la base de données");
+        }
+
+        [TestMethod]
+        public void Get_By_Card_Id_And_Owner_Id_And_Price_With_Correct_Informations_Returns_An_Auction()
+        {
+            AuctionHouse auction = _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice("CardIdTest", "OwnerIdTest", "100");
+            Assert.IsNotNull(auction, "Aucune vente n'a été trouvée dans la base de données");
+        }
+        
+        [TestMethod]
+        public void Get_By_Card_Id_And_Owner_Id_And_Price_With_Wring_Informations_Returns_Null()
+        {
+            AuctionHouse auction = _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice("CardIdTestWrong", "OwnerIdTest", "100");
+            Assert.IsNull(auction, "Une vente a été trouvée dans la base de données");
         }
     }
 }

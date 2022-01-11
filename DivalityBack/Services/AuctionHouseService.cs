@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 
-namespace Divality.Services
+namespace DivalityBack.Services
 {
     public class AuctionHouseService
     {

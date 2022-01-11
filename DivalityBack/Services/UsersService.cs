@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
@@ -12,7 +13,7 @@ using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace Divality.Services
+namespace DivalityBack.Services
 {
     public class UsersService
     {
@@ -71,21 +72,8 @@ namespace Divality.Services
 
             return jsonString;
         }
-
-        public async Task WarnFriendsOfUserOfDisconnection(String username, WebSocket webSocket, WebSocketReceiveResult result)
-        {
-            User userDisconnected = _usersCRUDService.GetByUsername(username);
-            List<String> listOfFriendsConnected = _usersCRUDService.GetUsersById(userDisconnected.Friends)
-                .Select(s => s.Username)
-                .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
-
-            foreach (String friendConnected in listOfFriendsConnected)
-            {
-                await WarnUsersOfConnection(friendConnected, webSocket, result);
-            }
-        }
-
-        public async Task BuyCard(string username, string pantheon, WebSocket webSocket, WebSocketReceiveResult result)
+        
+        public async Task Pray(string username, string pantheon, WebSocket webSocket, WebSocketReceiveResult result)
         {
             User user = _usersCRUDService.GetByUsername(username);
             if (CanAffordCard(user))
@@ -97,7 +85,7 @@ namespace Divality.Services
                 user.Collection.Add(card.Id);
 
                 _usersCRUDService.Update(user.Id, user);
-
+                
                 await WarnUserPurchaseCard(webSocket, result, card);
             }
             else
@@ -106,6 +94,7 @@ namespace Divality.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private async Task WarnUserNotEnoughDisciples(WebSocket webSocket, WebSocketReceiveResult result)
         {
             byte[] byteNotEnoughDisciples = Encoding.UTF8.GetBytes("L'utilisateur ne possède pas assez de disciples");
@@ -117,6 +106,7 @@ namespace Divality.Services
             return user.Disciples >= _cardsService.priceOfCard;
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task WarnUserPurchaseCard(WebSocket webSocket, WebSocketReceiveResult result, Card card)
         { 
             string jsonCard = _utilService.CardToJson(card);
@@ -124,20 +114,26 @@ namespace Divality.Services
             await webSocket.SendAsync(byteCardObtained, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task GetCollection(string username, WebSocket webSocket, WebSocketReceiveResult result)
         {
             User user = _usersCRUDService.GetByUsername(username);
-            List<String> collection = user.Collection;
-            String jsonCollection = _utilService.CollectionToJson(collection);
-            await WarnUserCollection(webSocket,result, jsonCollection);
+            if (user != null)
+            {
+                List<String> collection = user.Collection;
+                String jsonCollection = _utilService.CollectionToJson(collection);
+                await WarnUserCollection(webSocket, result, jsonCollection);
+            }
         }
-
+        
+        [ExcludeFromCodeCoverage]
         public async Task WarnUserCollection(WebSocket webSocket, WebSocketReceiveResult result, String jsonCollection)
         {
             byte[] byteCollection = Encoding.UTF8.GetBytes(jsonCollection);
             await webSocket.SendAsync(byteCollection, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task WarnUsersOfConnection(string username, WebSocket webSocket, WebSocketReceiveResult result)
         {
             User user = _usersCRUDService.GetByUsername(username);

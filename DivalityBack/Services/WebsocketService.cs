@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -6,8 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using DivalityBack.Services;
 
-namespace Divality.Services
+namespace DivalityBack.Services
 {
+    [ExcludeFromCodeCoverage]
     public class WebsocketService
     {
         private readonly UsersService _usersService;
@@ -101,7 +103,7 @@ namespace Divality.Services
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
             String pantheon = msgJson.RootElement.GetProperty("pantheon").ToString(); 
-            await _usersService.BuyCard(username, pantheon, webSocket, result); 
+            await _usersService.Pray(username, pantheon, webSocket, result); 
 
         }
 

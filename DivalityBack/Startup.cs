@@ -1,4 +1,4 @@
-using Divality.Services;
+using System.Diagnostics.CodeAnalysis;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 
 namespace DivalityBack
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)

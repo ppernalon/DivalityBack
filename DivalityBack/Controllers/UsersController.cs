@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using Divality.Services;
 using DivalityBack.Models;
+using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Controllers
 {
+    [ExcludeFromCodeCoverage]
     [Route("/user")]
     [ApiController]
     public class UsersController : ControllerBase

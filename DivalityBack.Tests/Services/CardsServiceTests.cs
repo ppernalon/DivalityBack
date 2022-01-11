@@ -85,14 +85,14 @@ namespace DivalityBack.Tests
             Assert.IsTrue(rarity.Equals("Légendaire"), "Sur 1000 essais, nous n'avons eu aucune legendaire");
         }
 
-        public void Generate_Card_Decrease_Available_Count()
+        [TestMethod]
+        public void Generate_Limited_Card_Increase_Distributed_Counter()
         {
-            Card card = _cardsService.GenerateNewCard("Nordique");
-            Assert.IsTrue(card.Available.Equals(19),"Le nombre de cartes disponibles n'est pas celui attendu");
-            card.Available = 20;
+            Card card = _cardsService.GenerateNewCard("Limited");
+            Assert.IsTrue(card.Distributed.Equals(6), "Le nombre de carte distribuées n'a pas été mis à jour");
+
+            card.Distributed = 5;
             _cardsCrudService.Update(card.Id, card);
-            Assert.IsTrue(card.Available.Equals(20), "Le nombre de cartes disponibles n'a pas été mis à jour après le test");;
         }
-        
     }
 }

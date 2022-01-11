@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
@@ -23,7 +25,7 @@ namespace DivalityBack.Tests
             _cardsService = new CardsService(new CardsCRUDService(SetupAssemblyInitializer._settings));
             _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
             _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
-            _utilService = new UtilServices(_cardsCrudService); 
+            _utilService = new UtilServices(_cardsCrudService, _usersCrudService); 
             _usersService = new UsersService(_usersCrudService, _cardsService, _utilService);
         }
         
@@ -101,6 +103,65 @@ namespace DivalityBack.Tests
         {
             User user = _usersCrudService.Get("61c34840ead236cba80ecec6");
             Assert.IsFalse(_usersService.CanAffordCard(user), "La méthode CanAffordCard renvoie true alors que l'user ne peut pas acheter de carte");
+        }
+
+        [TestMethod]
+        public void SignUp_With_A_New_Username_Creates_Entry_In_DB()
+        {
+            var jsonInput= @"{
+                        ""username"": ""newUsername"",
+                        ""password"":""test""
+                        }";
+            
+            JsonDocument doc = JsonDocument.Parse(jsonInput);
+            JsonElement jsonUser = doc.RootElement;
+
+            User user = _usersService.SignUp(jsonUser);
+            Assert.IsNotNull(user, "L'username existe déjà");
+
+            User userInDb = _usersCrudService.GetByUsername("newUsername");
+            Assert.IsNotNull(userInDb, "L'User n'a pas été créé en base"); 
+            
+            _usersCrudService.Remove(userInDb);
+        }
+        
+        
+        [TestMethod]
+        public void SignUp_With_An_Already_Taken_Username_Does_Not_Create_Entry_In_DB()
+        {
+            var jsonInput= @"{
+                        ""username"": ""UserTestSignIn"",
+                        ""password"":""test""
+                        }";
+            
+            JsonDocument doc = JsonDocument.Parse(jsonInput);
+            JsonElement jsonUser = doc.RootElement;
+
+            User user = _usersService.SignUp(jsonUser);
+            Assert.IsNull(user, "L'username n'existe pas ");
+
+            User userInDb = _usersCrudService.GetByUsername("newUsername");
+            Assert.IsNull(userInDb, "L'User a pas été créé en base"); 
+        }
+
+        [TestMethod]
+        public void Pray_With_Not_Enough_Disciples_Does_Not_Add_The_Card_To_Collection_Neither_Affect_Disciples()
+        { 
+            _usersService.Pray("UserTestUpdateModified", "NotLimited", null, null);
+            User user = _usersCrudService.GetByUsername("UserTestUpdateModified"); 
+            Assert.IsTrue(user.Disciples.Equals(0), "Le nombre de disciples a été modifié");
+            Assert.IsTrue(user.Collection.Count.Equals(0), "La collection a été modifiée");
+        }
+        
+        [TestMethod]
+        public void Pray_With_Enough_Disciples_Add_The_Card_To_Collection_And_Affect_Disciples()
+        {
+            User backup = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            _usersService.Pray("UserTestGetOneUser", "NotLimited", null, null);
+            User user = _usersCrudService.GetByUsername("UserTestGetOneUser"); 
+            Assert.IsTrue(user.Disciples.Equals(101), "Le nombre de disciples n'est pas celui attendu");
+            Assert.IsTrue(user.Collection.Count.Equals(3), "La collection n'a pas été modifiée");
+            _usersCrudService.Update(user.Id, backup);
         }
     }
 }

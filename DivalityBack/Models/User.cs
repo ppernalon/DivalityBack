@@ -18,33 +18,6 @@ namespace DivalityBack.Models
         public List<String> Collection { get; set; }
         public List<String> Friends{ get; set; }
         public List<Team> Teams { get; set; }
-
-        protected bool Equals(User other)
-        {
-            return Id == other.Id && Username == other.Username && Password == other.Password && Victory == other.Victory && Defeat == other.Defeat && Disciples == other.Disciples && Equals(Collection, other.Collection) && Equals(Friends, other.Friends) && Equals(Teams, other.Teams);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((User) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            var hashCode = new HashCode();
-            hashCode.Add(Id);
-            hashCode.Add(Username);
-            hashCode.Add(Password);
-            hashCode.Add(Victory);
-            hashCode.Add(Defeat);
-            hashCode.Add(Disciples);
-            hashCode.Add(Collection);
-            hashCode.Add(Friends);
-            hashCode.Add(Teams);
-            return hashCode.ToHashCode();
-        }
+        
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Divality.Services;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
@@ -22,7 +21,7 @@ namespace DivalityBack.Tests
         {
             _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
             _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
-            _utilService = new UtilServices(_cardsCrudService);
+            _utilService = new UtilServices(_cardsCrudService, _usersCrudService);
             _usersService = new UsersService(_usersCrudService, _cardsService, _utilService);
         }
 
@@ -153,6 +152,20 @@ namespace DivalityBack.Tests
 
             List<User> listUsers = _usersCrudService.GetUsersById(listId);
             Assert.IsNotNull(listUsers, "Aucun User n'a été remonté");
+        }
+        
+        [TestMethod]
+        public void Get_User_By_Username_With_Correct_Informations_Returns_A_User()
+        {
+            User user = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            Assert.IsNotNull(user, "Aucun user n'a été remonté de la base");
+        }
+        
+        [TestMethod]
+        public void Get_User_By_Username_With_Wrong_Informations_Returns_Null()
+        {
+            User user = _usersCrudService.GetByUsername("UserTestGetOneUserWrongInformations");
+            Assert.IsNull(user, "Un user a été remonté de la base");
         }
     }
 }
