@@ -29,13 +29,13 @@ namespace Divality.Services
             List<AuctionHouse> listAuctionHouse = _auctionHousesCrudService.Get();
             String jsonAuctionHouse = _utilServices.listAuctionToJson(listAuctionHouse);
 
-            WarnUserOfAuctionHouse(websocket, result, jsonAuctionHouse);
+            await WarnUserOfAuctionHouse(websocket, result, jsonAuctionHouse);
         }
 
-        private void WarnUserOfAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string jsonAuctionHouse)
+        private async Task WarnUserOfAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string jsonAuctionHouse)
         {
             byte[] byteAuctionHouse = Encoding.UTF8.GetBytes(jsonAuctionHouse);
-            websocket.SendAsync(byteAuctionHouse, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+            await websocket.SendAsync(byteAuctionHouse, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
 
         public async Task SellCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price)
@@ -62,6 +62,35 @@ namespace Divality.Services
             else
             {
                 string messageErreur = "L'utilisateur ne possède pas cette carte";
+                await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
+                    result.EndOfMessage, CancellationToken.None); 
+            }
+        }
+
+        public async Task BuyCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string ownerName, string price)
+        {
+            Card card = _cardsCrudService.GetCardByName(cardName);
+            User user = _usersCrudService.GetByUsername(username);
+            User owner = _usersCrudService.GetByUsername(ownerName);
+
+            if (!(user.Disciples < int.Parse(price)))
+            {
+                AuctionHouse auction = _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice(card.Id, owner.Id, price);
+                _auctionHousesCrudService.Remove(auction);
+
+                owner.Disciples += int.Parse(price);
+
+                user.Disciples -= int.Parse(price);
+                user.Collection.Add(card.Id);
+                _usersCrudService.Update(user.Id, user);
+                _usersCrudService.Update(owner.Id, owner);
+                
+                await GetAuctionHouse(websocket, result);
+
+            }
+            else
+            {
+                string messageErreur = "L'utilisateur ne possède pas assez de disciples";
                 await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
                     result.EndOfMessage, CancellationToken.None); 
             }

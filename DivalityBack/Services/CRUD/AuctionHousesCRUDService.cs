@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DivalityBack.Models;
+using Microsoft.AspNetCore.Server.HttpSys;
 using MongoDB.Driver;
 
 namespace DivalityBack.Services.CRUD
@@ -36,5 +37,12 @@ namespace DivalityBack.Services.CRUD
 
         public void Remove(string id) =>
             _auctionHouses.DeleteOne(auctionHouse => auctionHouse.Id == id);
+
+        public AuctionHouse GetByCardIdAndOwnerIdAndPrice(string cardId, string ownerId, string price)
+        {
+            return _auctionHouses.Find(auction =>
+                auction.CardId.Equals(cardId) && auction.OwnerId.Equals(ownerId) &&
+                auction.Price.Equals(int.Parse(price))).FirstOrDefault();
+        }
     }
 }
