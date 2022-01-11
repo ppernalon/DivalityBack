@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DivalityBack.Models;
 using MongoDB.Driver;
 
@@ -42,6 +43,11 @@ namespace DivalityBack.Services.CRUD
             return _cards.Find(card =>
                 card.Pantheon.Equals(pantheon) && card.Rarity.Equals(rarity) &&
                 ((card.isLimited && card.Available > 0) || !card.isLimited)).ToList(); 
+        }
+
+        public Card GetCardByName(String name)
+        {
+            return _cards.Find(card => card.Name.Equals(name)).FirstOrDefault(); 
         }
     }
 }

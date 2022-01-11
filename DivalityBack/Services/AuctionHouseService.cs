@@ -12,11 +12,15 @@ namespace Divality.Services
     public class AuctionHouseService
     {
         private readonly AuctionHousesCRUDService _auctionHousesCrudService;
+        private readonly CardsCRUDService _cardsCrudService;
+        private readonly UsersCRUDService _usersCrudService; 
         private readonly UtilServices _utilServices; 
         
-        public AuctionHouseService(AuctionHousesCRUDService auctionHousesCrudService, UtilServices utilServices)
+        public AuctionHouseService(AuctionHousesCRUDService auctionHousesCrudService, CardsCRUDService cardsCrudService, UsersCRUDService usersCrudService, UtilServices utilServices)
         {
             _auctionHousesCrudService = auctionHousesCrudService;
+            _cardsCrudService = cardsCrudService;
+            _usersCrudService = usersCrudService;
             _utilServices = utilServices; 
         }
 
@@ -32,6 +36,35 @@ namespace Divality.Services
         {
             byte[] byteAuctionHouse = Encoding.UTF8.GetBytes(jsonAuctionHouse);
             websocket.SendAsync(byteAuctionHouse, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
+
+        public async Task SellCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price)
+        {
+            Card card = _cardsCrudService.GetCardByName(cardName);
+            User user = _usersCrudService.GetByUsername(username);
+
+            //On vérifie que l'utilisateur possède la carte
+            if (card != null && user.Collection.Contains(card.Id))
+            {
+                //On enlève la carte de la collection
+                user.Collection.Remove(card.Id);
+                _usersCrudService.Update(user.Id, user);
+                
+                //On rajoute la vente dans l'HdV
+                AuctionHouse auction = new AuctionHouse();
+                auction.Price = int.Parse(price);
+                auction.CardId = card.Id;
+                auction.OwnerId = user.Id;
+                _auctionHousesCrudService.Create(auction); 
+                
+                await GetAuctionHouse(websocket, result);
+            }
+            else
+            {
+                string messageErreur = "L'utilisateur ne possède pas cette carte";
+                await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
+                    result.EndOfMessage, CancellationToken.None); 
+            }
         }
     }
 }

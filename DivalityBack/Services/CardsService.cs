@@ -15,7 +15,7 @@ namespace DivalityBack.Services
         {
             ["commune"]= 75, //75% de chances d'avoir une commune
             ["rare"]=95, //20% de chances d'avoir une rare
-            ["legendaire"]=5 //5% de chances d'avoir une légendaire
+            ["legendaire"]=100 //5% de chances d'avoir une légendaire
         };
 
         public int priceOfCard = 10; 

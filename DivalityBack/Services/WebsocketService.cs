@@ -49,6 +49,9 @@ namespace Divality.Services
                                 case "auctionHouse":
                                     await HandleAuctionHouse(websocket, result, msgJson);
                                     break; 
+                                case "sellAuctionHouse":
+                                    await HandleSellAuctionHouse(websocket, result, msgJson);
+                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -67,6 +70,14 @@ namespace Divality.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleSellAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String cardName = msgJson.RootElement.GetProperty("cardName").ToString();
+            String price = msgJson.RootElement.GetProperty("price").ToString();
+            await _auctionHouseService.SellCardInAuctionHouse(websocket, result, username, cardName, price);
         }
 
         private async Task HandleAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
