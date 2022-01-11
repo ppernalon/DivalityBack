@@ -64,9 +64,9 @@ namespace DivalityBack.Tests
             Assert.IsTrue(cardInDb.Life.Equals(40), "La vie de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.Speed.Equals(20), "La vitesse de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.Power.Equals(15), "La force de la carte en base n'est pas celle attendue");
-            Assert.IsNull(cardInDb.OffensiveAbility, "L'abilité offensive de la carte en base n'est pas celle attendue");
+            Assert.IsTrue(cardInDb.OffensiveAbility.Equals("test"), "L'abilité offensive de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.OffensiveEfficiency.Equals(0), "L'efficacité offensive de la carte en base n'est pas celle attendue");
-            Assert.IsNull(cardInDb.DefensiveAbility, "L'habilité défensive de la carte en base n'est pas celle attendue");
+            Assert.IsTrue(cardInDb.DefensiveAbility.Equals("test"), "L'habilité défensive de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.DefensiveEfficiency.Equals(0), "L'efficacité défensive de la carte en base n'est pas celle attendue");
             Assert.IsTrue(cardInDb.isLimited.Equals(true), "Le caractère limité de la carte en base n'est pas celui attendu");
             Assert.IsTrue(cardInDb.Distributed.Equals(5), "Le nombre de cartes distribuées en base n'est pas celui attendu");

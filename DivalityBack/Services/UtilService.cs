@@ -85,7 +85,7 @@ namespace DivalityBack.Services
             return jsonUsernames; 
         }
 
-        private string AuctionToJson(AuctionHouse auction)
+        public string AuctionToJson(AuctionHouse auction)
         {
             String cardName = _cardsCrudService.Get(auction.CardId).Name;
             String ownerName = _usersCrudService.Get(auction.OwnerId).Username;
