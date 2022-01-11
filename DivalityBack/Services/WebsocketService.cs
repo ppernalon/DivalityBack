@@ -38,7 +38,7 @@ namespace Divality.Services
                                 case "connection":
                                     await HandleConnection(websocket, result, msgJson); 
                                     break;
-                                case "buyCard":
+                                case "pray":
                                     await HandleGenerateCard(websocket, result, msgJson);
                                     break;
                                 case "collection":
