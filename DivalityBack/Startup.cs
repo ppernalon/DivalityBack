@@ -4,6 +4,7 @@ using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,6 +26,8 @@ namespace DivalityBack
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(); // Make sure you call this previous to AddMvc
+            services.AddRazorPages();
             services.Configure<DivalityDatabaseSettings>(
                 Configuration.GetSection(nameof(DivalityDatabaseSettings)));
 
@@ -55,10 +58,11 @@ namespace DivalityBack
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Divality v1"));
             }
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
-
+            app.UseCors(
+                options => options.WithOrigins("http://example.com").AllowAnyMethod()
+            );
+            
             app.UseAuthorization();
 
             app.UseWebSockets();
