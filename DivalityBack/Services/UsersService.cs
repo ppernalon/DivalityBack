@@ -18,14 +18,16 @@ namespace DivalityBack.Services
     public class UsersService
     {
         private readonly UsersCRUDService _usersCRUDService;
+        private readonly CardsCRUDService _cardsCrudService; 
         private readonly CardsService _cardsService;
         private readonly UtilServices _utilService; 
         
         public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
 
-        public UsersService(UsersCRUDService usersCRUDService, CardsService cardsService, UtilServices utilService)
+        public UsersService(UsersCRUDService usersCRUDService, CardsCRUDService cardsCrudService, CardsService cardsService, UtilServices utilService)
         {
             _usersCRUDService = usersCRUDService;
+            _cardsCrudService = cardsCrudService; 
             _cardsService = cardsService;
             _utilService = utilService; 
         }
@@ -176,7 +178,7 @@ namespace DivalityBack.Services
 
         public async Task getTeams(WebSocket websocket, WebSocketReceiveResult result, string username)
         {
-            List<Team> teams = _usersCRUDService.GetByUsername(username).Teams;
+            List<Team> teams = _usersCRUDService.GetByUsername(username).Teams.OrderBy(t => t.Name).ToList();
             String jsonTeams = _utilService.TeamsToJson(teams);
 
             await WarnUserTeams(websocket, result, jsonTeams); 
@@ -186,6 +188,25 @@ namespace DivalityBack.Services
         {
             byte[] bytes = Encoding.UTF8.GetBytes(jsonTeams);
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
+
+        public async Task ModifyTeam(WebSocket websocket, WebSocketReceiveResult result, string username, string oldNameTeam, string newNameTeam, string compo)
+        {
+            User user = _usersCRUDService.GetByUsername(username);
+            Team teamToModify = user.Teams.FindAll(t => t.Name.Equals(oldNameTeam)).FirstOrDefault();
+            user.Teams.Remove(teamToModify); 
+
+            teamToModify.Name = newNameTeam;
+            teamToModify.Compo.Clear();
+            List<String> listNewCardName = new List<string>(compo.Split(","));
+            foreach (string cardName in listNewCardName)
+            {
+                Card card = _cardsCrudService.GetCardByName(cardName);
+                teamToModify.Compo.Add(card.Id);
+            }
+            user.Teams.Add(teamToModify);
+            _usersCRUDService.Update(user.Id, user);
+            await getTeams(websocket, result, username); 
         }
     }
 }

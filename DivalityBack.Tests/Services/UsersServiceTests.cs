@@ -26,7 +26,7 @@ namespace DivalityBack.Tests
             _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
             _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
             _utilService = new UtilServices(_cardsCrudService, _usersCrudService); 
-            _usersService = new UsersService(_usersCrudService, _cardsService, _utilService);
+            _usersService = new UsersService(_usersCrudService, _cardsCrudService, _cardsService, _utilService);
         }
         
         [TestMethod]

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.WebSockets;
+using System.Reflection.Metadata;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +61,9 @@ namespace DivalityBack.Services
                                 case "teams":
                                     await HandleTeams(websocket, result, msgJson);
                                     break; 
+                                case "modificationTeam":
+                                    await HandleModificationTeam(websocket, result, msgJson);
+                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -78,6 +82,15 @@ namespace DivalityBack.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleModificationTeam(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String oldNameTeam = msgJson.RootElement.GetProperty("oldNameTeam").ToString();
+            String newNameTeam = msgJson.RootElement.GetProperty("newNameTeam").ToString();
+            String compo = msgJson.RootElement.GetProperty("compo").ToString();
+            await _usersService.ModifyTeam(websocket, result, username, oldNameTeam, newNameTeam, compo);
         }
 
         private async Task HandleTeams(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
