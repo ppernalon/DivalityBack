@@ -110,7 +110,7 @@ namespace DivalityBack.Tests
         {
             List<AuctionHouse> listAuction = _auctionHousesCrudService.Get();
             List<String> listJsonAuction = new List<string>(); 
-            String jsonListAuction = _utilServices.listAuctionToJson(listAuction);
+            String jsonListAuction = _utilServices.ListAuctionToJson(listAuction);
             
             foreach (AuctionHouse auction in listAuction)
             {

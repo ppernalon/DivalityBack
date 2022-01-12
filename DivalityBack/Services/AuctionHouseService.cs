@@ -29,7 +29,7 @@ namespace DivalityBack.Services
         public async Task GetAuctionHouse(WebSocket websocket, WebSocketReceiveResult result)
         {
             List<AuctionHouse> listAuctionHouse = _auctionHousesCrudService.Get();
-            String jsonAuctionHouse = _utilServices.listAuctionToJson(listAuctionHouse);
+            String jsonAuctionHouse = _utilServices.ListAuctionToJson(listAuctionHouse);
 
             await WarnUserOfAuctionHouse(websocket, result, jsonAuctionHouse);
         }

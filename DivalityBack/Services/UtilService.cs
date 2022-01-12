@@ -100,7 +100,7 @@ namespace DivalityBack.Services
             return jsonAuction;
         }
 
-        public string listAuctionToJson(List<AuctionHouse> listAuctionHouse)
+        public string ListAuctionToJson(List<AuctionHouse> listAuctionHouse)
         {
             String jsonListAuctionHouse = "";
 
