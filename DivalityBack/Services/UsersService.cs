@@ -173,5 +173,19 @@ namespace DivalityBack.Services
                 await webSocket.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);
             }
         }
+
+        public async Task getTeams(WebSocket websocket, WebSocketReceiveResult result, string username)
+        {
+            List<Team> teams = _usersCRUDService.GetByUsername(username).Teams;
+            String jsonTeams = _utilService.TeamsToJson(teams);
+
+            await WarnUserTeams(websocket, result, jsonTeams); 
+        }
+
+        private async Task WarnUserTeams(WebSocket websocket, WebSocketReceiveResult result, string jsonTeams)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonTeams);
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
     }
 }

@@ -117,5 +117,43 @@ namespace DivalityBack.Services
 
             return jsonListAuctionHouse; 
         }
+
+        public string TeamsToJson(List<Team> teams)
+        {
+            String jsonTeams = "";
+
+            jsonTeams += "{";
+            jsonTeams += "\"type\":\"teams\",";
+            foreach (Team team in teams)
+            {
+                jsonTeams += "\"team\" :";
+                jsonTeams += TeamToJson(team) + ","; 
+            }
+
+            jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
+            jsonTeams += "}";
+
+            return jsonTeams;
+        }
+
+        private string TeamToJson(Team team)
+        {
+            String jsonTeam = "";
+
+            jsonTeam += "{";
+            jsonTeam += "\"type\":\"team\",";
+            jsonTeam += "\"name\":\"" + team.Name + "\",";
+            jsonTeam += "\"compo\":";
+            foreach (string cardId in team.Compo)
+            {
+                Card card = _cardsCrudService.Get(cardId);
+                jsonTeam += CardToJson(card) + ",";
+            }
+
+            jsonTeam = jsonTeam.Remove(jsonTeam.Length - 1);
+            jsonTeam += "}";
+
+            return jsonTeam; 
+        }
     }
 }

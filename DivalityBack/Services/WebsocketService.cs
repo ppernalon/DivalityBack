@@ -56,6 +56,9 @@ namespace DivalityBack.Services
                                     break; 
                                 case "buyAuctionHouse":
                                     await HandleBuyAuctionHouse(websocket, result, msgJson);
+                                    break;
+                                case "teams":
+                                    await HandleTeams(websocket, result, msgJson);
                                     break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
@@ -75,6 +78,12 @@ namespace DivalityBack.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleTeams(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            await _usersService.getTeams(websocket, result, username); 
         }
 
         private async Task HandleBuyAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
