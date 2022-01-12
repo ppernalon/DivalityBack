@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using DivalityBack.Models;
 using DivalityBack.Services;
@@ -123,6 +124,35 @@ namespace DivalityBack.Tests
             Assert.IsTrue(root.GetProperty("type").ToString().Equals("auctionHouse"), "Le type renvoyé n'est pas correct");
             Assert.IsTrue(jsonListAuction.Contains(root.GetProperty("auction").ToString()),
                 "La liste des opérations de l'HdV n'est pas correctement transformée en Json");
+        }
+
+        [TestMethod]
+        public void Teams_To_Json_Returns_Correct_Informations()
+        {
+            List<Team> teams = _usersCrudService.GetByUsername("UserTestGetOneUser").Teams;
+            String jsonTeams = _utilServices.TeamsToJson(teams); 
+            
+            JsonDocument json = JsonDocument.Parse(jsonTeams);
+            JsonElement root = json.RootElement;
+            
+            Assert.IsTrue(root.GetProperty("type").ToString().Equals("teams"), "Le type renvoyé n'est pas correct");
+            Assert.IsTrue(jsonTeams.Contains(root.GetProperty("team").ToString()),
+                "Les équipes ne sont pas transformées en Json");
+        }
+        
+        [TestMethod]
+        public void Team_To_Json_Returns_Correct_Informations()
+        {
+            Team team = _usersCrudService.GetByUsername("UserTestGetOneUser").Teams.FirstOrDefault();
+            String jsonTeam = _utilServices.TeamToJson(team); 
+            
+            JsonDocument json = JsonDocument.Parse(jsonTeam);
+            JsonElement root = json.RootElement;
+            
+            Assert.IsTrue(root.GetProperty("type").ToString().Equals("team"), "Le type renvoyé n'est pas correct");
+            Assert.IsTrue(jsonTeam.Contains(root.GetProperty("compo").ToString()),
+                "L'équipe n'est pas transformée en Json"); 
+
         }
     }
 }

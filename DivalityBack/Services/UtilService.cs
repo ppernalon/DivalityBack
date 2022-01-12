@@ -136,21 +136,23 @@ namespace DivalityBack.Services
             return jsonTeams;
         }
 
-        private string TeamToJson(Team team)
+        public string TeamToJson(Team team)
         {
             String jsonTeam = "";
 
             jsonTeam += "{";
             jsonTeam += "\"type\":\"team\",";
             jsonTeam += "\"name\":\"" + team.Name + "\",";
-            jsonTeam += "\"compo\":";
+            jsonTeam += "\"compo\": {";
             foreach (string cardId in team.Compo)
             {
+                jsonTeam += "\"card\":";
                 Card card = _cardsCrudService.Get(cardId);
                 jsonTeam += CardToJson(card) + ",";
             }
 
             jsonTeam = jsonTeam.Remove(jsonTeam.Length - 1);
+            jsonTeam += "}";
             jsonTeam += "}";
 
             return jsonTeam; 

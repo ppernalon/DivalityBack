@@ -165,5 +165,22 @@ namespace DivalityBack.Tests
             Assert.IsTrue(user.Collection.Count.Equals(1), "La collection n'a pas été modifiée");
             _usersCrudService.Update(user.Id, backup);
         }
+
+        [TestMethod]
+        public void Modify_Team_Does_Affect_Database()
+        {
+            User backup = _usersCrudService.GetByUsername("UserTestGetOneUser");
+
+            _usersService.ModifyTeam(null, null, "UserTestGetOneUser", "NameTeam", "NameTeamChanged",
+                "CardTestUpdateModified,CardTestUpdateModified,CardTestNordiqueLegendaire");
+            
+            User user = _usersCrudService.GetByUsername("UserTestGetOneUser");
+
+            Assert.IsNotNull(user.Teams.Find(team => team.Name.Equals("NameTeamChanged")), "Le nom de l'équipe n'a pas été changé");
+            Assert.IsTrue(user.Teams.Find(team => team.Name.Equals("NameTeamChanged")).Compo.Contains(_cardsCrudService.GetCardByName("CardTestUpdateModified").Id), "Les cartes n'ont pas été modifiées");
+            Assert.IsFalse(user.Teams.Find(team => team.Name.Equals("NameTeamChanged")).Compo.Contains(_cardsCrudService.GetCardByName("CardTestGetOne").Id), "Les cartes n'ont pas été modifiées");
+
+            _usersCrudService.Update(user.Id, backup);
+        }
     }
 }

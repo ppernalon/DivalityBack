@@ -176,6 +176,7 @@ namespace DivalityBack.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task getTeams(WebSocket websocket, WebSocketReceiveResult result, string username)
         {
             List<Team> teams = _usersCRUDService.GetByUsername(username).Teams.OrderBy(t => t.Name).ToList();
@@ -184,6 +185,7 @@ namespace DivalityBack.Services
             await WarnUserTeams(websocket, result, jsonTeams); 
         }
 
+        [ExcludeFromCodeCoverage]
         private async Task WarnUserTeams(WebSocket websocket, WebSocketReceiveResult result, string jsonTeams)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(jsonTeams);
