@@ -174,12 +174,17 @@ namespace DivalityBack.Services
         public async Task HandleConnection(WebSocket webSocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
+            if (!_usersService.mapActivePlayersWebsocket.ContainsKey(username))
+            {
+                //On met à jour une map globale des utilisateurs connectés avec leur websocket
+                _usersService.mapActivePlayersWebsocket.Add(username, webSocket);
 
-            //On met à jour une map globale des utilisateurs connectés avec leur websocket
-            _usersService.mapActivePlayersWebsocket.Add(username, webSocket);
-
-            await _usersService.WarnUsersOfConnection(username,webSocket, result);
-         
+                await _usersService.WarnUsersOfConnection(username, webSocket, result);
+            }
+            else
+            {
+                await _usersService.WarnUseAlreadyConnected(webSocket, result, username);
+            }
         }
 
         public async Task HandleCollection(WebSocket webSocket, WebSocketReceiveResult result, JsonDocument msgJson)

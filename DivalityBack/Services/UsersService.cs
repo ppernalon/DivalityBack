@@ -348,5 +348,11 @@ namespace DivalityBack.Services
                     usernameFriendToDelete); 
             }
         }
+
+        public async Task WarnUseAlreadyConnected(WebSocket webSocket, WebSocketReceiveResult result, string username)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Le compte " + username + " est déjà connecté");
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
     }
 }
