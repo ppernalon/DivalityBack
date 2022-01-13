@@ -7,6 +7,18 @@ namespace DivalityBack.Models
 {
     public class User
     {
+        public User()
+        {
+            Username = "";
+            Password = "";
+            Victory = 0;
+            Defeat = 0;
+            Disciples = 30;
+            Collection = new List<string>();
+            Friends = new List<string>();
+            Teams = new List<Team>();
+        }
+        
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
