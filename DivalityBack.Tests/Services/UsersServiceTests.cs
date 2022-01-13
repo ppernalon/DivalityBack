@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Net.WebSockets;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DivalityBack.Models;
 using DivalityBack.Services;
@@ -183,6 +180,105 @@ namespace DivalityBack.Tests
             Assert.IsFalse(user.Teams.Find(team => team.Name.Equals("NameTeamChanged")).Compo.Contains(_cardsCrudService.GetCardByName("CardTestGetOne").Id), "Les cartes n'ont pas été modifiées");
 
             _usersCrudService.Update(user.Id, backup);
+        }
+
+        [TestMethod]
+        public void SendFriendRequest_Not_Existing_Create_Entry_In_Database()
+        {
+            User sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");
+            _usersService.SendFriendRequest(null, null, "UserTestGetOneUser", "UserTestCanAffordCardTrue");
+            FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id); 
+            Assert.IsNotNull(request, "Aucune demande n'a été créée en base");
+            
+            _friendRequestsCrudService.Remove(request);
+            
+        }
+
+        [TestMethod]
+        public void SendFriendRequest_Already_Existing_Does_Not_Create_Entry_In_Database()
+        {
+            User sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardFalse");
+            _usersService.SendFriendRequest(null, null, "UserTestGetOneUser", "UserTestCanAffordCardFalse");
+            _usersService.SendFriendRequest(null, null, "UserTestGetOneUser", "UserTestCanAffordCardFalse");
+            Assert.IsTrue(_friendRequestsCrudService.FindByReceiver(receiver.Id).Count == 1, "Il y a plus qu'une demande d'ami remontée");
+            
+            _friendRequestsCrudService.Remove(_friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id));
+        }
+        
+        [TestMethod]
+        public void SendFriendRequest_To_A_Friend_Does_Not_Create_Entry_In_Database()
+        {
+            User sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardFalse");
+            _usersService.SendFriendRequest(null, null, "UserTestGetOneUser", "UserTestCanAffordCardFalse");
+            _usersService.AcceptFriendRequest(null, null, "UserTestGetOneUser", "UserTestCanAffordCardFalse");
+            _usersService.SendFriendRequest(null, null, "UserTestGetOneUser", "UserTestCanAffordCardFalse");
+            Assert.IsNull(_friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id), "Une demande d'ami a été remontée");
+
+            _usersCrudService.Update(sender.Id, sender);
+            _usersCrudService.Update(receiver.Id, receiver);
+        }
+
+        
+        [TestMethod]
+        public void AcceptFriendRequest_Modify_Entries_In_DataBase()
+        {
+            User backupSender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User backupReceiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");
+            _usersService.SendFriendRequest(null, null, backupSender.Username, backupReceiver.Username);
+            
+            _usersService.AcceptFriendRequest(null, null, backupSender.Username, backupReceiver.Username);
+            
+            User sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");        
+            
+            Assert.IsTrue(sender.Friends.Contains(receiver.Id), "La liste d'ami du sender ne contient pas le receiver");
+            Assert.IsTrue(receiver.Friends.Contains(sender.Id), "La liste d'ami du receiver ne contient pas le sender");
+            Assert.IsNull(_friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id), "La demande d'ami n'a pas été supprimée");
+            
+            _usersCrudService.Update(sender.Id, backupSender);
+            _usersCrudService.Update(receiver.Id, backupReceiver);
+
+        }
+        
+        [TestMethod]
+        public void RefuseFriendRequest_Modify_Entries_In_DataBase()
+        {
+            User backupSender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User backupReceiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");
+            _usersService.SendFriendRequest(null, null, backupSender.Username, backupReceiver.Username);
+            
+            _usersService.RefuseFriendRequest(null, null, backupSender.Username, backupReceiver.Username);
+            
+            User sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");        
+            
+            Assert.IsFalse(sender.Friends.Contains(receiver.Id), "La liste d'ami du sender contient le receiver");
+            Assert.IsFalse(receiver.Friends.Contains(sender.Id), "La liste d'ami du receiver contient le sender");
+            Assert.IsNull(_friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id), "La demande d'ami n'a pas été supprimée");
+            
+            _usersCrudService.Update(sender.Id, backupSender);
+            _usersCrudService.Update(receiver.Id, backupReceiver);
+
+        }
+
+        [TestMethod]
+        public void DeleteFriend_Modify_Entries_In_DataBase()
+        {
+            User sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            User receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");        
+            _usersService.SendFriendRequest(null, null, sender.Username, receiver.Username);
+            _usersService.AcceptFriendRequest(null, null, sender.Username, receiver.Username);
+            
+            _usersService.DeleteFriend(null, null, sender.Username, receiver.Username); 
+            
+            sender = _usersCrudService.GetByUsername("UserTestGetOneUser");
+            receiver = _usersCrudService.GetByUsername("UserTestCanAffordCardTrue");
+            
+            Assert.IsFalse(sender.Friends.Contains(receiver.Id), "La liste d'ami du sender contient le receiver");
+            Assert.IsFalse(receiver.Friends.Contains(sender.Id), "La liste d'ami du receiver contient le sender");
         }
     }
 }

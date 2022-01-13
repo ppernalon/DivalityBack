@@ -232,25 +232,35 @@ namespace DivalityBack.Services
         {
             User sender = _usersCRUDService.GetByUsername(usernameSender);
             User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
-            if (receiver != null){
-            FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
-            if (request == null)
+            if (receiver != null)
             {
-                FriendRequest newRequest = new FriendRequest();
-                newRequest.Sender = sender.Id;
-                newRequest.Receiver = receiver.Id;
-
-                _friendRequestsCrudService.Create(newRequest);
-
-                if (mapActivePlayersWebsocket.ContainsKey(receiver.Username))
+                if (!sender.Friends.Contains(receiver.Id))
                 {
-                    WebSocket webSocketReceiver = mapActivePlayersWebsocket[receiver.Username];
-                    await WarnUserOfFriendRequest(webSocketReceiver, result, receiver.Username);
+
+
+                    FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
+                    if (request == null)
+                    {
+                        FriendRequest newRequest = new FriendRequest();
+                        newRequest.Sender = sender.Id;
+                        newRequest.Receiver = receiver.Id;
+
+                        _friendRequestsCrudService.Create(newRequest);
+
+                        if (mapActivePlayersWebsocket.ContainsKey(receiver.Username))
+                        {
+                            WebSocket webSocketReceiver = mapActivePlayersWebsocket[receiver.Username];
+                            await WarnUserOfFriendRequest(webSocketReceiver, result, receiver.Username);
+                        }
+                    }
+                    else
+                    {
+                        await WarnUserOfFriendRequestAlreadyExisting(websocket, result);
+                    }
                 }
-            }
-            else
+                else
                 {
-                    await WarnUserOfFriendRequestAlreadyExisting(websocket, result);
+                    await WarnUserAlreadyFriend(websocket, result); 
                 }
             }
             else
@@ -259,17 +269,27 @@ namespace DivalityBack.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
+        private async Task WarnUserAlreadyFriend(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Vous êtes déjà ami avec ce joueur");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);                 }
+
+        [ExcludeFromCodeCoverage]
         private async Task WarnUserOfUserNotFound(WebSocket websocket, WebSocketReceiveResult result)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Joueur introuvable");
-            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);         }
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);         
+        }
 
+        [ExcludeFromCodeCoverage]
         private async Task WarnUserOfFriendRequestAlreadyExisting(WebSocket websocket, WebSocketReceiveResult result)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Vous avez déjà envoyé une requête d'ami à cette personne");
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
 
+        [ExcludeFromCodeCoverage]
         private async Task WarnUserOfFriendRequest(WebSocket webSocketReceiver, WebSocketReceiveResult result, string receiverUsername)
         {
             User user = _usersCRUDService.GetByUsername(receiverUsername);
@@ -349,6 +369,7 @@ namespace DivalityBack.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task WarnUseAlreadyConnected(WebSocket webSocket, WebSocketReceiveResult result, string username)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Le compte " + username + " est déjà connecté");
