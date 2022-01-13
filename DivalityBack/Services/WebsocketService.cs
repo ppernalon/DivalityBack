@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection.Metadata;
 using System.Text.Json;
@@ -196,9 +198,13 @@ namespace DivalityBack.Services
         
         private async Task HandleDeconnection(WebSocket webSocket)
         {
-            Console.Write("ok");
+            foreach (var keyValuePair in _usersService.mapActivePlayersWebsocket)
+            {
+                if (keyValuePair.Value.State == WebSocketState.CloseReceived || keyValuePair.Value.State == WebSocketState.Closed)
+                {
+                    _usersService.mapActivePlayersWebsocket.Remove(keyValuePair.Key); 
+                }
+            }
         }
-        
-        
     }
 }
