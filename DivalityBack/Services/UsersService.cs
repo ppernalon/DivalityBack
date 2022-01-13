@@ -18,16 +18,18 @@ namespace DivalityBack.Services
     public class UsersService
     {
         private readonly UsersCRUDService _usersCRUDService;
-        private readonly CardsCRUDService _cardsCrudService; 
+        private readonly CardsCRUDService _cardsCrudService;
+        private readonly FriendRequestsCRUDService _friendRequestsCrudService;
         private readonly CardsService _cardsService;
         private readonly UtilServices _utilService; 
         
         public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
 
-        public UsersService(UsersCRUDService usersCRUDService, CardsCRUDService cardsCrudService, CardsService cardsService, UtilServices utilService)
+        public UsersService(UsersCRUDService usersCRUDService, CardsCRUDService cardsCrudService, FriendRequestsCRUDService friendRequestsCrudService, CardsService cardsService, UtilServices utilService)
         {
             _usersCRUDService = usersCRUDService;
-            _cardsCrudService = cardsCrudService; 
+            _cardsCrudService = cardsCrudService;
+            _friendRequestsCrudService = friendRequestsCrudService; 
             _cardsService = cardsService;
             _utilService = utilService; 
         }
@@ -150,7 +152,15 @@ namespace DivalityBack.Services
                 .Select(s => s.Username)
                 .Except(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
 
-            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected); 
+            //On récupère la liste des requêtes d'amis reçues par l'User
+            List<FriendRequest> listFriendRequests = _friendRequestsCrudService.FindByReceiver(user.Id);
+            List<String> listSenderOfFriendRequests = new List<string>();
+            foreach (FriendRequest friendRequest in listFriendRequests)
+            {
+                listSenderOfFriendRequests.Add(_usersCRUDService.Get(friendRequest.Sender).Username);
+            }
+            
+            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected, listSenderOfFriendRequests); 
             
             byte[] byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
             await webSocket.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);
@@ -159,16 +169,23 @@ namespace DivalityBack.Services
             {
                 user = _usersCRUDService.GetByUsername(friendUsername);
                 //On récupère la liste des amis connectés de l'User
-                List<String> FriendConnected = _usersCRUDService.GetUsersById(user.Friends)
+                List<String> friendsConnected = _usersCRUDService.GetUsersById(user.Friends)
                     .Select(s => s.Username)
                     .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
             
                 //On récupère la liste des amis déconnectés de l'User
-                List<String> listDisconnected = _usersCRUDService.GetUsersById(user.Friends)
+                listFriendsDisconnected = _usersCRUDService.GetUsersById(user.Friends)
                     .Select(s => s.Username)
                     .Except(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
 
-                jsonFriends = _utilService.FriendsToJson(FriendConnected, listDisconnected);
+                //On récupère la liste des requêtes d'amis reçues par l'User
+                listFriendRequests = _friendRequestsCrudService.FindByReceiver(user.Id);
+                listSenderOfFriendRequests = new List<string>();
+                foreach (FriendRequest friendRequest in listFriendRequests)
+                {
+                    listSenderOfFriendRequests.Add(_usersCRUDService.Get(friendRequest.Sender).Username);
+                }
+                jsonFriends = _utilService.FriendsToJson(friendsConnected, listFriendsDisconnected, listSenderOfFriendRequests);
                 byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
 
                 webSocket = mapActivePlayersWebsocket[user.Username];
@@ -209,6 +226,127 @@ namespace DivalityBack.Services
             user.Teams.Add(teamToModify);
             _usersCRUDService.Update(user.Id, user);
             await getTeams(websocket, result, username); 
+        }
+
+        public async Task SendFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender, string usernameReceiver)
+        {
+            User sender = _usersCRUDService.GetByUsername(usernameSender);
+            User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
+            if (receiver != null){
+            FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
+            if (request == null)
+            {
+                FriendRequest newRequest = new FriendRequest();
+                newRequest.Sender = sender.Id;
+                newRequest.Receiver = receiver.Id;
+
+                _friendRequestsCrudService.Create(newRequest);
+
+                if (mapActivePlayersWebsocket.ContainsKey(receiver.Username))
+                {
+                    WebSocket webSocketReceiver = mapActivePlayersWebsocket[receiver.Username];
+                    await WarnUserOfFriendRequest(webSocketReceiver, result, receiver.Username);
+                }
+            }
+            else
+                {
+                    await WarnUserOfFriendRequestAlreadyExisting(websocket, result);
+                }
+            }
+            else
+            {
+                await WarnUserOfUserNotFound(websocket, result); 
+            }
+        }
+
+        private async Task WarnUserOfUserNotFound(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Joueur introuvable");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);         }
+
+        private async Task WarnUserOfFriendRequestAlreadyExisting(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Vous avez déjà envoyé une requête d'ami à cette personne");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
+
+        private async Task WarnUserOfFriendRequest(WebSocket webSocketReceiver, WebSocketReceiveResult result, string receiverUsername)
+        {
+            User user = _usersCRUDService.GetByUsername(receiverUsername);
+
+            //On récupère la liste des amis connectés de l'User
+            List<String> listFriendsConnected = _usersCRUDService.GetUsersById(user.Friends)
+                .Select(s => s.Username)
+                .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
+            
+            //On récupère la liste des amis déconnectés de l'User
+            List<String> listFriendsDisconnected = _usersCRUDService.GetUsersById(user.Friends)
+                .Select(s => s.Username)
+                .Except(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
+
+            //On récupère la liste des requêtes d'amis reçues par l'User
+            List<FriendRequest> listFriendRequests = _friendRequestsCrudService.FindByReceiver(user.Id);
+            List<String> listSenderOfFriendRequests = new List<string>();
+            foreach (FriendRequest friendRequest in listFriendRequests)
+            {
+                listSenderOfFriendRequests.Add(_usersCRUDService.Get(friendRequest.Sender).Username);
+            }
+            
+            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected, listSenderOfFriendRequests); 
+            
+            byte[] byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
+            await webSocketReceiver.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
+
+        public async Task AcceptFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender, string usernameReceiver)
+        {
+            User sender = _usersCRUDService.GetByUsername(usernameSender);
+            User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
+            FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
+            
+            sender.Friends.Add(receiver.Id);
+            receiver.Friends.Add(sender.Id);
+            
+            _friendRequestsCrudService.Remove(request);
+            _usersCRUDService.Update(sender.Id, sender);
+            _usersCRUDService.Update(receiver.Id, receiver);
+
+            if (mapActivePlayersWebsocket.ContainsKey(usernameSender))
+            {
+                await WarnUserOfFriendRequest(mapActivePlayersWebsocket[usernameSender], result, usernameSender);
+            }
+
+            await WarnUserOfFriendRequest(websocket, result, usernameReceiver);
+
+        }
+
+        public async Task RefuseFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender, string usernameReceiver)
+        {
+            User sender = _usersCRUDService.GetByUsername(usernameSender);
+            User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
+            FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
+
+            _friendRequestsCrudService.Remove(request);
+
+            await WarnUserOfFriendRequest(websocket, result, usernameSender);
+        }
+
+        public async Task DeleteFriend(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameFriendToDelete)
+        {
+            User user = _usersCRUDService.GetByUsername(username);
+            User friendToDelete = _usersCRUDService.GetByUsername(usernameFriendToDelete);
+
+            user.Friends.Remove(friendToDelete.Id);
+            friendToDelete.Friends.Remove(user.Id);
+            
+            _usersCRUDService.Update(user.Id, user);
+            _usersCRUDService.Update(friendToDelete.Id, friendToDelete);
+            
+            await WarnUserOfFriendRequest(websocket, result, username);
+            if (mapActivePlayersWebsocket.ContainsKey(usernameFriendToDelete))
+            {
+                await WarnUserOfFriendRequest(mapActivePlayersWebsocket[usernameFriendToDelete], result,
+                    usernameFriendToDelete); 
+            }
         }
     }
 }

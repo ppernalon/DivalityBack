@@ -22,6 +22,7 @@ namespace DivalityBack.Tests
             _settings.AuctionHouseCollectionName = config["DivalityDatabaseSettings:AuctionHouseCollectionName"];
             _settings.CardsCollectionName = config["DivalityDatabaseSettings:CardsCollectionName"];
             _settings.TeamsCollectionName = config["DivalityDatabaseSettings:TeamsCollectionName"];
+            _settings.FriendRequestsCollectionName = config["DivalityDatabaseSettings:FriendRequestsCollectionName"];
 
         }
     }

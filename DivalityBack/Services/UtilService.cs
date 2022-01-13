@@ -57,7 +57,8 @@ namespace DivalityBack.Services
 
         }
 
-        public String FriendsToJson(List<String> listUsernameConnected, List<String> listUsernameDisconnected)
+        public string FriendsToJson(List<string> listUsernameConnected, List<string> listUsernameDisconnected,
+            List<string> listSenderOfFriendRequests)
         {
             String jsonUsernames = "";
             jsonUsernames += "{";
@@ -67,7 +68,10 @@ namespace DivalityBack.Services
                 jsonUsernames += ",";
                 jsonUsernames += "\"disconnected\":";
                 jsonUsernames += ListUsernameToJson(listUsernameDisconnected);
-            jsonUsernames += "}";
+                jsonUsernames += ",";
+                jsonUsernames += "\"requests\":";
+                jsonUsernames += ListUsernameToJson(listSenderOfFriendRequests);
+                jsonUsernames += "}";
             return jsonUsernames; 
         }
 

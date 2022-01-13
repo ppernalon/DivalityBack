@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DivalityBack.Services;
+using MongoDB.Driver.Core.Authentication;
 
 namespace DivalityBack.Services
 {
@@ -63,7 +64,19 @@ namespace DivalityBack.Services
                                     break; 
                                 case "modificationTeam":
                                     await HandleModificationTeam(websocket, result, msgJson);
+                                    break;
+                                case "sendFriendRequest":
+                                    await HandleSendFriendRequest(websocket, result, msgJson);
                                     break; 
+                                case "acceptFriendRequest":
+                                    await HandleAcceptFriendRequest(websocket, result, msgJson);
+                                    break;
+                                case "refuseFriendRequest":
+                                    await HandleRefuseFriendRequest(websocket, result, msgJson);
+                                    break;
+                                case "deleteFriend":
+                                    await HandleDeleteFriend(websocket, result, msgJson);
+                                    break;
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -82,6 +95,35 @@ namespace DivalityBack.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleDeleteFriend(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String usernameFriendToDelete = msgJson.RootElement.GetProperty("usernameFriendToDelete").ToString();
+            await _usersService.DeleteFriend(websocket, result, username, usernameFriendToDelete); 
+
+        }
+
+        private async Task HandleRefuseFriendRequest(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String usernameSender = msgJson.RootElement.GetProperty("usernameSender").ToString();
+            String usernameReceiver = msgJson.RootElement.GetProperty("usernameReceiver").ToString();
+            await _usersService.RefuseFriendRequest(websocket, result, usernameSender, usernameReceiver); 
+        }
+
+        private async Task HandleAcceptFriendRequest(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String usernameSender = msgJson.RootElement.GetProperty("usernameSender").ToString();
+            String usernameReceiver = msgJson.RootElement.GetProperty("usernameReceiver").ToString();
+            await _usersService.AcceptFriendRequest(websocket, result, usernameSender, usernameReceiver);
+        }
+
+        private async Task HandleSendFriendRequest(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String usernameSender = msgJson.RootElement.GetProperty("usernameSender").ToString();
+            String usernameReceiver = msgJson.RootElement.GetProperty("usernameReceiver").ToString();
+            await _usersService.SendFriendRequest(websocket, result, usernameSender, usernameReceiver); 
         }
 
         private async Task HandleModificationTeam(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

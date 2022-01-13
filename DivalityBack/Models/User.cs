@@ -18,6 +18,5 @@ namespace DivalityBack.Models
         public List<String> Collection { get; set; }
         public List<String> Friends{ get; set; }
         public List<Team> Teams { get; set; }
-        
     }
 }

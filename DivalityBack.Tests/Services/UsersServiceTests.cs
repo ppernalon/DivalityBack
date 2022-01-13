@@ -17,7 +17,8 @@ namespace DivalityBack.Tests
         private static CardsService _cardsService;
         private static UtilServices _utilService;
         private static CardsCRUDService _cardsCrudService; 
-        private static UsersCRUDService _usersCrudService; 
+        private static UsersCRUDService _usersCrudService;
+        private static FriendRequestsCRUDService _friendRequestsCrudService;
 
         [ClassInitialize]
         public static void SetUp(TestContext context)
@@ -25,8 +26,9 @@ namespace DivalityBack.Tests
             _cardsService = new CardsService(new CardsCRUDService(SetupAssemblyInitializer._settings));
             _usersCrudService = new UsersCRUDService(SetupAssemblyInitializer._settings);
             _cardsCrudService = new CardsCRUDService(SetupAssemblyInitializer._settings);
+            _friendRequestsCrudService = new FriendRequestsCRUDService(SetupAssemblyInitializer._settings);
             _utilService = new UtilServices(_cardsCrudService, _usersCrudService); 
-            _usersService = new UsersService(_usersCrudService, _cardsCrudService, _cardsService, _utilService);
+            _usersService = new UsersService(_usersCrudService, _cardsCrudService, _friendRequestsCrudService, _cardsService, _utilService);
         }
         
         [TestMethod]

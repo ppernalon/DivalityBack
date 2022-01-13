@@ -77,7 +77,7 @@ namespace DivalityBack.Tests
         public void Friends_To_Json_Returns_Correct_Informations()
         {
             User user = _usersCrudService.Get("619de7a37c00c8a09bed8bc3");
-            String jsonFriends = _utilServices.FriendsToJson(new List<string>(), user.Friends);
+            String jsonFriends = _utilServices.FriendsToJson(new List<string>(), user.Friends, new List<string>());
             
             JsonDocument json = JsonDocument.Parse(jsonFriends);
             JsonElement root = json.RootElement;
