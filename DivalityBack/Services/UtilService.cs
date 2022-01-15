@@ -21,21 +21,21 @@ namespace DivalityBack.Services
             jsonCollection += "{";
             jsonCollection += "\"type\":\"collection\",";
            
-            List<String> listGrec = new List<string>();
-            List<String> listEgypt = new List<string>();
+            List<String> listGreek = new List<string>();
+            List<String> listEgyptian = new List<string>();
             List<String> listNordic = new List<string>();
             foreach (string cardId in collection)
             {
                 Card card = _cardsCrudService.Get(cardId);
                 switch (card.Pantheon)
                 {
-                    case "Grec":
-                        listGrec.Add(card.Name);
+                    case "greek":
+                        listGreek.Add(card.Name);
                         break;
-                    case "Egypt":
-                        listEgypt.Add(card.Name);
+                    case "egyptian":
+                        listEgyptian.Add(card.Name);
                         break;
-                    case "Nordic":
+                    case "nordic":
                         listNordic.Add(card.Name);
                         break;
                 }
@@ -43,8 +43,8 @@ namespace DivalityBack.Services
             
             jsonCollection += "\"data\" :{ ";
             
-            jsonCollection += "\"Grec\" :" + "[";
-            foreach (string name in listGrec)
+            jsonCollection += "\"greek\" :" + "[";
+            foreach (string name in listGreek)
             {
                 jsonCollection += "\"" + name + "\"" + ",";
             }
@@ -56,8 +56,8 @@ namespace DivalityBack.Services
 
             jsonCollection += "],";
             
-            jsonCollection += "\"Egypt\" :" + "[";
-            foreach (string name in listEgypt)
+            jsonCollection += "\"egyptian\" :" + "[";
+            foreach (string name in listEgyptian)
             {
                 jsonCollection += "\"" + name + "\"" + ",";
             }
@@ -66,7 +66,7 @@ namespace DivalityBack.Services
                 jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
             }            jsonCollection += "],"; 
             
-            jsonCollection += "\"Nordic\" :" + "[";
+            jsonCollection += "\"nordic\" :" + "[";
             foreach (string name in listNordic)
             {
                 jsonCollection += "\"" + name + "\"" + ",";
