@@ -20,14 +20,63 @@ namespace DivalityBack.Services
             String jsonCollection = "";
             jsonCollection += "{";
             jsonCollection += "\"type\":\"collection\",";
+           
+            List<String> listGrec = new List<string>();
+            List<String> listEgypt = new List<string>();
+            List<String> listNordic = new List<string>();
             foreach (string cardId in collection)
             {
-                jsonCollection += "\"card\":";
-                jsonCollection += CardToJson(_cardsCrudService.Get(cardId)) + ",";
+                Card card = _cardsCrudService.Get(cardId);
+                switch (card.Pantheon)
+                {
+                    case "Grec":
+                        listGrec.Add(card.Name);
+                        break;
+                    case "Egypt":
+                        listEgypt.Add(card.Name);
+                        break;
+                    case "Nordic":
+                        listNordic.Add(card.Name);
+                        break;
+                }
+            }
+            
+            jsonCollection += "\"data\" :{ ";
+            
+            jsonCollection += "\"Grec\" :" + "[";
+            foreach (string name in listGrec)
+            {
+                jsonCollection += "\"" + name + "\"" + ",";
             }
 
-            jsonCollection = jsonCollection.Remove(jsonCollection.Length -1); 
+            if (jsonCollection.EndsWith(","))
+            {
+                jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
+            }
 
+            jsonCollection += "],";
+            
+            jsonCollection += "\"Egypt\" :" + "[";
+            foreach (string name in listEgypt)
+            {
+                jsonCollection += "\"" + name + "\"" + ",";
+            }
+            if (jsonCollection.EndsWith(","))
+            {
+                jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
+            }            jsonCollection += "],"; 
+            
+            jsonCollection += "\"Nordic\" :" + "[";
+            foreach (string name in listNordic)
+            {
+                jsonCollection += "\"" + name + "\"" + ",";
+            }
+            if (jsonCollection.EndsWith(","))
+            {
+                jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
+            }            jsonCollection += "]"; 
+           
+            jsonCollection += "}"; 
             jsonCollection += "}";
             return jsonCollection; 
         }
@@ -128,13 +177,27 @@ namespace DivalityBack.Services
 
             jsonTeams += "{";
             jsonTeams += "\"type\":\"teams\",";
+            jsonTeams += "\"teamsdata\": [";
+            
             foreach (Team team in teams)
             {
-                jsonTeams += "\"team\" :";
-                jsonTeams += TeamToJson(team) + ","; 
-            }
+                jsonTeams += "{";
+                jsonTeams += "\"name\" : \"" + team.Name + "\",";
+                jsonTeams += "\"compo\" : [";
+                foreach (string cardId in team.Compo)
+                {
+                    jsonTeams += "\"" + _cardsCrudService.Get(cardId).Name + "\",";
+                }
 
+                if (jsonTeams.EndsWith(","))
+                {
+                    jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
+                }
+                jsonTeams += "]";
+                jsonTeams += "},";
+            }
             jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
+            jsonTeams += "]"; 
             jsonTeams += "}";
 
             return jsonTeams;
