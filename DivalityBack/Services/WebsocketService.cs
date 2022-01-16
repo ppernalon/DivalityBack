@@ -79,6 +79,9 @@ namespace DivalityBack.Services
                                 case "deleteFriend":
                                     await HandleDeleteFriend(websocket, result, msgJson);
                                     break;
+                                case "waitForDuel":
+                                    HandleWaitForDuel(websocket, result, msgJson);
+                                    break;
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -91,12 +94,18 @@ namespace DivalityBack.Services
 
                     if (websocket.State == WebSocketState.CloseReceived)
                     {
-                        await HandleDeconnection(websocket);
+                        HandleDeconnection(websocket);
                     }
                 }
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private void HandleWaitForDuel(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            _usersService.WaitForDuel(username); 
         }
 
         private async Task HandleDeleteFriend(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
@@ -196,7 +205,7 @@ namespace DivalityBack.Services
             await _usersService.GetCollection(username, webSocket, result); 
         }
         
-        private async Task HandleDeconnection(WebSocket webSocket)
+        private void HandleDeconnection(WebSocket webSocket)
         {
             foreach (var keyValuePair in _usersService.mapActivePlayersWebsocket)
             {

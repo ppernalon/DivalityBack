@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
+using Microsoft.AspNetCore.Server.HttpSys;
 
 namespace DivalityBack.Services
 {
@@ -223,6 +224,18 @@ namespace DivalityBack.Services
             jsonTeam += "}";
 
             return jsonTeam; 
+        }
+
+        public string DuelToJson(string username)
+        {
+            String jsonDuel = "";
+
+            jsonDuel += "{";
+            jsonDuel += "\"type\":\"duel\",";
+            jsonDuel += "\"opponent\":\"" + username + "\"";
+            jsonDuel += "}";
+
+            return jsonDuel; 
         }
     }
 }

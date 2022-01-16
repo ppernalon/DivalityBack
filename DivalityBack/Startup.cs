@@ -26,7 +26,7 @@ namespace DivalityBack
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(); // Make sure you call this previous to AddMvc
+            services.AddCors();
             services.AddRazorPages();
             services.Configure<DivalityDatabaseSettings>(
                 Configuration.GetSection(nameof(DivalityDatabaseSettings)));
@@ -41,7 +41,11 @@ namespace DivalityBack
             services.AddSingleton<AuctionHouseService>(); 
             services.AddSingleton<UtilServices>();
             services.AddSingleton<WebsocketService>();
-            services.AddSingleton<FriendRequestsCRUDService>(); 
+            services.AddSingleton<FriendRequestsCRUDService>();
+            
+            services.AddHostedService<LongRunningService>();
+            services.AddSingleton<BackgroundWorkerQueue>();
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

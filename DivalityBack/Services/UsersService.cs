@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
+using Microsoft.VisualBasic;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DivalityBack.Services
@@ -21,17 +23,22 @@ namespace DivalityBack.Services
         private readonly CardsCRUDService _cardsCrudService;
         private readonly FriendRequestsCRUDService _friendRequestsCrudService;
         private readonly CardsService _cardsService;
-        private readonly UtilServices _utilService; 
-        
-        public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
+        private readonly UtilServices _utilService;
+        private readonly BackgroundWorkerQueue _backgroundWorkerQueue;
 
-        public UsersService(UsersCRUDService usersCRUDService, CardsCRUDService cardsCrudService, FriendRequestsCRUDService friendRequestsCrudService, CardsService cardsService, UtilServices utilService)
+        public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
+        public Dictionary<String, WebSocket> mapQueuePlayersWebsocket = new Dictionary<string, WebSocket>();
+
+        public UsersService(BackgroundWorkerQueue backgroundWorkerQueue, UsersCRUDService usersCRUDService,
+            CardsCRUDService cardsCrudService, FriendRequestsCRUDService friendRequestsCrudService,
+            CardsService cardsService, UtilServices utilService)
         {
             _usersCRUDService = usersCRUDService;
             _cardsCrudService = cardsCrudService;
-            _friendRequestsCrudService = friendRequestsCrudService; 
+            _friendRequestsCrudService = friendRequestsCrudService;
             _cardsService = cardsService;
-            _utilService = utilService; 
+            _utilService = utilService;
+            _backgroundWorkerQueue = backgroundWorkerQueue;
         }
 
         public string HashPassword(String password)
@@ -76,7 +83,7 @@ namespace DivalityBack.Services
 
             return jsonString;
         }
-        
+
         public async Task Pray(string username, string pantheon, WebSocket webSocket, WebSocketReceiveResult result)
         {
             User user = _usersCRUDService.GetByUsername(username);
@@ -89,12 +96,12 @@ namespace DivalityBack.Services
                 user.Collection.Add(card.Id);
 
                 _usersCRUDService.Update(user.Id, user);
-                
+
                 await WarnUserPurchaseCard(webSocket, result, card);
             }
             else
             {
-                await WarnUserNotEnoughDisciples(webSocket, result); 
+                await WarnUserNotEnoughDisciples(webSocket, result);
             }
         }
 
@@ -102,7 +109,8 @@ namespace DivalityBack.Services
         private async Task WarnUserNotEnoughDisciples(WebSocket webSocket, WebSocketReceiveResult result)
         {
             byte[] byteNotEnoughDisciples = Encoding.UTF8.GetBytes("L'utilisateur ne possède pas assez de disciples");
-            await webSocket.SendAsync(byteNotEnoughDisciples, result.MessageType, result.EndOfMessage, CancellationToken.None);
+            await webSocket.SendAsync(byteNotEnoughDisciples, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
         }
 
         public Boolean CanAffordCard(User user)
@@ -112,10 +120,11 @@ namespace DivalityBack.Services
 
         [ExcludeFromCodeCoverage]
         public async Task WarnUserPurchaseCard(WebSocket webSocket, WebSocketReceiveResult result, Card card)
-        { 
+        {
             string jsonCard = _utilService.CardToJson(card);
             byte[] byteCardObtained = Encoding.UTF8.GetBytes(jsonCard);
-            await webSocket.SendAsync(byteCardObtained, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+            await webSocket.SendAsync(byteCardObtained, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
@@ -129,12 +138,12 @@ namespace DivalityBack.Services
                 await WarnUserCollection(webSocket, result, jsonCollection);
             }
         }
-        
+
         [ExcludeFromCodeCoverage]
         public async Task WarnUserCollection(WebSocket webSocket, WebSocketReceiveResult result, String jsonCollection)
         {
             byte[] byteCollection = Encoding.UTF8.GetBytes(jsonCollection);
-            await webSocket.SendAsync(byteCollection, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+            await webSocket.SendAsync(byteCollection, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
@@ -146,7 +155,7 @@ namespace DivalityBack.Services
             List<String> listFriendsConnected = _usersCRUDService.GetUsersById(user.Friends)
                 .Select(s => s.Username)
                 .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
-            
+
             //On récupère la liste des amis déconnectés de l'User
             List<String> listFriendsDisconnected = _usersCRUDService.GetUsersById(user.Friends)
                 .Select(s => s.Username)
@@ -159,12 +168,13 @@ namespace DivalityBack.Services
             {
                 listSenderOfFriendRequests.Add(_usersCRUDService.Get(friendRequest.Sender).Username);
             }
-            
-            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected, listSenderOfFriendRequests); 
-            
+
+            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected,
+                listSenderOfFriendRequests);
+
             byte[] byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
             await webSocket.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);
-            
+
             foreach (string friendUsername in listFriendsConnected)
             {
                 user = _usersCRUDService.GetByUsername(friendUsername);
@@ -172,7 +182,7 @@ namespace DivalityBack.Services
                 List<String> friendsConnected = _usersCRUDService.GetUsersById(user.Friends)
                     .Select(s => s.Username)
                     .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
-            
+
                 //On récupère la liste des amis déconnectés de l'User
                 listFriendsDisconnected = _usersCRUDService.GetUsersById(user.Friends)
                     .Select(s => s.Username)
@@ -185,7 +195,9 @@ namespace DivalityBack.Services
                 {
                     listSenderOfFriendRequests.Add(_usersCRUDService.Get(friendRequest.Sender).Username);
                 }
-                jsonFriends = _utilService.FriendsToJson(friendsConnected, listFriendsDisconnected, listSenderOfFriendRequests);
+
+                jsonFriends = _utilService.FriendsToJson(friendsConnected, listFriendsDisconnected,
+                    listSenderOfFriendRequests);
                 byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
 
                 webSocket = mapActivePlayersWebsocket[user.Username];
@@ -199,21 +211,22 @@ namespace DivalityBack.Services
             List<Team> teams = _usersCRUDService.GetByUsername(username).Teams.OrderBy(t => t.Name).ToList();
             String jsonTeams = _utilService.TeamsToJson(teams);
 
-            await WarnUserTeams(websocket, result, jsonTeams); 
+            await WarnUserTeams(websocket, result, jsonTeams);
         }
 
         [ExcludeFromCodeCoverage]
         private async Task WarnUserTeams(WebSocket websocket, WebSocketReceiveResult result, string jsonTeams)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(jsonTeams);
-            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
-        public async Task ModifyTeam(WebSocket websocket, WebSocketReceiveResult result, string username, string oldNameTeam, string newNameTeam, string compo)
+        public async Task ModifyTeam(WebSocket websocket, WebSocketReceiveResult result, string username,
+            string oldNameTeam, string newNameTeam, string compo)
         {
             User user = _usersCRUDService.GetByUsername(username);
             Team teamToModify = user.Teams.FindAll(t => t.Name.Equals(oldNameTeam)).FirstOrDefault();
-            user.Teams.Remove(teamToModify); 
+            user.Teams.Remove(teamToModify);
 
             teamToModify.Name = newNameTeam;
             teamToModify.Compo.Clear();
@@ -223,12 +236,14 @@ namespace DivalityBack.Services
                 Card card = _cardsCrudService.GetCardByName(cardName);
                 teamToModify.Compo.Add(card.Id);
             }
+
             user.Teams.Add(teamToModify);
             _usersCRUDService.Update(user.Id, user);
-            await getTeams(websocket, result, username); 
+            await getTeams(websocket, result, username);
         }
 
-        public async Task SendFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender, string usernameReceiver)
+        public async Task SendFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender,
+            string usernameReceiver)
         {
             User sender = _usersCRUDService.GetByUsername(usernameSender);
             User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
@@ -260,12 +275,12 @@ namespace DivalityBack.Services
                 }
                 else
                 {
-                    await WarnUserAlreadyFriend(websocket, result); 
+                    await WarnUserAlreadyFriend(websocket, result);
                 }
             }
             else
             {
-                await WarnUserOfUserNotFound(websocket, result); 
+                await WarnUserOfUserNotFound(websocket, result);
             }
         }
 
@@ -273,24 +288,26 @@ namespace DivalityBack.Services
         private async Task WarnUserAlreadyFriend(WebSocket websocket, WebSocketReceiveResult result)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Vous êtes déjà ami avec ce joueur");
-            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);                 }
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
 
         [ExcludeFromCodeCoverage]
         private async Task WarnUserOfUserNotFound(WebSocket websocket, WebSocketReceiveResult result)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Joueur introuvable");
-            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);         
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
         private async Task WarnUserOfFriendRequestAlreadyExisting(WebSocket websocket, WebSocketReceiveResult result)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Vous avez déjà envoyé une requête d'ami à cette personne");
-            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
-        private async Task WarnUserOfFriendRequest(WebSocket webSocketReceiver, WebSocketReceiveResult result, string receiverUsername)
+        private async Task WarnUserOfFriendRequest(WebSocket webSocketReceiver, WebSocketReceiveResult result,
+            string receiverUsername)
         {
             User user = _usersCRUDService.GetByUsername(receiverUsername);
 
@@ -298,7 +315,7 @@ namespace DivalityBack.Services
             List<String> listFriendsConnected = _usersCRUDService.GetUsersById(user.Friends)
                 .Select(s => s.Username)
                 .Intersect(new List<string>(mapActivePlayersWebsocket.Keys)).ToList();
-            
+
             //On récupère la liste des amis déconnectés de l'User
             List<String> listFriendsDisconnected = _usersCRUDService.GetUsersById(user.Friends)
                 .Select(s => s.Username)
@@ -311,21 +328,25 @@ namespace DivalityBack.Services
             {
                 listSenderOfFriendRequests.Add(_usersCRUDService.Get(friendRequest.Sender).Username);
             }
-            
-            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected, listSenderOfFriendRequests); 
-            
-            byte[] byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
-            await webSocketReceiver.SendAsync(byteFriends, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
 
-        public async Task AcceptFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender, string usernameReceiver)
+            String jsonFriends = _utilService.FriendsToJson(listFriendsConnected, listFriendsDisconnected,
+                listSenderOfFriendRequests);
+
+            byte[] byteFriends = Encoding.UTF8.GetBytes(jsonFriends);
+            await webSocketReceiver.SendAsync(byteFriends, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
+        }
+
+        public async Task AcceptFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender,
+            string usernameReceiver)
         {
             User sender = _usersCRUDService.GetByUsername(usernameSender);
             User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
             FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
-            
+
             sender.Friends.Add(receiver.Id);
             receiver.Friends.Add(sender.Id);
-            
+
             _friendRequestsCrudService.Remove(request);
             _usersCRUDService.Update(sender.Id, sender);
             _usersCRUDService.Update(receiver.Id, receiver);
@@ -339,7 +360,8 @@ namespace DivalityBack.Services
 
         }
 
-        public async Task RefuseFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender, string usernameReceiver)
+        public async Task RefuseFriendRequest(WebSocket websocket, WebSocketReceiveResult result, string usernameSender,
+            string usernameReceiver)
         {
             User sender = _usersCRUDService.GetByUsername(usernameSender);
             User receiver = _usersCRUDService.GetByUsername(usernameReceiver);
@@ -350,22 +372,23 @@ namespace DivalityBack.Services
             await WarnUserOfFriendRequest(websocket, result, usernameSender);
         }
 
-        public async Task DeleteFriend(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameFriendToDelete)
+        public async Task DeleteFriend(WebSocket websocket, WebSocketReceiveResult result, string username,
+            string usernameFriendToDelete)
         {
             User user = _usersCRUDService.GetByUsername(username);
             User friendToDelete = _usersCRUDService.GetByUsername(usernameFriendToDelete);
 
             user.Friends.Remove(friendToDelete.Id);
             friendToDelete.Friends.Remove(user.Id);
-            
+
             _usersCRUDService.Update(user.Id, user);
             _usersCRUDService.Update(friendToDelete.Id, friendToDelete);
-            
+
             await WarnUserOfFriendRequest(websocket, result, username);
             if (mapActivePlayersWebsocket.ContainsKey(usernameFriendToDelete))
             {
                 await WarnUserOfFriendRequest(mapActivePlayersWebsocket[usernameFriendToDelete], result,
-                    usernameFriendToDelete); 
+                    usernameFriendToDelete);
             }
         }
 
@@ -373,7 +396,199 @@ namespace DivalityBack.Services
         public async Task WarnUseAlreadyConnected(WebSocket webSocket, WebSocketReceiveResult result, string username)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Le compte " + username + " est déjà connecté");
-            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+        
+        public void StartMatchmaking()
+        {
+            _backgroundWorkerQueue.QueueBackgroundWorkItem(async token =>
+            {
+                while (true)
+                {
+                    await Task.Delay(5000);
+                    await Matchmaking();
+                }
+            });
+        }
+        
+        private async Task Matchmaking()
+        {
+            if (mapQueuePlayersWebsocket.Count > 1)
+            {
+                List<List<List<User>>> combinaisons = new List<List<List<User>>>();
+
+                //On récupère la file d'attente et on la vide
+                Dictionary<String, WebSocket> queue = new Dictionary<string, WebSocket>(mapQueuePlayersWebsocket);
+                mapQueuePlayersWebsocket.Clear();
+                //On récupère tous les joueurs
+                List<User> listUserInQueue = new List<User>();
+
+                foreach (var keyValuePair in queue)
+                {
+                    listUserInQueue.Add(_usersCRUDService.GetByUsername(keyValuePair.Key));
+                }
+
+                //On calcule toutes les combinaisons possibles de duels
+                combinaisons = CalculCombinaison(listUserInQueue);
+
+                Dictionary<int, double> mapCombinaisonScore = new Dictionary<int, double>();
+
+                //On leur attribue à chacune un score
+                foreach (List<List<User>> combinaison in combinaisons)
+                {
+                    double score = CalculScoreCombinaison(combinaison);
+                    mapCombinaisonScore.Add(combinaisons.IndexOf(combinaison), score);
+                }
+
+                //On prend une des combinaisons avec le score le plus faible 
+                int indexOfMinimalScore = mapCombinaisonScore.OrderBy(k => k.Value).FirstOrDefault().Key;
+                List<List<User>> combinaisonKept = combinaisons[indexOfMinimalScore];
+
+                //On prévient tous les joueurs de leur opponent
+                foreach (List<User> pair in combinaisonKept)
+                {
+                   await WarnUsersOfDuel(pair, queue);
+                }
+
+                //S'il reste un joueur sans match, on le replace dans la liste d'attente
+                foreach (List<User> pair in combinaisonKept)
+                {
+                    if (queue.Keys.Contains(pair[0].Username))
+                    {
+                        queue.Remove(pair[0].Username);
+                    }
+
+                    if (queue.Keys.Contains(pair[1].Username))
+                    {
+                        queue.Remove(pair[1].Username);
+                    }
+                }
+
+                foreach (var keyValuePair in queue)
+                {
+                    mapQueuePlayersWebsocket.Add(keyValuePair.Key, keyValuePair.Value);
+                }
+            }
+        }
+
+        private async Task WarnUsersOfDuel(List<User> pair, Dictionary<string, WebSocket> queue)
+        {
+            String jsonOpponent = _utilService.DuelToJson(pair[1].Username);
+            WebSocket webSocket = queue[pair[0].Username]; 
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonOpponent);
+            await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+            
+            jsonOpponent = _utilService.DuelToJson(pair[0].Username);
+            webSocket = queue[pair[1].Username]; 
+            bytes = Encoding.UTF8.GetBytes(jsonOpponent);
+            await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private double CalculScoreCombinaison(List<List<User>> combinaison)
+        {
+            double score = 0;
+            foreach (List<User> pair in combinaison)
+            {
+                int winrateUser0 = 0;
+                int winrateUser1 = 0;
+
+                if (!(pair[0].Victory + pair[0].Defeat).Equals(0))
+                {
+                    winrateUser0 = pair[0].Victory / (pair[0].Victory + pair[0].Defeat);
+                }
+                
+                if (!(pair[1].Victory + pair[1].Defeat).Equals(0))
+                {
+                    winrateUser1 = pair[1].Victory / (pair[1].Victory + pair[1].Defeat);
+                }
+
+                score += Math.Pow(winrateUser0 - winrateUser1, 2); 
+            }
+            return score; 
+        }
+
+        private List<List<List<User>>> CalculCombinaison(List<User> listUserInQueue)
+        {
+            List<List<List<User>>> combinaisons = new List<List<List<User>>>();
+            List<List<User>> pairs = GetAllPairsOfUsers(listUserInQueue);
+            
+            int numberOfPairs = (int) Math.Floor((decimal) (listUserInQueue.Count / 2)); 
+            
+            GetAllCombinaisonsFromPairs(pairs, combinaisons, new List<List<User>>(), new List<List<User>>(), numberOfPairs);
+            
+            return combinaisons;
+        }
+
+        public List<List<User>> GetAllPairsOfUsers(List<User> users)
+        {
+            List<List<User>> listPairs = new List<List<User>>();
+            for (int i = 0; i < users.Count; i++)
+            {
+                for (int j = i; j < users.Count; j++)
+                {
+                    if (i != j)
+                    {
+                        List<User> pair = new List<User>();
+                        pair.Add(users[i]);
+                        pair.Add(users[j]);
+                        listPairs.Add(pair);
+                    }
+                }
+            }
+
+            return listPairs;
+        }
+
+        private void GetAllCombinaisonsFromPairs(List<List<User>> pairs, List<List<List<User>>> combinaisons,
+            List<List<User>> pairsKept, List<List<User>> combinaison, int numberOfPairs)
+        {
+            List<List<User>> pairsFiltered = new List<List<User>>();
+            //Pour toutes les paires
+            foreach (List<User> pair in pairs)
+            {
+              
+                if (pairsKept.Count == 0)
+                {
+                    combinaison.Clear();
+                }
+
+                combinaison.Add(pair);
+                pairsKept.Add(pair);
+                
+                //On maj la liste des users utilisés
+                List<User> userUsed = new List<User>();
+                foreach (List<User> pairKept in pairsKept)
+                {
+                    userUsed.Add(pairKept[0]);
+                    userUsed.Add(pairKept[1]);
+                }
+                pairsFiltered = pairs.Except(pairs.FindAll(p => userUsed.Contains(p[0]) || userUsed.Contains(p[1]))).ToList();
+                
+                
+                if (combinaison.Count == numberOfPairs)
+                {
+                    pairsKept.Remove(pairsKept[pairsKept.Count -1]);
+                    combinaisons.Add(new List<List<User>>(combinaison));
+                    combinaison = new List<List<User>>(pairsKept); 
+                }
+                
+                if (pairsFiltered.Count > 0)
+                {
+                    //On réitère pour toutes les paires restantes
+                    GetAllCombinaisonsFromPairs(pairsFiltered, combinaisons, pairsKept, combinaison, numberOfPairs);
+                }
+            }
+
+            if (!pairsKept.Count.Equals(0))
+            {
+                pairsKept.Remove(pairsKept[pairsKept.Count - 1]);
+            }
+        }
+
+        public void WaitForDuel(string username)
+        {
+            mapQueuePlayersWebsocket.Add(username, mapActivePlayersWebsocket[username]); 
         }
     }
+
 }
