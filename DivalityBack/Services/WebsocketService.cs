@@ -213,6 +213,11 @@ namespace DivalityBack.Services
                 {
                     _usersService.mapActivePlayersWebsocket.Remove(keyValuePair.Key); 
                 }
+
+                if (_usersService.mapQueuePlayersWebsocket.Keys.Contains(keyValuePair.Key))
+                {
+                    _usersService.mapQueuePlayersWebsocket.Remove(keyValuePair.Key); 
+                }
             }
         }
     }
