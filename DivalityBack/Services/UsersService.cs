@@ -587,7 +587,18 @@ namespace DivalityBack.Services
 
         public void WaitForDuel(string username)
         {
-            mapQueuePlayersWebsocket.Add(username, mapActivePlayersWebsocket[username]); 
+            if (!(mapQueuePlayersWebsocket.Keys.Contains(username)) && mapActivePlayersWebsocket.Keys.Contains(username))
+            {
+                mapQueuePlayersWebsocket.Add(username, mapActivePlayersWebsocket[username]);
+            }
+        }
+
+        public void CancelWaitForDuel(string username)
+        {
+            if ((mapQueuePlayersWebsocket.Keys.Contains(username)))
+            {
+                mapQueuePlayersWebsocket.Remove(username);
+            }
         }
     }
 
