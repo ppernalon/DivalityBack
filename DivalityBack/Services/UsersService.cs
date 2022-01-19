@@ -91,6 +91,10 @@ namespace DivalityBack.Services
             {
                 //On génère la carte aléatoire en fonction du pantheon choisi
                 Card card = _cardsService.GenerateNewCard(pantheon);
+                while (card != null)
+                {
+                    card = _cardsService.GenerateNewCard(pantheon);
+                }
                 //On met à jour le nombre de disciples et la collection
                 user.Disciples -= _cardsService.priceOfCard;
                 user.Collection.Add(card.Id);
