@@ -604,6 +604,19 @@ namespace DivalityBack.Services
                 mapQueuePlayersWebsocket.Remove(username);
             }
         }
+
+        public async Task GetDisciples(WebSocket webSocket,WebSocketReceiveResult result, string username)
+        {
+            int disciples = _usersCRUDService.GetByUsername(username).Disciples;
+            String jsonDisciples = _utilService.DisciplesToJson(disciples);
+            await WarnUserOfDisciples(webSocket, result, jsonDisciples);
+        }
+
+        private async Task WarnUserOfDisciples(WebSocket webSocket, WebSocketReceiveResult result, string jsonDisciples)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonDisciples);
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
     }
 
 }

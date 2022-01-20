@@ -237,5 +237,16 @@ namespace DivalityBack.Services
 
             return jsonDuel; 
         }
+
+        public string DisciplesToJson(int disciples)
+        {
+            String jsonDisciples = "";
+
+            jsonDisciples += "{";
+            jsonDisciples += "\"type\":\"disciples\",";
+            jsonDisciples += "\"disciples\":\"" + disciples + "\"";
+            jsonDisciples += "}";
+
+            return jsonDisciples;         }
     }
 }

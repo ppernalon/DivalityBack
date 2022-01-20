@@ -85,6 +85,9 @@ namespace DivalityBack.Services
                                 case "cancelWaitForDuel":
                                     HandleCancelWaitForDuel(websocket, result, msgJson);
                                     break; 
+                                case "disciples":
+                                    await HandleDisciples(websocket, result, msgJson);
+                                    break;
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -105,10 +108,17 @@ namespace DivalityBack.Services
             }
         }
 
+        private async Task HandleDisciples(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            await _usersService.GetDisciples(websocket, result, username);
+        }
+
         private void HandleCancelWaitForDuel(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
-            _usersService.CancelWaitForDuel(username);         }
+            _usersService.CancelWaitForDuel(username);
+        }
 
         private void HandleWaitForDuel(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
