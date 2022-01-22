@@ -230,14 +230,21 @@ namespace DivalityBack.Services
         {
             User user = _usersCRUDService.GetByUsername(username);
             Team teamToModify = user.Teams.FindAll(t => t.Name.Equals(oldNameTeam)).FirstOrDefault();
-            user.Teams.Remove(teamToModify);
+            if (teamToModify == null)
+            {
+                teamToModify = new Team();
+            }
+            else
+            {
+                user.Teams.Remove(teamToModify);
+                teamToModify.Compo.Clear();
+            }
 
             teamToModify.Name = newNameTeam;
-            teamToModify.Compo.Clear();
-            List<String> listNewCardName = new List<string>(compo.Split(","));
+            List<String> listNewCardName = new List<string>(compo.Remove(0,1).Remove(compo.Length-2).Split(","));
             foreach (string cardName in listNewCardName)
             {
-                Card card = _cardsCrudService.GetCardByName(cardName);
+                Card card = _cardsCrudService.GetCardByName(cardName.Replace("\"","").Trim());
                 teamToModify.Compo.Add(card.Id);
             }
 
