@@ -27,7 +27,8 @@ namespace DivalityBack.Services
         private readonly BackgroundWorkerQueue _backgroundWorkerQueue;
 
         public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
-        public Dictionary<String, WebSocket> mapQueuePlayersWebsocket = new Dictionary<string, WebSocket>();
+        public Dictionary<String, WebSocket> mapQueuePlayersWebsocket = new Dictionary<String, WebSocket>();
+        public Dictionary<String, WebSocket> mapInFightPlayersWebsocket = new Dictionary<String, WebSocket>();
 
         public UsersService(BackgroundWorkerQueue backgroundWorkerQueue, UsersCRUDService usersCRUDService,
             CardsCRUDService cardsCrudService, FriendRequestsCRUDService friendRequestsCrudService,
