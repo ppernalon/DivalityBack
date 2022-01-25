@@ -5,15 +5,17 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DivalityBack.Models.Gods
 {
-    public class AbrstractGod
+    public class GenericGod
     {
-        AbrstractGod(string name, int life, int armor, int speed, int power)
+        GenericGod(string name, int life, int armor, int speed, int power)
         {
             Name = name; // identify the god
             Life = life; // current life of the god
             Armor = armor; // percentage of damage reduction
             Speed = speed; // define de the order of attack
             Power = power; // define the damage of ability
+            GlobalAllyEffect = new EffectOnGod();
+            GlobalEnnemyEffect = new EffectOnGod();
         }
         
         [BsonId]
@@ -22,17 +24,67 @@ namespace DivalityBack.Models.Gods
         
         public string Name { get; set; }
         public int Life { get; set; }
-        public int CurrentLife { get; set; }
         public int Armor { get; set; }
         public int Speed { get; set; }
         public int Power { get; set; }
+        public EffectOnGod GlobalAllyEffect { get; set; }
+        public EffectOnGod GlobalEnnemyEffect { get; set; }
 
         public Boolean isAlive()
         {
             return Life > 0;
         }
-        
-        public List<int[]> strike(List<List<AbrstractGod>> opponentGods)
+
+        public void addPositiveEffect(EffectOnGod effect)
+        {
+            Life += effect.Life;
+            Speed += effect.Speed;
+            Power += effect.Power;
+            
+            const int ARMOR_CAP = 75;
+            if (Armor + effect.Armor < ARMOR_CAP)
+            {
+                Armor += effect.Armor;
+            }
+            else
+            {
+                Armor = ARMOR_CAP;
+            }
+        }
+
+        public void addNegativeEffect(EffectOnGod effect)
+        {
+            if (Life - effect.Life >= 1)
+            {
+                Life -= effect.Life;
+            }
+            else
+            {
+                Life = 1;
+            }
+            
+            if (Power - effect.Power >= 0)
+            {
+                Power -= effect.Power;
+            }
+            else
+            {
+                Power = 0;
+            }
+            
+            if (Armor - effect.Armor >= 0)
+            {
+                Armor -= effect.Armor;
+            }
+            else
+            {
+                Armor = 0;
+            }
+            
+            Speed -= effect.Speed;
+        }
+
+        public void strike(List<List<GenericGod>> opponentGods)
         {
             /*
                 opponentGods is a matrix from which we get the god placements
@@ -48,14 +100,14 @@ namespace DivalityBack.Models.Gods
 
             List<int[]> strikeIndexes = new List<int[]>();
 
-            List<AbrstractGod> firstRow = opponentGods[0];
+            List<GenericGod> firstRow = opponentGods[0];
             int firstStrikedCol = strikeOneRow(firstRow, -1);
             if (firstStrikedCol != -1)
             {
                 strikeIndexes.Add(new int[] {0, firstStrikedCol});
             }
 
-            List<AbrstractGod> secondRow = opponentGods[1];
+            List<GenericGod> secondRow = opponentGods[1];
             int secondStrikedCol = strikeOneRow(secondRow, firstStrikedCol);
             if (secondStrikedCol != -1)
             {
@@ -64,7 +116,7 @@ namespace DivalityBack.Models.Gods
 
             if (secondStrikedCol != 0 && secondStrikedCol != 3) // 0 and 3 are the player
             {
-                List<AbrstractGod> thirdRow = opponentGods[2];
+                List<GenericGod> thirdRow = opponentGods[2];
                 int thirdStrikedCol = strikeOneRow(thirdRow, secondStrikedCol);
                 if (thirdStrikedCol != -1)
                 {
@@ -72,17 +124,22 @@ namespace DivalityBack.Models.Gods
                 }
             }
 
-            return strikeIndexes;
+            foreach (int[] strikeIndex in strikeIndexes)
+            {
+                int line = strikeIndex[0];
+                int col = strikeIndex[1];
+                opponentGods[line][col].onEnnemyStrike(Power);
+            }
         }
 
-        private int strikeOneRow(List<AbrstractGod> rowOfGods, int strikeComesFrom)
+        private int strikeOneRow(List<GenericGod> rowOfGods, int strikeComesFrom)
         {
             List<int> canBeStrikedGods = new List<int>();
             
             // only alive gods can be attacked
             for (int index = 0; index < rowOfGods.Count; index++)
             {
-                AbrstractGod god = rowOfGods[index];
+                GenericGod god = rowOfGods[index];
                 if (god.isAlive())
                 {
                     canBeStrikedGods.Add(index);
@@ -116,7 +173,7 @@ namespace DivalityBack.Models.Gods
             return indexPicked;
         }
 
-        public void withstand(int amountOfDamage)
+        public void onEnnemyStrike(int amountOfDamage)
         {
             Life -= amountOfDamage * Armor / 100;
         }
