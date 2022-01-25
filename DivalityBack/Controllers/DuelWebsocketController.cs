@@ -8,18 +8,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace DivalityBack.Controllers
 {
     [ExcludeFromCodeCoverage]
-    [Route("/duel")]
+    [Route("/duel/{roomId}")]
     [ApiController]
     public class DuelWebsocketController : ControllerBase
     {
+        private readonly string _duelRoomId;
         private readonly DuelWebsocketService _duelWebsocketService;
         
-        public DuelWebsocketController(DuelWebsocketService duelWebsocketService)
+        public DuelWebsocketController(DuelWebsocketService duelWebsocketService, string roomId)
         {
-            _duelWebsocketService = duelWebsocketService; 
+            _duelWebsocketService = duelWebsocketService;
+            _duelRoomId = roomId;
         }
-        
-                
+
         [HttpGet]
         public async Task Get()
         {
