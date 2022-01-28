@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using DivalityBack.Models.Gods;
 
 namespace DivalityBack.Services
 {
@@ -51,6 +53,11 @@ namespace DivalityBack.Services
                 Console.Write("ERREUR WS: " + e.Message);
                 
             }
+        }
+
+        public async Task StartFight(List<List<GenericGod>> firstTeam, List<List<GenericGod>> secondTeam)
+        {
+            
         }
     }
 }

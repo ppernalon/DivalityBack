@@ -4,6 +4,7 @@ using System.Net.WebSockets;
 using System.Threading.Tasks;
 using DivalityBack.Services;
 using Microsoft.AspNetCore.Mvc;
+
 namespace DivalityBack.Controllers
 {
     [ExcludeFromCodeCoverage]
@@ -12,10 +13,16 @@ namespace DivalityBack.Controllers
     public class WebsocketController : ControllerBase
     {
         private readonly WebsocketService _websocketService;
+        private readonly DuelWebsocketService _duelWebsocketService;
+        
+        
 
-        public WebsocketController(WebsocketService websocketService)
-        {
-            _websocketService = websocketService; 
+        public WebsocketController(
+            WebsocketService websocketService,
+            DuelWebsocketService duelWebsocketService
+        ) {
+            _websocketService = websocketService;
+            _duelWebsocketService = duelWebsocketService;
         }
         
         [HttpGet]

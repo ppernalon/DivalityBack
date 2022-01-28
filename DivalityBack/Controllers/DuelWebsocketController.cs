@@ -1,19 +1,27 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using DivalityBack.Services;
 using System.Net;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
+using DivalityBack.Models.Gods;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DivalityBack.Controllers
 {
     [ExcludeFromCodeCoverage]
-    [Route("/duel/{roomId}")]
+    [Route("/duel")]
     [ApiController]
     public class DuelWebsocketController : ControllerBase
     {
         private readonly string _duelRoomId;
         private readonly DuelWebsocketService _duelWebsocketService;
+
+        public int firstPlayerLife = 250;
+        public int secondPlayerLife = 250;
+
+        public List<List<GenericGod>> firstTeam;
+        public List<List<GenericGod>> secondTeam;
         
         public DuelWebsocketController(DuelWebsocketService duelWebsocketService, string roomId)
         {
@@ -21,8 +29,8 @@ namespace DivalityBack.Controllers
             _duelRoomId = roomId;
         }
 
-        [HttpGet]
-        public async Task Get()
+        [HttpGet("{roomId}")]
+        public async Task Get(int roomId)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
