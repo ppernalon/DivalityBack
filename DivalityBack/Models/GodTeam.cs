@@ -11,8 +11,8 @@ namespace DivalityBack.Models
             AllGods = gods;
             AliveGods = new List<GenericGod>(gods);
             TopGod = gods[0]; // index 0 of god rows
-            MiddleGods = gods[1..2]; // index 1 of god rows
-            BaseGods = gods[2..]; // index 2 of god rows
+            MiddleGods = gods[1..3]; // index 1 of god rows
+            BaseGods = gods[3..]; // index 2 of god rows
         }
         
         public GenericGod TopGod { set; get; }
@@ -21,7 +21,7 @@ namespace DivalityBack.Models
         public GenericGod[] AllGods { set; get; }
         public List<GenericGod> AliveGods { set; get; }
 
-        public void getStriked(int initialAmountOfDamage, int[][] positions)
+        public void  getStriked(int initialAmountOfDamage, int[][] positions)
         {
             // position : { row, col } which means { 2, 1 } is the second god on the row of 3 gods
             // if position = {-1, -1} it means that the player is attack
@@ -45,7 +45,12 @@ namespace DivalityBack.Models
                     attackedGod = TopGod;
                     amountOfDamage = TopGod.getStriked(amountOfDamage);
                 }
-                if (!attackedGod.isAlive()) AliveGods.Remove(attackedGod);
+
+                if (!attackedGod.isAlive())
+                {
+                    Console.WriteLine(attackedGod.Name + " est mort"); // TODO à enlever
+                    AliveGods.Remove(attackedGod);
+                }
             }
         }
 

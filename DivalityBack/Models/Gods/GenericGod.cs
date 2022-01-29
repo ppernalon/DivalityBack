@@ -5,7 +5,7 @@ namespace DivalityBack.Models.Gods
 {
     public class GenericGod : Card
     {
-        GenericGod(string name, int life, int armor, int speed, int power)
+        public GenericGod(string name, int life, int armor, int speed, int power)
         {
             Name = name; // identify the god
             Life = life; // current life of the god
@@ -79,9 +79,10 @@ namespace DivalityBack.Models.Gods
 
         public int getStriked(int amountOfDamage)
         {
-            int reducedDamge = amountOfDamage * Armor / 100;
-            Life -= reducedDamge;
-            return reducedDamge;
+            int reducedDamage = amountOfDamage * ( 100 - Armor ) / 100;
+            Life -= reducedDamage;
+            Console.WriteLine(Name + " perd " + reducedDamage + " point de vie"); // TODO a enlever
+            return reducedDamage;
         }
 
         public int getRebound()
@@ -151,11 +152,6 @@ namespace DivalityBack.Models.Gods
         {
             if (attackedPosition == 0) // MiddleGods on Left
             {
-                if (leftOrRight == -1) // Left
-                {
-                    attackedPositions.Add(new [] {-1, -1}); // rebound ext
-                }
-
                 if (leftOrRight == 1) // right
                 {
                     if (topGod.isAlive())
@@ -166,11 +162,6 @@ namespace DivalityBack.Models.Gods
             }
             else if (attackedPosition == 1) // MiddleGods on Right
             {
-                if (leftOrRight == 1) // Right
-                {
-                    attackedPositions.Add(new [] {-1, -1}); // rebound ext
-                }
-
                 if (leftOrRight == -1) // Left
                 {
                     if (topGod.isAlive())
@@ -201,13 +192,25 @@ namespace DivalityBack.Models.Gods
             ) {
                 secondAttackIndex = new[] {1, 0};
                 GenericGod secondAttackedGod = opponentGodTeam.getGod(secondAttackIndex);
-                int secondLeftOrRight = secondAttackedGod.getRebound();
-                middleGodsAttacked(
-                    secondAttackIndex[1], 
-                    secondLeftOrRight, 
-                    attackedPositions, 
-                    opponentGodTeam.TopGod
-                );
+                if (secondAttackedGod.isAlive())
+                {
+                    attackedPositions.Add(secondAttackIndex);
+                    int secondLeftOrRight = secondAttackedGod.getRebound();
+                    middleGodsAttacked(
+                        secondAttackIndex[1], 
+                        secondLeftOrRight, 
+                        attackedPositions, 
+                        opponentGodTeam.TopGod
+                    );
+                }
+                else
+                {
+                    // the attack follows his path to TopGod
+                    if ( attackIndex[0] == 0 && leftOrRight == 1 && opponentGodTeam.TopGod.isAlive())
+                    {
+                        attackedPositions.Add(new[] {0, 0});
+                    }
+                }
             }
             // rebound on right of MiddleGods
             // right rebound left or middle rebound right
@@ -217,13 +220,25 @@ namespace DivalityBack.Models.Gods
             ) {
                 secondAttackIndex = new[] {1, 1};
                 GenericGod secondAttackedGod = opponentGodTeam.getGod(secondAttackIndex);
-                int secondLeftOrRight = secondAttackedGod.getRebound();
-                middleGodsAttacked(
-                    secondAttackIndex[1], 
-                    secondLeftOrRight, 
-                    attackedPositions, 
-                    opponentGodTeam.TopGod
-                );
+                if (secondAttackedGod.isAlive())
+                {
+                    attackedPositions.Add(secondAttackIndex);
+                    int secondLeftOrRight = secondAttackedGod.getRebound();
+                    middleGodsAttacked(
+                        secondAttackIndex[1], 
+                        secondLeftOrRight, 
+                        attackedPositions, 
+                        opponentGodTeam.TopGod
+                    );
+                }
+                else
+                {
+                    // the attack follows his path to TopGod
+                    if (attackIndex[0] == 2 && leftOrRight == -1 && opponentGodTeam.TopGod.isAlive())
+                    {
+                        attackedPositions.Add(new [] {0, 0});
+                    }
+                }
             }
         }
         
@@ -237,7 +252,7 @@ namespace DivalityBack.Models.Gods
             }
             else if (GodTeam.rowIsAlive(opponentGodTeam.MiddleGods))
             {
-                return new[] {1, randomPick(opponentGodTeam.BaseGods)};
+                return new[] {1, randomPick(opponentGodTeam.MiddleGods)};
             }
             else
             {
@@ -249,7 +264,7 @@ namespace DivalityBack.Models.Gods
         {
             List<int> canBeAttackedGods = new List<int>();
 
-            for (int godIndex = 0; godIndex < 3; godIndex++)
+            for (int godIndex = 0; godIndex < rowGods.Length; godIndex++)
             {
                 if (rowGods[godIndex].isAlive()) canBeAttackedGods.Add(godIndex);
             }
