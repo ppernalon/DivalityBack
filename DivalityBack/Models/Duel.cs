@@ -17,8 +17,6 @@ namespace DivalityBack.Models
         
         public Player Player1 { set; get; }
         public Player Player2 { set; get; }
-        public Player OffensivePlayer { set; get; }
-        public Player DefensivePlayer { set; get; }
         public int TurnCount { set; get; }
         public Dictionary<Player, GenericGod> GodsBySpeed { set; get; }
 
@@ -84,6 +82,21 @@ namespace DivalityBack.Models
             return Player2.isAlive();
         }
 
+        public void initDuel()
+        {
+            foreach (var god in Player1.GodTeam.AllGods)
+            {
+                Player1.GodTeam.addGlobalPositiveEffect(god.GlobalAllyEffect);
+                Player2.GodTeam.addGlobalNegativeEffect(god.GlobalEnnemyEffect);
+            }
+
+            foreach (var god in Player2.GodTeam.AllGods)
+            {
+                Player2.GodTeam.addGlobalPositiveEffect(god.GlobalAllyEffect);
+                Player1.GodTeam.addGlobalNegativeEffect(god.GlobalEnnemyEffect);
+            }
+        }
+
         public Boolean play()
         {
             foreach (var GodAndPlayer in GodsBySpeed)
@@ -117,8 +130,7 @@ namespace DivalityBack.Models
         private void godAttack(GenericGod attackerGod, Player opponentPlayer)
         {
             int[][] attackPattern = attackerGod.getAttackPattern(opponentPlayer.GodTeam);
-            int reducedDamage = opponentPlayer.GodTeam.getStriked(attackerGod.Power, attackPattern);
-            opponentPlayer.getStriked(reducedDamage);
+            opponentPlayer.GodTeam.getStriked(attackerGod.Power, attackPattern);
         }
         
     }

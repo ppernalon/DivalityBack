@@ -12,12 +12,16 @@ namespace DivalityBack.Models.Gods
             Armor = armor; // percentage of damage reduction
             Speed = speed; // define de the order of attack
             Power = power; // define the damage of ability
+            ToLeftRate = 0.5;
+            ToRightRate = 1 - ToLeftRate;
             GlobalAllyEffect = new EffectOnGod();
             GlobalEnnemyEffect = new EffectOnGod();
         }
         
         public EffectOnGod GlobalAllyEffect { get; set; }
         public EffectOnGod GlobalEnnemyEffect { get; set; }
+        public double ToLeftRate { get; set; }
+        public double ToRightRate { get; set; }
 
         public Boolean isAlive()
         {
@@ -80,6 +84,25 @@ namespace DivalityBack.Models.Gods
             return reducedDamge;
         }
 
+        public int getRebound()
+        {
+            // return -1 if left, 1 if right
+
+            int leftOrRight;
+            Random random = new Random();
+            double randomValue = random.NextDouble();
+            if (randomValue <= ToLeftRate)
+            {
+                leftOrRight = -1;
+            }
+            else
+            {
+                leftOrRight = 1;
+            }
+
+            return leftOrRight;
+        }
+
         public static int compareSpeed(GenericGod g1, GenericGod g2)
         {
             if (g1.Speed > g2.Speed) return -1;
@@ -91,113 +114,154 @@ namespace DivalityBack.Models.Gods
         {
             List<int[]> attackedPositions = new List<int[]>();
 
-            int baseAttackIndex = whoToAttackBase(opponentGodTeam.BaseGods);
-            if (baseAttackIndex != -2) attackedPositions.Add(new int[]{2, baseAttackIndex});
-            
-            int middleAttackIndex = whoToAttackMiddle(opponentGodTeam.MiddleGods, baseAttackIndex);
-            if (middleAttackIndex != -2 && middleAttackIndex != -1) attackedPositions.Add(new int[]{2, middleAttackIndex});
-            
-            if (middleAttackIndex == -1) // player is attacked, no more bounds
+            int[] firstAttackIndex = whoToAttackFirst(opponentGodTeam);
+            attackedPositions.Add(firstAttackIndex);
+
+            // TopGod is not attacked first so attack can rebound
+            // if TopGod is attacked the pattern ends
+            if (firstAttackIndex[0] != 0)
             {
-                attackedPositions.Add(new int[]{-1, middleAttackIndex});
-            }
-            else
-            {
-                int topAttackIndex = whoToAttackTop(opponentGodTeam.TopGod, middleAttackIndex);
-                if (topAttackIndex == -1) // player is attacked
+                GenericGod firstAttackedGod = opponentGodTeam.getGod(firstAttackIndex);
+                int firstLeftOrRight = firstAttackedGod.getRebound();
+                
+                if (firstAttackIndex[0] == 1) // MiddleGods
                 {
-                    attackedPositions.Add(new int[]{-1, middleAttackIndex});
+                    middleGodsAttacked(
+                        firstAttackIndex[1], 
+                        firstLeftOrRight, 
+                        attackedPositions, 
+                        opponentGodTeam.TopGod
+                    );
                 }
-                else
+                else if (firstAttackIndex[0] == 2) // BaseGods
                 {
-                    attackedPositions.Add(new int[]{0, topAttackIndex});
-                    attackedPositions.Add(new int[]{-1, middleAttackIndex}); // player is attacked if TopGod is attacked
+                    baseGodsAttacked(
+                        firstAttackIndex,
+                        firstLeftOrRight,
+                        attackedPositions,
+                        opponentGodTeam
+                    );
                 }
             }
 
             return attackedPositions.ToArray();
         }
 
-        private int whoToAttackBase(GenericGod[] opponentBaseGods)
+        private void middleGodsAttacked(int attackedPosition, int leftOrRight, List<int[]> attackedPositions, GenericGod topGod)
+        {
+            if (attackedPosition == 0) // MiddleGods on Left
+            {
+                if (leftOrRight == -1) // Left
+                {
+                    attackedPositions.Add(new [] {-1, -1}); // rebound ext
+                }
+
+                if (leftOrRight == 1) // right
+                {
+                    if (topGod.isAlive())
+                    {
+                        attackedPositions.Add(new [] {0, 0});
+                    }  
+                }
+            }
+            else if (attackedPosition == 1) // MiddleGods on Right
+            {
+                if (leftOrRight == 1) // Right
+                {
+                    attackedPositions.Add(new [] {-1, -1}); // rebound ext
+                }
+
+                if (leftOrRight == -1) // Left
+                {
+                    if (topGod.isAlive())
+                    {
+                        attackedPositions.Add(new [] {0, 0});
+                    }  
+                }
+            }
+        }
+
+        private void baseGodsAttacked(int[] attackIndex, int leftOrRight, List<int[]> attackedPositions, GodTeam opponentGodTeam)
+        {
+            int[] secondAttackIndex;
+            // rebound ext after first attack
+            // left rebound left or right rebound right
+            if (
+                ( attackIndex[1] == 0 && leftOrRight == -1 )
+                || ( attackIndex[1] == 2 && leftOrRight == 1 )
+            )
+            {
+                return;
+            }
+            // rebound on left of MiddleGods
+            // left rebound right or middle rebound left
+            else if ( 
+                ( attackIndex[0] == 0 && leftOrRight == 1)
+                || ( attackIndex[0] == 1 && leftOrRight == -1)
+            ) {
+                secondAttackIndex = new[] {1, 0};
+                GenericGod secondAttackedGod = opponentGodTeam.getGod(secondAttackIndex);
+                int secondLeftOrRight = secondAttackedGod.getRebound();
+                middleGodsAttacked(
+                    secondAttackIndex[1], 
+                    secondLeftOrRight, 
+                    attackedPositions, 
+                    opponentGodTeam.TopGod
+                );
+            }
+            // rebound on right of MiddleGods
+            // right rebound left or middle rebound right
+            else if ( 
+                ( attackIndex[0] == 2 && leftOrRight == -1) 
+                || ( attackIndex[0] == 1 && leftOrRight == 1) 
+            ) {
+                secondAttackIndex = new[] {1, 1};
+                GenericGod secondAttackedGod = opponentGodTeam.getGod(secondAttackIndex);
+                int secondLeftOrRight = secondAttackedGod.getRebound();
+                middleGodsAttacked(
+                    secondAttackIndex[1], 
+                    secondLeftOrRight, 
+                    attackedPositions, 
+                    opponentGodTeam.TopGod
+                );
+            }
+        }
+        
+        private int[] whoToAttackFirst(GodTeam opponentGodTeam)
+        {
+            // the godTeam has to be alive
+            // return { a, b } where a is the row attacked (0 : top, 2: base) and b the position (0 : left)
+            if (GodTeam.rowIsAlive(opponentGodTeam.BaseGods))
+            {
+                return new [] {2, randomPick(opponentGodTeam.BaseGods)};
+            }
+            else if (GodTeam.rowIsAlive(opponentGodTeam.MiddleGods))
+            {
+                return new[] {1, randomPick(opponentGodTeam.BaseGods)};
+            }
+            else
+            {
+                return new[] {0, 0};
+            }
+        }
+
+        private int randomPick(GenericGod[] rowGods)
         {
             List<int> canBeAttackedGods = new List<int>();
 
             for (int godIndex = 0; godIndex < 3; godIndex++)
             {
-                if (opponentBaseGods[godIndex].isAlive()) canBeAttackedGods.Add(godIndex);
+                if (rowGods[godIndex].isAlive()) canBeAttackedGods.Add(godIndex);
             }
             
-            if (canBeAttackedGods.Count == 0) // all BaseGods are dead
-            {
-                return -2;
-            }
+            int indexPicked;
 
-            else
-            {
-                int indexPicked;
+            // random pick between last possibilities
+            int numberOfPossibilities = canBeAttackedGods.Count;
+            Random aleatoire = new Random();
+            indexPicked = canBeAttackedGods[aleatoire.Next(0, numberOfPossibilities)];
 
-                // random pick between last possibilities
-                int numberOfPossibilities = canBeAttackedGods.Count;
-                Random aleatoire = new Random();
-                indexPicked = canBeAttackedGods[aleatoire.Next(0, numberOfPossibilities)];
-
-                return indexPicked;
-            }
-        }
-
-        private int whoToAttackMiddle(GenericGod[] opponentMiddleGos, int baseGodAttacked)
-        {
-            List<int> canBeAttackedGods = new List<int>();
-
-            for (int godIndex = 0; godIndex < 3; godIndex++)
-            {
-                if (opponentMiddleGos[godIndex].isAlive()) canBeAttackedGods.Add(godIndex);
-            }
-            
-            if (canBeAttackedGods.Count == 0) // all MiddleGods are dead
-            {
-                return -2;
-            }
-            else
-            {
-                // if baseGodAttacked == -2 all gods can be attacked but no player
-                if (baseGodAttacked == 0) canBeAttackedGods.Remove(1);
-                if (baseGodAttacked == 2) canBeAttackedGods.Remove(0);
-                if (baseGodAttacked != 1 && baseGodAttacked != -2) canBeAttackedGods.Add(-1); // player can be attacked
-                
-                int indexPicked;
-
-                // random pick between last possibilities
-                int numberOfPossibilities = canBeAttackedGods.Count;
-                Random aleatoire = new Random();
-                indexPicked = canBeAttackedGods[aleatoire.Next(0, numberOfPossibilities)];
-
-                return indexPicked;
-            }
-        }
-
-        private int whoToAttackTop(GenericGod topGod, int middleGodAttacked)
-        {
-            if (topGod.isAlive())
-            {
-                List<int> canBeAttackedGods = new List<int>();
-                canBeAttackedGods.Add(0); // topGod is alive so he can be attacked
-                // if middleGodAttacked =-2 the topGod is attacked
-                if (middleGodAttacked != -2) canBeAttackedGods.Add(-1); // player can be attack from the left or the right
-                
-                int indexPicked;
-
-                // random pick between last possibilities
-                int numberOfPossibilities = canBeAttackedGods.Count;
-                Random aleatoire = new Random();
-                indexPicked = canBeAttackedGods[aleatoire.Next(0, numberOfPossibilities)];
-
-                return indexPicked;
-            }
-            else
-            {
-                return -1; // the player is attacked if topGod is dead
-            }
+            return indexPicked;
         }
     }
 }
