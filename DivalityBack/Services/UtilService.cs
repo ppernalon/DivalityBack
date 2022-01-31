@@ -251,7 +251,25 @@ namespace DivalityBack.Services
             jsonDisciples += "\"disciples\":\"" + disciples + "\"";
             jsonDisciples += "}";
 
-            return jsonDisciples;         }
+            return jsonDisciples;         
+        }
+
+        public string GodListToJson(List<string> namesOfGods)
+        {
+            string jsonGodList = "";
+
+            jsonGodList += "{";
+            jsonGodList += "\"type\":\"opponentPickedTeam\",";
+            jsonGodList += "\"opponentGods\": [";
+            for (int index = 0; index < 6; index++)
+            {
+                jsonGodList += namesOfGods[index];
+                if (index < 5) jsonGodList += ",";
+            }
+            jsonGodList += "]}";
+            
+            return jsonGodList;
+        }       
         
         public string AuctionsToJson(List<AuctionHouse> auctions)
         {

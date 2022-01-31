@@ -84,6 +84,9 @@ namespace DivalityBack.Services
                                 case "disciples":
                                     await HandleDisciples(websocket, result, msgJson);
                                     break;
+                                case  "pickTeamForDuel":
+                                    await PickTeamForDuel(result, msgJson);
+                                    break;
                                 case "auctionsByUsername":
                                     await HandleAuctionsByUsername(websocket, result, msgJson);
                                     break; 
@@ -258,6 +261,15 @@ namespace DivalityBack.Services
                     _usersService.mapQueuePlayersWebsocket.Remove(keyValuePair.Key); 
                 }
             }
+        }
+
+        private async Task PickTeamForDuel(WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            int teamIndex = msgJson.RootElement.GetProperty("teamIndex").GetInt32();
+            String username = msgJson.RootElement.GetProperty("username").GetString();
+            await _usersService.PickTeamForDuel(username, teamIndex, result);
+            
+            
         }
     }
 }

@@ -28,7 +28,8 @@ namespace DivalityBack.Services
 
         public Dictionary<String, WebSocket> mapActivePlayersWebsocket = new Dictionary<String, WebSocket>();
         public Dictionary<String, WebSocket> mapQueuePlayersWebsocket = new Dictionary<String, WebSocket>();
-        public Dictionary<String, WebSocket> mapInFightPlayersWebsocket = new Dictionary<String, WebSocket>();
+        public Dictionary<String, String> mapInFightPlayersCouple = new Dictionary<String, String>();
+        public Dictionary<String, int> mapPlayerCurrentGodTeam = new Dictionary<String, int>();
 
         public UsersService(BackgroundWorkerQueue backgroundWorkerQueue, UsersCRUDService usersCRUDService,
             CardsCRUDService cardsCrudService, FriendRequestsCRUDService friendRequestsCrudService,
@@ -457,10 +458,12 @@ namespace DivalityBack.Services
                 int indexOfMinimalScore = mapCombinaisonScore.OrderBy(k => k.Value).FirstOrDefault().Key;
                 List<List<User>> combinaisonKept = combinaisons[indexOfMinimalScore];
 
-                //On prévient tous les joueurs de leur opponent
+                //On prévient tous les joueurs de leur opponent et on les ajoute dans la map InFight
                 foreach (List<User> pair in combinaisonKept)
                 {
-                    await WarnUsersOfDuel(pair, queue);
+                   await WarnUsersOfDuel(pair, queue);
+                   mapInFightPlayersCouple.Add(pair[0].Username, pair[1].Username);
+                   mapInFightPlayersCouple.Add(pair[1].Username, pair[0].Username);
                 }
 
                 //S'il reste un joueur sans match, on le replace dans la liste d'attente
@@ -630,6 +633,27 @@ namespace DivalityBack.Services
         {
             byte[] bytes = Encoding.UTF8.GetBytes(jsonDisciples);
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        public async Task PickTeamForDuel(String username, int teamIndex, WebSocketReceiveResult result)
+        {
+            mapPlayerCurrentGodTeam.Add(username, teamIndex);
+            
+            // Récupération de la liste des noms de dieux
+            User user = _usersCRUDService.GetByUsername(username);
+            Team userTeam = user.Teams[teamIndex];
+            List<string> idsOfGods = userTeam.Compo;
+            List<string> namesOfGods = new List<string>();
+            foreach (var id in idsOfGods)
+            {
+                namesOfGods.Add(_cardsCrudService.Get(id).Name);
+            }
+
+            // Avertissement du joueur adverse
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.GodListToJson(namesOfGods));
+            String opponentUsername = mapInFightPlayersCouple[username];
+            WebSocket opponentWebsocket = mapActivePlayersWebsocket[opponentUsername];
+            await opponentWebsocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result){

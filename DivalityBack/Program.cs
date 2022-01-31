@@ -7,7 +7,6 @@ using DivalityBack.Services;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace DivalityBack
 {
@@ -18,7 +17,24 @@ namespace DivalityBack
         public static async Task Main(string[] args)
         {
             IWebHost webHost = CreateWebHostBuilder(args).Build();
-            
+
+            // Tests();
+
+            using (var scope = webHost.Services.CreateScope())
+            {
+                var usersService = scope.ServiceProvider.GetRequiredService<UsersService>();
+
+                usersService.StartMatchmaking();
+            }
+            await webHost.RunAsync();
+        }
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>();
+
+        private static void Tests()
+        {
             GenericGod anubis_1 = new GenericGod("Anubis_j", 100, 10, 1, 40);
             GenericGod anubis_2 = new GenericGod("Thor_j", 100, 10, 2, 40);
             GenericGod anubis_3 = new GenericGod("Odin_j", 100, 10, 3, 40);
@@ -47,18 +63,6 @@ namespace DivalityBack
             }
             
             Console.WriteLine(testDuel.winner().Username + " a gagné");
-
-            using (var scope = webHost.Services.CreateScope())
-            {
-                var usersService = scope.ServiceProvider.GetRequiredService<UsersService>();
-
-                usersService.StartMatchmaking();
-            }
-            await webHost.RunAsync();
         }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
     }
 }

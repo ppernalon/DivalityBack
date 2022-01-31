@@ -13,16 +13,10 @@ namespace DivalityBack.Controllers
     public class WebsocketController : ControllerBase
     {
         private readonly WebsocketService _websocketService;
-        private readonly DuelWebsocketService _duelWebsocketService;
         
-        
-
-        public WebsocketController(
-            WebsocketService websocketService,
-            DuelWebsocketService duelWebsocketService
-        ) {
+        public WebsocketController(WebsocketService websocketService) 
+        {
             _websocketService = websocketService;
-            _duelWebsocketService = duelWebsocketService;
         }
         
         [HttpGet]
