@@ -263,7 +263,7 @@ namespace DivalityBack.Services
             jsonGodList += "\"opponentGods\": [";
             for (int index = 0; index < 6; index++)
             {
-                jsonGodList += namesOfGods[index];
+                jsonGodList += "\"" + namesOfGods[index] + "\"";
                 if (index < 5) jsonGodList += ",";
             }
             jsonGodList += "]}";
