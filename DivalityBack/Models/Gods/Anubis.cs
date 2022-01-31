@@ -4,6 +4,7 @@
     {
         public Anubis()
         {
+            Name = "Anubis";
             Life = 120;
             Armor = 12;
             Power = 40;

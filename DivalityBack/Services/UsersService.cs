@@ -716,7 +716,7 @@ namespace DivalityBack.Services
             string winner = duel.winner().Username;
             string looser = duel.looser().Username;
 
-            string winnerJson = _utilService.LooserJson();
+            string winnerJson = _utilService.WinnerJson();
             string looserJson = _utilService.LooserJson();
             
             byte[] winnerBytes = Encoding.UTF8.GetBytes(winnerJson);

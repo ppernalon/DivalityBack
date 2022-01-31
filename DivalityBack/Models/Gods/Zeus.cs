@@ -4,6 +4,7 @@
     {
         public Zeus()
         {
+            Name = "Zeus";
             Life = 100;
             Armor = 0;
             Power = 50;

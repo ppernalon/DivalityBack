@@ -4,6 +4,7 @@
     {
         public Athena()
         {
+            Name = "Athena";
             Life = 150;
             Armor = 30;
             Power = 50;

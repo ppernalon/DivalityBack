@@ -4,6 +4,7 @@
     {
         public Hades()
         {
+            Name = "Hades";
             Life = 200;
             Armor = 40;
             Power = 10;

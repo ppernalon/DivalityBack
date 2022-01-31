@@ -4,6 +4,7 @@
     {
         public Horus()
         {
+            Name = "Horus";
             Life = 200;
             Armor = 20;
             Power = 15;

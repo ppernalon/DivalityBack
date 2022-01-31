@@ -4,6 +4,7 @@
     {
         public Ymir()
         {
+            Name = "Ymir";
             Life = 200;
             Armor = 50;
             Power = 20;

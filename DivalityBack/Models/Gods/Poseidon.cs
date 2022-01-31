@@ -4,6 +4,7 @@
     {
         public Poseidon()
         {
+            Name = "Poseidon";
             Life = 140;
             Armor = 0;
             Power = 20;

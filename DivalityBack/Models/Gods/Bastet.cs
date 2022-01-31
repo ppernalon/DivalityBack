@@ -4,6 +4,7 @@
     {
         public Bastet()
         {
+            Name = "Bastet";
             Life = 120;
             Armor = 7;
             Power = 50;

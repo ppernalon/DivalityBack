@@ -4,6 +4,7 @@
     {
         public Thor()
         {
+            Name = "Thor";
             Life = 180;
             Armor = 20;
             Power = 35;

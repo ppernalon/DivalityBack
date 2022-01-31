@@ -1,9 +1,10 @@
 ﻿namespace DivalityBack.Models.Gods
 {
-    public class Hell : GenericGod
+    public class Hel : GenericGod
     {
-        public Hell()
+        public Hel()
         {
+            Name = "Hel";
             Life = 80;
             Armor = 5;
             Power = 50;

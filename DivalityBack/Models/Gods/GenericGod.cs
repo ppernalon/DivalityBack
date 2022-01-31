@@ -320,8 +320,8 @@ namespace DivalityBack.Models.Gods
                 // nordic
                 case "odin":
                     return new Odin();
-                case "hell":
-                    return new Hell();
+                case "hel":
+                    return new Hel();
                 case "thor":
                     return new Thor();
                 case "ymir":

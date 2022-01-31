@@ -4,6 +4,7 @@
     {
         public Odin()
         {
+            Name = "Odin";
             Life = 130;
             Armor = 15;
             Power = 30;
