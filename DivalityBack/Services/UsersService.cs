@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DivalityBack.Models;
+using DivalityBack.Models.Gods;
 using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
@@ -640,6 +641,32 @@ namespace DivalityBack.Services
             mapPlayerCurrentGodTeam.Add(username, teamIndex);
             
             // Récupération de la liste des noms de dieux
+            List<string> namesOfGods = getNamesOfGods(username, teamIndex);
+
+            // Avertissement du joueur adverse
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.GodListToJson(namesOfGods));
+            String opponentUsername = mapInFightPlayersCouple[username];
+            WebSocket opponentWebsocket = mapActivePlayersWebsocket[opponentUsername];
+            await opponentWebsocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+            
+            // Lancement du duel si les deux joueurs ont choisi leur team
+            if (mapPlayerCurrentGodTeam.Keys.Contains(opponentUsername))
+            {
+                // Récupération de la liste des noms de dieux opposants
+                int opponentTeamIndex = mapPlayerCurrentGodTeam[opponentUsername];
+                List<string> opponentNamesOfGods = getNamesOfGods(opponentUsername, opponentTeamIndex);
+                await StartDuel(
+                    namesOfGods, 
+                    opponentNamesOfGods, 
+                    username, 
+                    opponentUsername, 
+                    result
+                );
+            }
+        }
+
+        private List<string> getNamesOfGods(string username, int teamIndex)
+        {
             User user = _usersCRUDService.GetByUsername(username);
             Team userTeam = user.Teams[teamIndex];
             List<string> idsOfGods = userTeam.Compo;
@@ -649,11 +676,59 @@ namespace DivalityBack.Services
                 namesOfGods.Add(_cardsCrudService.Get(id).Name);
             }
 
-            // Avertissement du joueur adverse
-            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.GodListToJson(namesOfGods));
-            String opponentUsername = mapInFightPlayersCouple[username];
-            WebSocket opponentWebsocket = mapActivePlayersWebsocket[opponentUsername];
-            await opponentWebsocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+            return namesOfGods;
+        }
+
+        private async Task StartDuel(
+            List<string> namesOfGods1, 
+            List<string> namesOfGods2, 
+            string username1, 
+            string username2,
+            WebSocketReceiveResult result
+        ) {
+            // création de l'équipe de dieux et des joueurs
+            List<GenericGod> godList1 = new List<GenericGod>();
+            List<GenericGod> godList2 = new List<GenericGod>();;
+
+            for (int index = 0; index < namesOfGods1.Count; index++)
+            {
+                godList1.Add(GenericGod.getGodByName(namesOfGods1[index]));
+                godList2.Add(GenericGod.getGodByName(namesOfGods2[index]));
+            }
+
+            GodTeam godTeam1 = new GodTeam(godList1.ToArray());
+            GodTeam godTeam2 = new GodTeam(godList2.ToArray());
+
+            Player player1 = new Player(godTeam1, username1);
+            Player player2 = new Player(godTeam2, username2);
+
+            // lancement du duel
+            Duel duel = new Duel(player1, player2);
+            
+            duel.initDuel();
+
+            while (player1.isAlive() && player2.isAlive())
+            {
+                duel.play();
+            }
+
+            // avertissement du résultat
+            string winner = duel.winner().Username;
+            string looser = duel.looser().Username;
+
+            string winnerJson = _utilService.LooserJson();
+            string looserJson = _utilService.LooserJson();
+            
+            byte[] winnerBytes = Encoding.UTF8.GetBytes(winnerJson);
+            byte[] looserBytes = Encoding.UTF8.GetBytes(looserJson);
+            
+            WebSocket winnerWebSocket = mapActivePlayersWebsocket[winner];
+            WebSocket looserWebSocket = mapActivePlayersWebsocket[looser];
+
+            await winnerWebSocket.SendAsync(winnerBytes, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
+            await looserWebSocket.SendAsync(looserBytes, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
         }
 
         public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result){

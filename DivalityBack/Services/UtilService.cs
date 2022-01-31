@@ -295,5 +295,27 @@ namespace DivalityBack.Services
 
             return jsonAuctions;
         }
+
+        public string WinnerJson()
+        {
+            string winnerJson = "{";
+
+            winnerJson += "\"type\":\"duelWinner\",";
+            winnerJson += "\"rewards\":\"300\"";
+            winnerJson += "}";
+            
+            return winnerJson;
+        }
+        
+        public string LooserJson()
+        {
+            string looserJson = "{";
+
+            looserJson += "\"type\":\"duelLooser\",";
+            looserJson += "\"rewards\":\"150\"";
+            looserJson += "}";
+            
+            return looserJson;
+        }
     }
 }

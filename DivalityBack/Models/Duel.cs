@@ -72,6 +72,12 @@ namespace DivalityBack.Models
             else return Player2;
         }
 
+        public Player looser()
+        {
+            if (Player2.isAlive()) return Player1;
+            else return Player2;
+        }
+
         public Boolean didPlayerOneWon()
         {
             return Player1.isAlive();
@@ -116,6 +122,7 @@ namespace DivalityBack.Models
                     {
                         godAttack(attacker, Player1);
                     }
+                    // TODO envoyer un message pour actualiser l'état des joueurs
                 }
 
                 if (!(Player1.isAlive() && Player2.isAlive())) // the game end when one player is dead

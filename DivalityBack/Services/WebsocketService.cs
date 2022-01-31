@@ -268,8 +268,6 @@ namespace DivalityBack.Services
             int teamIndex = msgJson.RootElement.GetProperty("teamIndex").GetInt32();
             String username = msgJson.RootElement.GetProperty("username").GetString();
             await _usersService.PickTeamForDuel(username, teamIndex, result);
-            
-            
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DivalityBack.Services.CRUD;
 
 namespace DivalityBack.Models.Gods
 {
@@ -14,6 +15,19 @@ namespace DivalityBack.Models.Gods
             Power = power; // define the damage of ability
             ToLeftRate = 0.5;
             ToRightRate = 1 - ToLeftRate;
+            GlobalAllyEffect = new EffectOnGod();
+            GlobalEnnemyEffect = new EffectOnGod();
+        }
+
+        public GenericGod()
+        {
+            Name = ""; // identify the god
+            Life = -1; // current life of the god
+            Armor = -1; // percentage of damage reduction
+            Speed = -1; // define de the order of attack
+            Power = -1; // define the damage of ability
+            ToLeftRate = -1;
+            ToRightRate = -1;
             GlobalAllyEffect = new EffectOnGod();
             GlobalEnnemyEffect = new EffectOnGod();
         }
@@ -277,6 +291,44 @@ namespace DivalityBack.Models.Gods
             indexPicked = canBeAttackedGods[aleatoire.Next(0, numberOfPossibilities)];
 
             return indexPicked;
+        }
+
+        public static GenericGod getGodByName(string name)
+        {
+            switch (name.ToLower())
+            {
+                // egyptian
+                case "anubis":
+                    return new Anubis();
+                case "bastet":
+                    return new Bastet();
+                case "horus":
+                    return new Horus();
+                case "osiris":
+                    return new Osiris();
+                
+                //greek
+                case "athena":
+                    return new Athena();
+                case "hades":
+                    return new Hades();
+                case "poseidon":
+                    return new Poseidon();
+                case "zeus":
+                    return new Zeus();
+                
+                // nordic
+                case "odin":
+                    return new Odin();
+                case "hell":
+                    return new Hell();
+                case "thor":
+                    return new Thor();
+                case "ymir":
+                    return new Ymir();
+            }
+
+            return new GenericGod();
         }
     }
 }
