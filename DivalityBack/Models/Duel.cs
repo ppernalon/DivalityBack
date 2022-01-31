@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
 using DivalityBack.Models.Gods;
+using DivalityBack.Services;
 
 namespace DivalityBack.Models
 {
@@ -103,7 +107,7 @@ namespace DivalityBack.Models
             }
         }
 
-        public Boolean play()
+        public Boolean play(WebSocketReceiveResult result)
         {
             foreach (var GodAndPlayer in GodsBySpeed)
             {
@@ -114,15 +118,24 @@ namespace DivalityBack.Models
 
                 if (attacker.isAlive()) // a dead god can't attack
                 {
+                    int[][] attackPattern;
+                    GenericGod[] attackedGods;
                     if (offensivePlayer.isEqual(Player1)) // player 2 is attacked
                     {
-                        godAttack(attacker, Player2);
+                        attackedGods = Player2.GodTeam.AllGods;
+                        attackPattern = godAttack(attacker, Player2);
                     }
                     else // player 1 is attacked
                     {
-                        godAttack(attacker, Player1);
+                        attackedGods = Player1.GodTeam.AllGods;
+                        attackPattern = godAttack(attacker, Player1);
                     }
-                    // TODO envoyer un message pour actualiser l'état des joueurs
+
+                    string updateJson = UtilServices.UpdateDuelJson(attackedGods.ToList(), offensivePlayer.Username, attackPattern);
+                    byte[] updateBytes = Encoding.UTF8.GetBytes(updateJson);
+                    
+                    Player1.PlayerWebSocket.SendAsync(updateBytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+                    Player2.PlayerWebSocket.SendAsync(updateBytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
                 }
 
                 if (!(Player1.isAlive() && Player2.isAlive())) // the game end when one player is dead
@@ -134,11 +147,12 @@ namespace DivalityBack.Models
             return false;
         }
 
-        private void godAttack(GenericGod attackerGod, Player opponentPlayer)
+        private int[][] godAttack(GenericGod attackerGod, Player opponentPlayer)
         {
             Console.WriteLine(opponentPlayer.Username + " est attaqué pour " + attackerGod.Power); // TODO à enlever
             int[][] attackPattern = attackerGod.getAttackPattern(opponentPlayer.GodTeam);
             opponentPlayer.GodTeam.getStriked(attackerGod.Power, attackPattern);
+            return attackPattern;
         }
         
     }

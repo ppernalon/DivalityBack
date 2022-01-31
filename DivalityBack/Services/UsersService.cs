@@ -699,8 +699,11 @@ namespace DivalityBack.Services
             GodTeam godTeam1 = new GodTeam(godList1.ToArray());
             GodTeam godTeam2 = new GodTeam(godList2.ToArray());
 
-            Player player1 = new Player(godTeam1, username1);
-            Player player2 = new Player(godTeam2, username2);
+            WebSocket ws1 = mapActivePlayersWebsocket[username1];
+            WebSocket ws2 = mapActivePlayersWebsocket[username2];
+            
+            Player player1 = new Player(godTeam1, username1, ws1);
+            Player player2 = new Player(godTeam2, username2, ws2);
 
             // lancement du duel
             Duel duel = new Duel(player1, player2);
@@ -709,21 +712,18 @@ namespace DivalityBack.Services
 
             while (player1.isAlive() && player2.isAlive())
             {
-                duel.play();
+                duel.play(result);
             }
 
             // avertissement du résultat
-            string winner = duel.winner().Username;
-            string looser = duel.looser().Username;
-
             string winnerJson = _utilService.WinnerJson();
             string looserJson = _utilService.LooserJson();
             
             byte[] winnerBytes = Encoding.UTF8.GetBytes(winnerJson);
             byte[] looserBytes = Encoding.UTF8.GetBytes(looserJson);
-            
-            WebSocket winnerWebSocket = mapActivePlayersWebsocket[winner];
-            WebSocket looserWebSocket = mapActivePlayersWebsocket[looser];
+
+            WebSocket winnerWebSocket = duel.winner().PlayerWebSocket;
+            WebSocket looserWebSocket = duel.looser().PlayerWebSocket;
 
             await winnerWebSocket.SendAsync(winnerBytes, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);

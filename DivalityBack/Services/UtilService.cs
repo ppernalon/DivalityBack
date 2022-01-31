@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DivalityBack.Models;
+using DivalityBack.Models.Gods;
 using DivalityBack.Services.CRUD;
 using Microsoft.AspNetCore.Server.HttpSys;
 
@@ -316,6 +317,21 @@ namespace DivalityBack.Services
             looserJson += "}";
             
             return looserJson;
+        }
+
+        public static string UpdateDuelJson(List<GenericGod> godsAttacked, string attacker, int[][] attackPattern)
+        {
+            string updateDuelJson = "{";
+            
+            updateDuelJson += "\"type\":\"updatingDuelState\",";
+            updateDuelJson += "\"offensivePlayer\":\"" + attacker + "\",";
+            
+            // TODO utiliser godsAttacked pour créer une liste de {dieu : santé actuelle}
+            // TODO transmettre attackPattern
+
+            updateDuelJson += "}";
+            
+            return updateDuelJson;
         }
     }
 }
