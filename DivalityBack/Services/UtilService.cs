@@ -300,22 +300,18 @@ namespace DivalityBack.Services
         public string WinnerJson()
         {
             string winnerJson = "{";
-
             winnerJson += "\"type\":\"duelWinner\",";
             winnerJson += "\"rewards\":\"300\"";
             winnerJson += "}";
-            
             return winnerJson;
         }
         
         public string LooserJson()
         {
             string looserJson = "{";
-
             looserJson += "\"type\":\"duelLooser\",";
             looserJson += "\"rewards\":\"150\"";
             looserJson += "}";
-            
             return looserJson;
         }
 
@@ -325,11 +321,28 @@ namespace DivalityBack.Services
             
             updateDuelJson += "\"type\":\"updatingDuelState\",";
             updateDuelJson += "\"offensivePlayer\":\"" + attacker + "\",";
+            updateDuelJson += "\"updatedAttackedGod\": [";
             
-            // TODO utiliser godsAttacked pour créer une liste de {dieu : santé actuelle}
-            // TODO transmettre attackPattern
+            for (int index = 0; index < godsAttacked.Count; index++)
+            {
+                GenericGod god = godsAttacked[index];
+                updateDuelJson += "{\"" + god.Name + "\": " + god.Life + "}";
+                if (index != godsAttacked.Count - 1) updateDuelJson += ",";
+            }
+            
+            updateDuelJson += "],";
+            updateDuelJson += "\"attackPattern\": [";
+            
+            for (int index = 0; index < attackPattern.Length; index++)
+            {
+                int row = attackPattern[index][0];
+                int col = attackPattern[index][1];
+                
+                updateDuelJson += "[" + row + "," + col + "]";
+                if (index != attackPattern.Length - 1) updateDuelJson += ",";
+            }
 
-            updateDuelJson += "}";
+            updateDuelJson += "]}";
             
             return updateDuelJson;
         }
