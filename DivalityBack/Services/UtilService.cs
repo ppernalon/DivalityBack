@@ -197,7 +197,9 @@ namespace DivalityBack.Services
                 jsonTeams += "]";
                 jsonTeams += "},";
             }
-            jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
+            if(jsonTeams.Substring(jsonTeams.Length - 1) == ","){
+                jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
+            }
             jsonTeams += "]"; 
             jsonTeams += "}";
 
