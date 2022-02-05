@@ -84,9 +84,6 @@ namespace DivalityBack.Services
                                 case "disciples":
                                     await HandleDisciples(websocket, result, msgJson);
                                     break;
-                                case "ready":
-                                    await HandleReady(websocket, result, msgJson);
-                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -106,12 +103,7 @@ namespace DivalityBack.Services
                 Console.Write("ERREUR WS: " + e.Message);
             }
         }
-
-        private async Task HandleReady(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
-        {
-            String username = msgJson.RootElement.GetProperty("username").ToString();
-            await _usersService.Ready(websocket, result, username);
-        }
+        
 
         private async Task HandleDisciples(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
