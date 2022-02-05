@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
-using System.Reflection.Metadata;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using DivalityBack.Services;
-using MongoDB.Driver.Core.Authentication;
 
 namespace DivalityBack.Services
 {
@@ -88,6 +84,9 @@ namespace DivalityBack.Services
                                 case "disciples":
                                     await HandleDisciples(websocket, result, msgJson);
                                     break;
+                                case "ready":
+                                    await HandleReady(websocket, result, msgJson);
+                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -106,6 +105,12 @@ namespace DivalityBack.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleReady(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            await _usersService.Ready(websocket, result, username);
         }
 
         private async Task HandleDisciples(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
@@ -184,7 +189,8 @@ namespace DivalityBack.Services
             String username = msgJson.RootElement.GetProperty("username").ToString();
             String cardName = msgJson.RootElement.GetProperty("cardName").ToString();
             String price = msgJson.RootElement.GetProperty("price").ToString();
-            await _auctionHouseService.SellCardInAuctionHouse(websocket, result, username, cardName, price);
+            String quantity = msgJson.RootElement.GetProperty("quantity").ToString(); 
+            await _auctionHouseService.SellCardInAuctionHouse(websocket, result, username, cardName, price, quantity);
         }
 
         private async Task HandleAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

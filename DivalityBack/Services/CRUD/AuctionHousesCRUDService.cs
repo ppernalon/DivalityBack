@@ -44,5 +44,11 @@ namespace DivalityBack.Services.CRUD
                 auction.CardId.Equals(cardId) && auction.OwnerId.Equals(ownerId) &&
                 auction.Price.Equals(int.Parse(price))).FirstOrDefault();
         }
+
+        public List<AuctionHouse> GetByCardIdAndOwnerId(string cardId, string ownerId)
+        {
+            return _auctionHouses.Find(auction => auction.CardId.Equals(cardId) && auction.OwnerId.Equals(ownerId))
+                .ToList();
+        }
     }
 }

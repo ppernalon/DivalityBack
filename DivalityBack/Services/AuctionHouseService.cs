@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -41,14 +42,18 @@ namespace DivalityBack.Services
             await websocket.SendAsync(byteAuctionHouse, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
 
-        public async Task SellCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price)
+        public async Task SellCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price, string quantity)
         {
             Card card = _cardsCrudService.GetCardByName(cardName);
             User user = _usersCrudService.GetByUsername(username);
-
-            //On vérifie que l'utilisateur possède la carte
-            if (card != null && user.Collection.Contains(card.Id))
+            
+            //On vérifie que l'utilisateur possède la bonne quantité de la carte mise en vente
+            int quantityInCollection = user.Collection.Select(c => c.Equals(card.Id)).Count();
+            //On prend également en compte les cartes déjà mises en vente par cet utilisateur dans l'HDV
+            int quantityInHdv = _auctionHousesCrudService.GetByCardIdAndOwnerId(card.Id, user.Id).Count();
+            if (card != null && quantityInCollection - quantityInHdv >= int.Parse(quantity))
             {
+
                 //On enlève la carte de la collection
                 user.Collection.Remove(card.Id);
                 _usersCrudService.Update(user.Id, user);
@@ -64,7 +69,7 @@ namespace DivalityBack.Services
             }
             else
             {
-                string messageErreur = "L'utilisateur ne possède pas cette carte";
+                string messageErreur = "L'utilisateur ne possède pas assez d'exemplaires de cette carte";
                 await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
                     result.EndOfMessage, CancellationToken.None); 
             }
