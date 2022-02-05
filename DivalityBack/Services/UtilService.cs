@@ -146,7 +146,6 @@ namespace DivalityBack.Services
             
             String jsonAuction = "";
             jsonAuction += "{";
-            jsonAuction += "\"type\":\"auction\",";
             jsonAuction += "\"cardName\": \"" + cardName + "\",";
             jsonAuction += "\"ownerName\": \"" + ownerName + "\",";
             jsonAuction += "\"price\":\"" + auction.Price + "\""; 
@@ -154,23 +153,26 @@ namespace DivalityBack.Services
             return jsonAuction;
         }
 
-        public string ListAuctionToJson(List<AuctionHouse> listAuctionHouse)
+
+        public string ListAuctionToJson(List<AuctionHouse> listAuctionHouse)    
         {
             String jsonListAuctionHouse = "";
 
             jsonListAuctionHouse += "{";
             jsonListAuctionHouse += "\"type\":\"auctionHouse\",";
+            jsonListAuctionHouse += "\"shopData\":[";
+
             foreach (AuctionHouse auction in listAuctionHouse)
             {
-                jsonListAuctionHouse += "\"auction\" :";
                 jsonListAuctionHouse += AuctionToJson(auction) + ",";
             }
             jsonListAuctionHouse = jsonListAuctionHouse.Remove(jsonListAuctionHouse.Length - 1);
 
-            jsonListAuctionHouse += "}";
+            jsonListAuctionHouse += "]}";
 
             return jsonListAuctionHouse; 
         }
+
 
         public string TeamsToJson(List<Team> teams)
         {
