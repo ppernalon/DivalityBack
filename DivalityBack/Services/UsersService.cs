@@ -95,6 +95,7 @@ namespace DivalityBack.Services
                 {
                     card = _cardsService.GenerateNewCard(pantheon);
                 }
+
                 //On met à jour le nombre de disciples et la collection
                 user.Disciples -= _cardsService.priceOfCard;
                 user.Collection.Add(card.Id);
@@ -241,10 +242,10 @@ namespace DivalityBack.Services
             }
 
             teamToModify.Name = newNameTeam;
-            List<String> listNewCardName = new List<string>(compo.Remove(0,1).Remove(compo.Length-2).Split(","));
+            List<String> listNewCardName = new List<string>(compo.Remove(0, 1).Remove(compo.Length - 2).Split(","));
             foreach (string cardName in listNewCardName)
             {
-                Card card = _cardsCrudService.GetCardByName(cardName.Replace("\"","").Trim());
+                Card card = _cardsCrudService.GetCardByName(cardName.Replace("\"", "").Trim());
                 teamToModify.Compo.Add(card.Id);
             }
 
@@ -409,7 +410,7 @@ namespace DivalityBack.Services
             byte[] bytes = Encoding.UTF8.GetBytes("Le compte " + username + " est déjà connecté");
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
-        
+
         public void StartMatchmaking()
         {
             _backgroundWorkerQueue.QueueBackgroundWorkItem(async token =>
@@ -421,7 +422,7 @@ namespace DivalityBack.Services
                 }
             });
         }
-        
+
         private async Task Matchmaking()
         {
             if (mapQueuePlayersWebsocket.Count > 1)
@@ -458,7 +459,7 @@ namespace DivalityBack.Services
                 //On prévient tous les joueurs de leur opponent
                 foreach (List<User> pair in combinaisonKept)
                 {
-                   await WarnUsersOfDuel(pair, queue);
+                    await WarnUsersOfDuel(pair, queue);
                 }
 
                 //S'il reste un joueur sans match, on le replace dans la liste d'attente
@@ -485,12 +486,12 @@ namespace DivalityBack.Services
         private async Task WarnUsersOfDuel(List<User> pair, Dictionary<string, WebSocket> queue)
         {
             String jsonOpponent = _utilService.DuelToJson(pair[1].Username);
-            WebSocket webSocket = queue[pair[0].Username]; 
+            WebSocket webSocket = queue[pair[0].Username];
             byte[] bytes = Encoding.UTF8.GetBytes(jsonOpponent);
             await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
-            
+
             jsonOpponent = _utilService.DuelToJson(pair[0].Username);
-            webSocket = queue[pair[1].Username]; 
+            webSocket = queue[pair[1].Username];
             bytes = Encoding.UTF8.GetBytes(jsonOpponent);
             await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
         }
@@ -507,26 +508,28 @@ namespace DivalityBack.Services
                 {
                     winrateUser0 = pair[0].Victory / (pair[0].Victory + pair[0].Defeat);
                 }
-                
+
                 if (!(pair[1].Victory + pair[1].Defeat).Equals(0))
                 {
                     winrateUser1 = pair[1].Victory / (pair[1].Victory + pair[1].Defeat);
                 }
 
-                score += Math.Pow(winrateUser0 - winrateUser1, 2); 
+                score += Math.Pow(winrateUser0 - winrateUser1, 2);
             }
-            return score; 
+
+            return score;
         }
 
         private List<List<List<User>>> CalculCombinaison(List<User> listUserInQueue)
         {
             List<List<List<User>>> combinaisons = new List<List<List<User>>>();
             List<List<User>> pairs = GetAllPairsOfUsers(listUserInQueue);
-            
-            int numberOfPairs = (int) Math.Floor((decimal) (listUserInQueue.Count / 2)); 
-            
-            GetAllCombinaisonsFromPairs(pairs, combinaisons, new List<List<User>>(), new List<List<User>>(), numberOfPairs);
-            
+
+            int numberOfPairs = (int) Math.Floor((decimal) (listUserInQueue.Count / 2));
+
+            GetAllCombinaisonsFromPairs(pairs, combinaisons, new List<List<User>>(), new List<List<User>>(),
+                numberOfPairs);
+
             return combinaisons;
         }
 
@@ -557,7 +560,7 @@ namespace DivalityBack.Services
             //Pour toutes les paires
             foreach (List<User> pair in pairs)
             {
-              
+
                 if (pairsKept.Count == 0)
                 {
                     combinaison.Clear();
@@ -565,7 +568,7 @@ namespace DivalityBack.Services
 
                 combinaison.Add(pair);
                 pairsKept.Add(pair);
-                
+
                 //On maj la liste des users utilisés
                 List<User> userUsed = new List<User>();
                 foreach (List<User> pairKept in pairsKept)
@@ -573,16 +576,18 @@ namespace DivalityBack.Services
                     userUsed.Add(pairKept[0]);
                     userUsed.Add(pairKept[1]);
                 }
-                pairsFiltered = pairs.Except(pairs.FindAll(p => userUsed.Contains(p[0]) || userUsed.Contains(p[1]))).ToList();
-                
-                
+
+                pairsFiltered = pairs.Except(pairs.FindAll(p => userUsed.Contains(p[0]) || userUsed.Contains(p[1])))
+                    .ToList();
+
+
                 if (combinaison.Count == numberOfPairs)
                 {
-                    pairsKept.Remove(pairsKept[pairsKept.Count -1]);
+                    pairsKept.Remove(pairsKept[pairsKept.Count - 1]);
                     combinaisons.Add(new List<List<User>>(combinaison));
-                    combinaison = new List<List<User>>(pairsKept); 
+                    combinaison = new List<List<User>>(pairsKept);
                 }
-                
+
                 if (pairsFiltered.Count > 0)
                 {
                     //On réitère pour toutes les paires restantes
@@ -598,7 +603,8 @@ namespace DivalityBack.Services
 
         public void WaitForDuel(string username)
         {
-            if (!(mapQueuePlayersWebsocket.Keys.Contains(username)) && mapActivePlayersWebsocket.Keys.Contains(username))
+            if (!(mapQueuePlayersWebsocket.Keys.Contains(username)) &&
+                mapActivePlayersWebsocket.Keys.Contains(username))
             {
                 mapQueuePlayersWebsocket.Add(username, mapActivePlayersWebsocket[username]);
             }
@@ -612,7 +618,7 @@ namespace DivalityBack.Services
             }
         }
 
-        public async Task GetDisciples(WebSocket webSocket,WebSocketReceiveResult result, string username)
+        public async Task GetDisciples(WebSocket webSocket, WebSocketReceiveResult result, string username)
         {
             int disciples = _usersCRUDService.GetByUsername(username).Disciples;
             String jsonDisciples = _utilService.DisciplesToJson(disciples);
@@ -624,6 +630,11 @@ namespace DivalityBack.Services
             byte[] bytes = Encoding.UTF8.GetBytes(jsonDisciples);
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
-    }
 
+        public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result){
+            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur n'a pas pu être trouvé, veuillez réessayer");
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+    }
+    }
 }

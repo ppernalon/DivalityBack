@@ -16,14 +16,16 @@ namespace DivalityBack.Services
         private readonly AuctionHousesCRUDService _auctionHousesCrudService;
         private readonly CardsCRUDService _cardsCrudService;
         private readonly UsersCRUDService _usersCrudService; 
-        private readonly UtilServices _utilServices; 
+        private readonly UtilServices _utilServices;
+        private readonly UsersService _usersService; 
         
-        public AuctionHouseService(AuctionHousesCRUDService auctionHousesCrudService, CardsCRUDService cardsCrudService, UsersCRUDService usersCrudService, UtilServices utilServices)
+        public AuctionHouseService(AuctionHousesCRUDService auctionHousesCrudService, CardsCRUDService cardsCrudService, UsersCRUDService usersCrudService, UtilServices utilServices, UsersService usersService)
         {
             _auctionHousesCrudService = auctionHousesCrudService;
             _cardsCrudService = cardsCrudService;
             _usersCrudService = usersCrudService;
-            _utilServices = utilServices; 
+            _utilServices = utilServices;
+            _usersService = usersService; 
         }
 
         [ExcludeFromCodeCoverage]
@@ -106,11 +108,18 @@ namespace DivalityBack.Services
 
         public async Task GetAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, string username)
         {
-            User user = _usersCrudService.GetByUsername(username); 
-            List<AuctionHouse> auctions = _auctionHousesCrudService.getByOwnerId(user.Id);
-            String jsonAuctions = _utilServices.AuctionsToJson(auctions);
+            User user = _usersCrudService.GetByUsername(username);
+            if (user != null)
+            {
+                List<AuctionHouse> auctions = _auctionHousesCrudService.getByOwnerId(user.Id);
+                String jsonAuctions = _utilServices.AuctionsToJson(auctions);
 
-            await WarnUserOfAuctionsByUsername(websocket, result, jsonAuctions);
+                await WarnUserOfAuctionsByUsername(websocket, result, jsonAuctions);
+            }
+            else
+            {
+                await _usersService.WarnUserNotFound(websocket, result);
+            }
         }
         
         private async Task WarnUserOfAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, string jsonAuctions)
