@@ -84,6 +84,9 @@ namespace DivalityBack.Services
                                 case "disciples":
                                     await HandleDisciples(websocket, result, msgJson);
                                     break;
+                                case "auctionsByUsername":
+                                    await HandleAuctionsByUsername(websocket, result, msgJson);
+                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -103,7 +106,13 @@ namespace DivalityBack.Services
                 Console.Write("ERREUR WS: " + e.Message);
             }
         }
-        
+
+        private async Task HandleAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            await _auctionHouseService.GetAuctionsByUsername(websocket, result, username); 
+        }
+
 
         private async Task HandleDisciples(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {

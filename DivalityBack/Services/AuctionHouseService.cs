@@ -103,5 +103,20 @@ namespace DivalityBack.Services
                     result.EndOfMessage, CancellationToken.None); 
             }
         }
+
+        public async Task GetAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, string username)
+        {
+            User user = _usersCrudService.GetByUsername(username); 
+            List<AuctionHouse> auctions = _auctionHousesCrudService.getByOwnerId(user.Id);
+            String jsonAuctions = _utilServices.AuctionsToJson(auctions);
+
+            await WarnUserOfAuctionsByUsername(websocket, result, jsonAuctions);
+        }
+        
+        private async Task WarnUserOfAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, string jsonAuctions)
+        {
+            byte[] byteAuctions = Encoding.UTF8.GetBytes(jsonAuctions);
+            await websocket.SendAsync(byteAuctions, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
     }
 }

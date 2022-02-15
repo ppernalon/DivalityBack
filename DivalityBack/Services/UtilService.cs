@@ -252,5 +252,30 @@ namespace DivalityBack.Services
             jsonDisciples += "}";
 
             return jsonDisciples;         }
+        
+        public string AuctionsToJson(List<AuctionHouse> auctions)
+        {
+            String jsonAuctions = "";
+
+            jsonAuctions += "{";
+
+            jsonAuctions += "\"type\" : \"auctions\",";
+            jsonAuctions += "\"auctionsData\" : [";
+            
+            foreach (AuctionHouse auction in auctions)
+            {
+                jsonAuctions += AuctionToJson(auction);
+                jsonAuctions += ",";
+            }
+
+            if (jsonAuctions.EndsWith(","))
+            {
+                jsonAuctions = jsonAuctions.Remove(jsonAuctions.Length - 1); 
+            }
+            jsonAuctions += "]";
+            jsonAuctions += "}";
+
+            return jsonAuctions;
+        }
     }
 }
