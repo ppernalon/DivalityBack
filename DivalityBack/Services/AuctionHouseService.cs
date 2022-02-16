@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -17,15 +18,17 @@ namespace DivalityBack.Services
         private readonly CardsCRUDService _cardsCrudService;
         private readonly UsersCRUDService _usersCrudService; 
         private readonly UtilServices _utilServices;
-        private readonly UsersService _usersService; 
+        private readonly UsersService _usersService;
+        private readonly CardsService _cardsService; 
         
-        public AuctionHouseService(AuctionHousesCRUDService auctionHousesCrudService, CardsCRUDService cardsCrudService, UsersCRUDService usersCrudService, UtilServices utilServices, UsersService usersService)
+        public AuctionHouseService(AuctionHousesCRUDService auctionHousesCrudService, CardsCRUDService cardsCrudService, UsersCRUDService usersCrudService, UtilServices utilServices, UsersService usersService, CardsService cardsService)
         {
             _auctionHousesCrudService = auctionHousesCrudService;
             _cardsCrudService = cardsCrudService;
             _usersCrudService = usersCrudService;
             _utilServices = utilServices;
-            _usersService = usersService; 
+            _usersService = usersService;
+            _cardsService = cardsService; 
         }
 
         [ExcludeFromCodeCoverage]
@@ -126,6 +129,48 @@ namespace DivalityBack.Services
         {
             byte[] byteAuctions = Encoding.UTF8.GetBytes(jsonAuctions);
             await websocket.SendAsync(byteAuctions, result.MessageType, result.EndOfMessage, CancellationToken.None); 
+        }
+
+        public async Task cancelAuction(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price, string quantity)
+        {
+            User user = _usersCrudService.GetByUsername(username);
+            if (user != null)
+            {
+                Card card = _cardsCrudService.GetCardByName(cardName);
+                if (card != null)
+                {
+                    List<AuctionHouse> auctions = _auctionHousesCrudService.getByOwnerId(user.Id);
+                    List<AuctionHouse> auctionsToRemove = auctions.FindAll(auction =>
+                        auction.CardId.Equals(card.Id) && auction.Price.Equals(int.Parse(price)));
+                    if (int.Parse(quantity) <= auctionsToRemove.Count)
+                    {
+                        for (int i = 0; i < int.Parse(quantity); i++)
+                        {
+                            AuctionHouse auctionToRemove = auctionsToRemove[i];
+                            _auctionHousesCrudService.Remove(auctionToRemove);
+                        }
+                    }
+                    else
+                    {
+                        foreach (AuctionHouse auctionToRemove in auctionsToRemove)
+                        {
+                            _auctionHousesCrudService.Remove(auctionToRemove);
+                        }
+                    }
+
+                    String jsonAuctionHouse = _utilServices.ListAuctionToJson(_auctionHousesCrudService.Get());
+                    await WarnUserOfAuctionHouse(websocket, result, jsonAuctionHouse);
+                }
+                else
+                {
+                    await _cardsService.WarnCardNotFound(websocket, result);
+                }
+
+            }
+            else
+            {
+                await _usersService.WarnUserNotFound(websocket, result);
+            }
         }
     }
 }

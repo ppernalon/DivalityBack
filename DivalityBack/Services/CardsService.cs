@@ -1,5 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
 using MongoDB.Driver;
@@ -55,6 +59,12 @@ namespace DivalityBack.Services
                 return cardGenerated;
             }
             return null; 
+        }
+
+        public async Task WarnCardNotFound(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("La carte n'a pas pu être trouvée, veuillez réessayer");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
     }
 }

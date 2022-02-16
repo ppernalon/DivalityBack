@@ -87,6 +87,9 @@ namespace DivalityBack.Services
                                 case "auctionsByUsername":
                                     await HandleAuctionsByUsername(websocket, result, msgJson);
                                     break; 
+                                case "cancelAuction":
+                                    await HandleCancelAuction(websocket, result, msgJson);
+                                    break; 
                                 default:
                                     await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
@@ -105,6 +108,17 @@ namespace DivalityBack.Services
             } catch (InvalidOperationException e) {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleCancelAuction(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String cardName = msgJson.RootElement.GetProperty("cardName").ToString();
+            String price = msgJson.RootElement.GetProperty("price").ToString();
+            String quantity = msgJson.RootElement.GetProperty("quantity").ToString();
+
+            await _auctionHouseService.cancelAuction(websocket, result, username, cardName, price, quantity);
+
         }
 
         private async Task HandleAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

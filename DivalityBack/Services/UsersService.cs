@@ -636,5 +636,5 @@ namespace DivalityBack.Services
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
     }
-    }
 }
+
