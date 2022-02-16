@@ -201,8 +201,8 @@ namespace DivalityBack.Models.Gods
             // rebound on left of MiddleGods
             // left rebound right or middle rebound left
             else if ( 
-                ( attackIndex[0] == 0 && leftOrRight == 1)
-                || ( attackIndex[0] == 1 && leftOrRight == -1)
+                ( attackIndex[1] == 0 && leftOrRight == 1)
+                || ( attackIndex[1] == 1 && leftOrRight == -1)
             ) {
                 secondAttackIndex = new[] {1, 0};
                 GenericGod secondAttackedGod = opponentGodTeam.getGod(secondAttackIndex);
@@ -220,7 +220,7 @@ namespace DivalityBack.Models.Gods
                 else
                 {
                     // the attack follows his path to TopGod
-                    if ( attackIndex[0] == 0 && leftOrRight == 1 && opponentGodTeam.TopGod.isAlive())
+                    if ( attackIndex[1] == 0 && leftOrRight == 1 && opponentGodTeam.TopGod.isAlive())
                     {
                         attackedPositions.Add(new[] {0, 0});
                     }
@@ -229,8 +229,8 @@ namespace DivalityBack.Models.Gods
             // rebound on right of MiddleGods
             // right rebound left or middle rebound right
             else if ( 
-                ( attackIndex[0] == 2 && leftOrRight == -1) 
-                || ( attackIndex[0] == 1 && leftOrRight == 1) 
+                ( attackIndex[1] == 2 && leftOrRight == -1) 
+                || ( attackIndex[1] == 1 && leftOrRight == 1) 
             ) {
                 secondAttackIndex = new[] {1, 1};
                 GenericGod secondAttackedGod = opponentGodTeam.getGod(secondAttackIndex);
@@ -248,7 +248,7 @@ namespace DivalityBack.Models.Gods
                 else
                 {
                     // the attack follows his path to TopGod
-                    if (attackIndex[0] == 2 && leftOrRight == -1 && opponentGodTeam.TopGod.isAlive())
+                    if (attackIndex[1] == 2 && leftOrRight == -1 && opponentGodTeam.TopGod.isAlive())
                     {
                         attackedPositions.Add(new [] {0, 0});
                     }
