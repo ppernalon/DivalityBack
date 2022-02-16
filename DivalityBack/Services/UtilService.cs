@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using DivalityBack.Models;
 using DivalityBack.Models.Gods;
 using DivalityBack.Services.CRUD;
-using Microsoft.AspNetCore.Server.HttpSys;
 
 namespace DivalityBack.Services
 {

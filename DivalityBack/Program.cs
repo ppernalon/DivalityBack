@@ -1,8 +1,5 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using DivalityBack.Models;
-using DivalityBack.Models.Gods;
 using DivalityBack.Services;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
