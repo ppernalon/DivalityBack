@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,13 +15,13 @@ namespace DivalityBack.Services
     {
         private readonly UsersService _usersService;
         private readonly CardsService _cardsService;
-        private readonly AuctionHouseService _auctionHouseService; 
+        private readonly AuctionHouseService _auctionHouseService;
         
         public WebsocketService(UsersService usersService, CardsService cardsService, AuctionHouseService auctionHouseService)
         {
             _usersService = usersService;
             _cardsService = cardsService;
-            _auctionHouseService = auctionHouseService; 
+            _auctionHouseService = auctionHouseService;
         }
         
         public async Task HandleMessages(WebSocket websocket){
@@ -35,6 +36,16 @@ namespace DivalityBack.Services
                         }
                         while (!result.EndOfMessage);
 
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            HandleDeconnection(websocket);
+                            await websocket.CloseOutputAsync(
+                                WebSocketCloseStatus.NormalClosure, 
+                                string.Empty,
+                                CancellationToken.None
+                            );
+                        }
+                        
                         if (result.MessageType == WebSocketMessageType.Text) {
                             JsonDocument msgJson = JsonDocument.Parse(ms.ToArray());
                             switch (@msgJson.RootElement.GetProperty("type").ToString().Trim())
