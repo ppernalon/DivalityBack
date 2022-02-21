@@ -13,7 +13,7 @@ namespace DivalityBack.Models
             Password = "";
             Victory = 0;
             Defeat = 0;
-            Disciples = 30;
+            Disciples = 80;
             Collection = new List<string>();
             Friends = new List<string>();
             Teams = new List<Team>();
