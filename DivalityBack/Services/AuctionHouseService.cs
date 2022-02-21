@@ -151,6 +151,7 @@ namespace DivalityBack.Services
                         {
                             AuctionHouse auctionToRemove = auctionsToRemove[i];
                             _auctionHousesCrudService.Remove(auctionToRemove);
+                            user.Collection.Add(auctionsToRemove[i].CardId);
                         }
                     }
                     else
@@ -158,9 +159,10 @@ namespace DivalityBack.Services
                         foreach (AuctionHouse auctionToRemove in auctionsToRemove)
                         {
                             _auctionHousesCrudService.Remove(auctionToRemove);
+                            user.Collection.Add(auctionToRemove.CardId);
                         }
                     }
-
+                    _usersCrudService.Update(user.Id, user);
                     String jsonAuctionHouse = _utilServices.ListAuctionToJson(_auctionHousesCrudService.Get());
                     await WarnUserOfAuctionHouse(websocket, result, jsonAuctionHouse);
                 }
