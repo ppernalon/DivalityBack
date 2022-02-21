@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DivalityBack.Models;
 using DivalityBack.Models.Gods;
 using DivalityBack.Services.CRUD;
@@ -139,16 +140,17 @@ namespace DivalityBack.Services
             return jsonUsernames; 
         }
 
-        public string AuctionToJson(AuctionHouse auction)
+        public string AuctionToJson(String cardId, String ownerId, string price, string quantity)
         {
-            String cardName = _cardsCrudService.Get(auction.CardId).Name;
-            String ownerName = _usersCrudService.Get(auction.OwnerId).Username;
+            String cardName = _cardsCrudService.Get(cardId).Name;
+            String ownerName = _usersCrudService.Get(ownerId).Username;
             
             String jsonAuction = "";
             jsonAuction += "{";
             jsonAuction += "\"cardName\": \"" + cardName + "\",";
             jsonAuction += "\"ownerName\": \"" + ownerName + "\",";
-            jsonAuction += "\"price\":\"" + auction.Price + "\""; 
+            jsonAuction += "\"price\":\"" + price + "\","; 
+            jsonAuction += "\"quantity\":\"" + quantity + "\",";
             jsonAuction += "}";
             return jsonAuction;
         }
@@ -162,18 +164,28 @@ namespace DivalityBack.Services
             jsonListAuctionHouse += "\"type\":\"auctionHouse\",";
             jsonListAuctionHouse += "\"shopData\":[";
 
-            foreach (AuctionHouse auction in listAuctionHouse)
+            //Regroupement des ventes de l'HdV par Owner, Card et Price
+            var groupedAuctions = listAuctionHouse
+                .GroupBy(auction => new {auction.OwnerId, auction.CardId, auction.Price}).Select(a => new
+                {
+                    OwnerId = a.Key.OwnerId,
+                    CardId = a.Key.CardId,
+                    Price = a.Key.Price,
+                    Quantity = a
+                }).ToList();
+            
+            foreach (var groupedAuction in groupedAuctions)
             {
-                jsonListAuctionHouse += AuctionToJson(auction) + ",";
+                jsonListAuctionHouse += AuctionToJson(groupedAuction.CardId, groupedAuction.OwnerId, groupedAuction.Price.ToString(), groupedAuction.Quantity.Count().ToString()) + ",";
             }
+            
             jsonListAuctionHouse = jsonListAuctionHouse.Remove(jsonListAuctionHouse.Length - 1);
 
             jsonListAuctionHouse += "]}";
 
             return jsonListAuctionHouse; 
         }
-
-
+        
         public string TeamsToJson(List<Team> teams)
         {
             String jsonTeams = "";
@@ -280,12 +292,20 @@ namespace DivalityBack.Services
             jsonAuctions += "\"type\" : \"auctions\",";
             jsonAuctions += "\"auctionsData\" : [";
             
-            foreach (AuctionHouse auction in auctions)
+            //Regroupement des ventes de l'HdV par Owner, Card et Price
+            var groupedAuctions = auctions
+                .GroupBy(auction => new {auction.OwnerId, auction.CardId, auction.Price}).Select(a => new
+                {
+                    OwnerId = a.Key.OwnerId,
+                    CardId = a.Key.CardId,
+                    Price = a.Key.Price,
+                    Quantity = a
+                }).ToList();
+            
+            foreach (var groupedAuction in groupedAuctions)
             {
-                jsonAuctions += AuctionToJson(auction);
-                jsonAuctions += ",";
+                jsonAuctions += AuctionToJson(groupedAuction.CardId, groupedAuction.OwnerId, groupedAuction.Price.ToString(), groupedAuction.Quantity.Count().ToString()) + ",";
             }
-
             if (jsonAuctions.EndsWith(","))
             {
                 jsonAuctions = jsonAuctions.Remove(jsonAuctions.Length - 1); 
