@@ -131,7 +131,7 @@ namespace DivalityBack.Services
             String price = msgJson.RootElement.GetProperty("price").ToString();
             String quantity = msgJson.RootElement.GetProperty("quantity").ToString();
 
-            await _auctionHouseService.cancelAuction(websocket, result, username, cardName, price, quantity);
+            await _auctionHouseService.CancelAuction(websocket, result, username, cardName, price, quantity);
 
         }
 

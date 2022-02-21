@@ -53,23 +53,26 @@ namespace DivalityBack.Services
             User user = _usersCrudService.GetByUsername(username);
             
             //On vérifie que l'utilisateur possède la bonne quantité de la carte mise en vente
-            int quantityInCollection = user.Collection.Select(c => c.Equals(card.Id)).Count();
+            int quantityInCollection = user.Collection.Where(c => c.Equals(card.Id)).Count();
             //On prend également en compte les cartes déjà mises en vente par cet utilisateur dans l'HDV
             int quantityInHdv = _auctionHousesCrudService.GetByCardIdAndOwnerId(card.Id, user.Id).Count();
             if (card != null && quantityInCollection - quantityInHdv >= int.Parse(quantity))
             {
 
-                //On enlève la carte de la collection
-                user.Collection.Remove(card.Id);
+                for (int i = 0; i < int.Parse(quantity); i++)
+                {
+                    //On enlève les cartes de la collection
+                    user.Collection.Remove(card.Id);
+                    
+                    //On rajoute les ventes dans l'HdV
+                    AuctionHouse auction = new AuctionHouse();
+                    auction.Price = int.Parse(price);
+                    auction.CardId = card.Id;
+                    auction.OwnerId = user.Id;
+                    _auctionHousesCrudService.Create(auction); 
+                }
+                
                 _usersCrudService.Update(user.Id, user);
-                
-                //On rajoute la vente dans l'HdV
-                AuctionHouse auction = new AuctionHouse();
-                auction.Price = int.Parse(price);
-                auction.CardId = card.Id;
-                auction.OwnerId = user.Id;
-                _auctionHousesCrudService.Create(auction); 
-                
                 await GetAuctionHouse(websocket, result);
             }
             else
@@ -131,7 +134,7 @@ namespace DivalityBack.Services
             await websocket.SendAsync(byteAuctions, result.MessageType, result.EndOfMessage, CancellationToken.None); 
         }
 
-        public async Task cancelAuction(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price, string quantity)
+        public async Task CancelAuction(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string price, string quantity)
         {
             User user = _usersCrudService.GetByUsername(username);
             if (user != null)
