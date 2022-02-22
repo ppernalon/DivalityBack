@@ -122,10 +122,10 @@ namespace DivalityBack.Services
             var groupedAuctions = listAuctionHouse
                 .GroupBy(auction => new {auction.OwnerId, auction.CardId, auction.Price}).Select(a => new
                 {
-                    OwnerName = _usersCrudService.Get(a.Key.OwnerId).Username,
-                    CardName = _cardsCrudService.Get(a.Key.CardId).Name,
-                    Price = a.Key.Price,
-                    Quantity = a.Count()
+                    ownerName = _usersCrudService.Get(a.Key.OwnerId).Username,
+                    cardName = _cardsCrudService.Get(a.Key.CardId).Name,
+                    price = a.Key.Price,
+                    quantity = a.Count()
                 }).ToList();
             
             dictRes.Add("shopData", groupedAuctions);
@@ -202,10 +202,10 @@ namespace DivalityBack.Services
             var groupedAuctions = auctions
                 .GroupBy(auction => new {auction.OwnerId, auction.CardId, auction.Price}).Select(a => new
                 {
-                    OwnerId = a.Key.OwnerId,
-                    CardId = a.Key.CardId,
-                    Price = a.Key.Price,
-                    Quantity = a
+                    ownerId = a.Key.OwnerId,
+                    cardId = a.Key.CardId,
+                    price = a.Key.Price,
+                    quantity = a
                 }).ToList();
 
             dictRes.Add("auctionsData", groupedAuctions);
