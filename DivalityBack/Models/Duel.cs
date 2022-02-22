@@ -149,7 +149,6 @@ namespace DivalityBack.Models
 
         private int[][] godAttack(GenericGod attackerGod, Player opponentPlayer)
         {
-            Console.WriteLine(opponentPlayer.Username + " est attaqué pour " + attackerGod.Power); // TODO à enlever
             int[][] attackPattern = attackerGod.getAttackPattern(opponentPlayer.GodTeam);
             opponentPlayer.GodTeam.getStriked(attackerGod.Power, attackPattern);
             return attackPattern;

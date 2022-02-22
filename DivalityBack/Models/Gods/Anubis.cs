@@ -6,6 +6,7 @@
         {
             Name = "Anubis";
             Life = 120;
+            MaxLife = 120;
             Armor = 12;
             Power = 40;
             Speed = 80;

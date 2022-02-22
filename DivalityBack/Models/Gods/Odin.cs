@@ -6,6 +6,7 @@
         {
             Name = "Odin";
             Life = 130;
+            MaxLife = 130;
             Armor = 15;
             Power = 30;
             Speed = 50;

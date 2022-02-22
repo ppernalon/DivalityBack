@@ -10,6 +10,7 @@ namespace DivalityBack.Models.Gods
         {
             Name = name; // identify the god
             Life = life; // current life of the god
+            MaxLife = life;
             Armor = armor; // percentage of damage reduction
             Speed = speed; // define de the order of attack
             Power = power; // define the damage of ability
@@ -23,6 +24,7 @@ namespace DivalityBack.Models.Gods
         {
             Name = ""; // identify the god
             Life = -1; // current life of the god
+            MaxLife = -1;
             Armor = -1; // percentage of damage reduction
             Speed = -1; // define de the order of attack
             Power = -1; // define the damage of ability
@@ -31,7 +33,8 @@ namespace DivalityBack.Models.Gods
             GlobalAllyEffect = new EffectOnGod();
             GlobalEnnemyEffect = new EffectOnGod();
         }
-        
+
+        public int MaxLife { get; set; }
         public EffectOnGod GlobalAllyEffect { get; set; }
         public EffectOnGod GlobalEnnemyEffect { get; set; }
         public double ToLeftRate { get; set; }
@@ -45,6 +48,7 @@ namespace DivalityBack.Models.Gods
         public void addPositiveEffect(EffectOnGod effect)
         {
             Life += effect.Life;
+            MaxLife += effect.MaxLife;
             Speed += effect.Speed;
             Power += effect.Power;
             
@@ -69,7 +73,16 @@ namespace DivalityBack.Models.Gods
             {
                 Life = 1;
             }
-            
+
+            if (MaxLife - effect.MaxLife >= 1)
+            {
+                MaxLife -= effect.MaxLife;
+            }
+            else
+            {
+                Life = 1;
+            }
+
             if (Power - effect.Power >= 0)
             {
                 Power -= effect.Power;
@@ -95,7 +108,7 @@ namespace DivalityBack.Models.Gods
         {
             int reducedDamage = amountOfDamage * ( 100 - Armor ) / 100;
             Life -= reducedDamage;
-            Console.WriteLine(Name + " perd " + reducedDamage + " point de vie"); // TODO a enlever
+            if (Life < 0) Life = 0;
             return reducedDamage;
         }
 

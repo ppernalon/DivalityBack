@@ -6,6 +6,7 @@
         {
             Name = "Athena";
             Life = 150;
+            MaxLife = 150;
             Armor = 30;
             Power = 50;
             Speed = 80;
