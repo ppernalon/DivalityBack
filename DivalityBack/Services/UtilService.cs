@@ -150,7 +150,7 @@ namespace DivalityBack.Services
             jsonAuction += "\"cardName\": \"" + cardName + "\",";
             jsonAuction += "\"ownerName\": \"" + ownerName + "\",";
             jsonAuction += "\"price\":\"" + price + "\","; 
-            jsonAuction += "\"quantity\":\"" + quantity + "\",";
+            jsonAuction += "\"quantity\":\"" + quantity + "\"";
             jsonAuction += "}";
             return jsonAuction;
         }
