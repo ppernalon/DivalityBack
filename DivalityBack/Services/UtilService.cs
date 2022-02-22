@@ -340,12 +340,12 @@ namespace DivalityBack.Services
             
             updateDuelJson += "\"type\":\"updatingDuelState\",";
             updateDuelJson += "\"offensivePlayer\":\"" + attacker + "\",";
-            updateDuelJson += "\"updatedAttackedGod\": [";
+            updateDuelJson += "\"updatedAttackedGods\": [";
             
             for (int index = 0; index < godsAttacked.Count; index++)
             {
                 GenericGod god = godsAttacked[index];
-                updateDuelJson += "{\"" + god.Name + "\": " + god.Life + "}";
+                updateDuelJson += "{\"god\": \"" + god.Name + "\", \"maxLife\": " + god.MaxLife + ", \"currentLife\": " + god.Life + "}";
                 if (index != godsAttacked.Count - 1) updateDuelJson += ",";
             }
             
@@ -364,6 +364,34 @@ namespace DivalityBack.Services
             updateDuelJson += "]}";
             
             return updateDuelJson;
+        }
+
+        public string StartDuelJson(Player firstPlayer, Player secondPlayer)
+        {
+            string startDuelJson = "{";
+            startDuelJson += "\"type\":\"startDuel\",";
+            
+            // first player initial state
+            startDuelJson += "\"" + firstPlayer.Username + "\": [";
+            for (int index = 0; index < firstPlayer.GodTeam.AllGods.Length; index++)
+            {
+                GenericGod god = firstPlayer.GodTeam.AllGods[index];
+                startDuelJson += "{\"god\": \"" + god.Name + "\", \"maxLife\": " + god.Life + ", \"currentLife\": " + god.Life + "}";
+                if (index != firstPlayer.GodTeam.AllGods.Length - 1) startDuelJson += ",";
+            }
+            startDuelJson += "],";
+            
+            // second player initial state
+            startDuelJson += "\"" + secondPlayer.Username + "\": [";
+            for (int index = 0; index < secondPlayer.GodTeam.AllGods.Length; index++)
+            {
+                GenericGod god = secondPlayer.GodTeam.AllGods[index];
+                startDuelJson += "{\"god\": \"" + god.Name + "\", \"maxLife\": " + god.Life + ", \"currentLife\": " + god.Life + "}";
+                if (index != secondPlayer.GodTeam.AllGods.Length - 1) startDuelJson += ",";
+            }
+            startDuelJson += "]}";
+
+            return startDuelJson;
         }
     }
 }

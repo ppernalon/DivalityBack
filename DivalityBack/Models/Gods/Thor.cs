@@ -6,6 +6,7 @@
         {
             Name = "Thor";
             Life = 180;
+            MaxLife = 180;
             Armor = 20;
             Power = 35;
             Speed = 65;

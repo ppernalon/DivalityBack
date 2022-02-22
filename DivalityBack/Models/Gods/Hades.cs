@@ -6,6 +6,7 @@
         {
             Name = "Hades";
             Life = 200;
+            MaxLife = 200;
             Armor = 40;
             Power = 10;
             Speed = 10;

@@ -6,6 +6,7 @@
         {
             Name = "Bastet";
             Life = 120;
+            MaxLife = 120;
             Armor = 7;
             Power = 50;
             Speed = 100;

@@ -6,6 +6,7 @@
         {
             Name = "Ymir";
             Life = 200;
+            MaxLife = 200;
             Armor = 50;
             Power = 20;
             Speed = 5;

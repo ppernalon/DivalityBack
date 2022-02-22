@@ -6,6 +6,7 @@
         {
             Name = "Horus";
             Life = 200;
+            MaxLife = 200;
             Armor = 20;
             Power = 15;
             Speed = 30;

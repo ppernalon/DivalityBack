@@ -707,9 +707,16 @@ namespace DivalityBack.Services
 
             // lancement du duel
             Duel duel = new Duel(player1, player2);
-            
             duel.initDuel();
-
+            
+            string startJson = _utilService.StartDuelJson(player1, player2);
+            byte[] startBytes = Encoding.UTF8.GetBytes(startJson);
+            await player1.PlayerWebSocket.SendAsync(startBytes, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
+            await player2.PlayerWebSocket.SendAsync(startBytes, result.MessageType, result.EndOfMessage,
+                CancellationToken.None);
+            
+            // boucle du duel
             while (player1.isAlive() && player2.isAlive())
             {
                 duel.play(result);

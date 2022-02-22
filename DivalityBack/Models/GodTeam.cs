@@ -48,7 +48,6 @@ namespace DivalityBack.Models
 
                 if (!attackedGod.isAlive())
                 {
-                    Console.WriteLine(attackedGod.Name + " est mort"); // TODO à enlever
                     AliveGods.Remove(attackedGod);
                 }
             }
