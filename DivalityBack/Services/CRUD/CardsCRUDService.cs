@@ -22,7 +22,7 @@ namespace DivalityBack.Services.CRUD
 
         public Card Get(string id) =>
             _cards.Find<Card>(_cards => _cards.Id == id).FirstOrDefault();
-
+        
         public Card Create(Card card)
         {
             _cards.InsertOne(card);
@@ -48,6 +48,18 @@ namespace DivalityBack.Services.CRUD
         public Card GetCardByName(String name)
         {
             return _cards.Find(card => card.Name.Equals(name)).FirstOrDefault(); 
+        }
+
+        public List<Card> Get(List<String> cardsId)
+        {
+            List<Card> listCard = new List<Card>(); 
+          
+            foreach (String id in cardsId)
+            {
+                listCard.Add(Get(id));
+            }
+
+            return listCard; 
         }
     }
 }
