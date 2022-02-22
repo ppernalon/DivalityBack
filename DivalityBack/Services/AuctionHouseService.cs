@@ -52,11 +52,12 @@ namespace DivalityBack.Services
             Card card = _cardsCrudService.GetCardByName(cardName);
             User user = _usersCrudService.GetByUsername(username);
             
-            //On vérifie que l'utilisateur possède la bonne quantité de la carte mise en vente
+            //On vérifie que l'utilisateur possède la bonne quantité de la carte mise en vente, les cartes mises
+            // en vente dans l'HdV sont retirées de la collection
+            
             int quantityInCollection = user.Collection.Where(c => c.Equals(card.Id)).Count();
-            //On prend également en compte les cartes déjà mises en vente par cet utilisateur dans l'HDV
-            int quantityInHdv = _auctionHousesCrudService.GetByCardIdAndOwnerId(card.Id, user.Id).Count();
-            if (card != null && quantityInCollection - quantityInHdv >= int.Parse(quantity))
+
+            if (card != null && quantityInCollection >= int.Parse(quantity))
             {
 
                 for (int i = 0; i < int.Parse(quantity); i++)
