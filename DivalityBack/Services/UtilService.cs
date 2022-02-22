@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using DivalityBack.Models;
 using DivalityBack.Models.Gods;
 using DivalityBack.Services.CRUD;
@@ -19,10 +20,10 @@ namespace DivalityBack.Services
         
         public string CollectionToJson(List<String> collection)
         {
-            String jsonCollection = "";
-            jsonCollection += "{";
-            jsonCollection += "\"type\":\"collection\",";
-           
+            
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "collection");
+            
             List<String> listGreek = new List<string>();
             List<String> listEgyptian = new List<string>();
             List<String> listNordic = new List<string>();
@@ -42,102 +43,56 @@ namespace DivalityBack.Services
                         break;
                 }
             }
-            
-            jsonCollection += "\"data\" :{ ";
-            
-            jsonCollection += "\"greek\" :" + "[";
-            foreach (string name in listGreek)
-            {
-                jsonCollection += "\"" + name + "\"" + ",";
-            }
 
-            if (jsonCollection.EndsWith(","))
-            {
-                jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
-            }
-
-            jsonCollection += "],";
+            Dictionary<string, Object> data = new Dictionary<string, object>();
+            data.Add("greek", listGreek);
+            data.Add("nordic", listNordic);
+            data.Add("egyptian", listEgyptian);
             
-            jsonCollection += "\"egyptian\" :" + "[";
-            foreach (string name in listEgyptian)
-            {
-                jsonCollection += "\"" + name + "\"" + ",";
-            }
-            if (jsonCollection.EndsWith(","))
-            {
-                jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
-            }            jsonCollection += "],"; 
+            dictRes.Add("data", data);
             
-            jsonCollection += "\"nordic\" :" + "[";
-            foreach (string name in listNordic)
-            {
-                jsonCollection += "\"" + name + "\"" + ",";
-            }
-            if (jsonCollection.EndsWith(","))
-            {
-                jsonCollection = jsonCollection.Remove(jsonCollection.Length - 1);
-            }            jsonCollection += "]"; 
-           
-            jsonCollection += "}"; 
-            jsonCollection += "}";
-            return jsonCollection; 
+            
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString; 
         }
 
         public string CardToJson(Card card)
         {
-            String jsonCard = "";
-            jsonCard += "{";
-            jsonCard += "\"type\":\"card\",";
-            jsonCard += "\"name\":\"" + card.Name + "\",";
-            jsonCard += "\"pantheon\":\"" + card.Pantheon + "\",";
-            jsonCard += "\"rarity\":\"" + card.Rarity + "\",";
-            jsonCard += "\"life\":\"" + card.Life + "\",";
-            jsonCard += "\"speed\":\"" + card.Speed + "\",";
-            jsonCard += "\"power\":\"" + card.Power + "\",";
-            jsonCard += "\"armor\":\"" + card.Armor + "\",";
-            jsonCard += "\"offensiveAbility\":\"" + card.OffensiveAbility + "\",";
-            jsonCard += "\"offensiveEfficiency\":\"" + card.OffensiveEfficiency + "\",";
-            jsonCard += "\"defensiveAbility\":\"" + card.DefensiveAbility + "\",";
-            jsonCard += "\"defensiveEfficiency\":\"" + card.DefensiveEfficiency + "\",";
-            jsonCard += "\"isLimited\":\"" + card.isLimited + "\",";
-            jsonCard += "\"distributed\":\"" + card.Distributed + "\",";
-            jsonCard += "\"available\":\"" + card.Available + "\"";
-            jsonCard += "}";
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "card");
+            
+            dictRes.Add("name", card.Name);
+            dictRes.Add("pantheon", card.Pantheon);
+            dictRes.Add("rarity", card.Rarity);
+            dictRes.Add("life", card.Life);
+            dictRes.Add("speed", card.Speed);
+            dictRes.Add("power", card.Power);
+            dictRes.Add("armor", card.Armor);
+            dictRes.Add("offensiveAbility", card.OffensiveAbility);
+            dictRes.Add("offensiveEfficiency", card.OffensiveEfficiency);
+            dictRes.Add("defensiveAbility", card.DefensiveAbility);
+            dictRes.Add("defensiveEfficiency", card.DefensiveEfficiency);
+            dictRes.Add("isLimited", card.isLimited);
+            dictRes.Add("distributed", card.Distributed);
+            dictRes.Add("available", card.Available);
 
-            return jsonCard; 
-
+            
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public string FriendsToJson(List<string> listUsernameConnected, List<string> listUsernameDisconnected,
             List<string> listSenderOfFriendRequests)
         {
-            String jsonUsernames = "";
-            jsonUsernames += "{";
-                jsonUsernames += "\"type\":\"friends\",";
-                jsonUsernames += "\"connected\":";
-                jsonUsernames += ListUsernameToJson(listUsernameConnected);
-                jsonUsernames += ",";
-                jsonUsernames += "\"disconnected\":";
-                jsonUsernames += ListUsernameToJson(listUsernameDisconnected);
-                jsonUsernames += ",";
-                jsonUsernames += "\"requests\":";
-                jsonUsernames += ListUsernameToJson(listSenderOfFriendRequests);
-                jsonUsernames += "}";
-            return jsonUsernames; 
-        }
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "friends");
+            
+            dictRes.Add("connected", listUsernameConnected);
+            dictRes.Add("disconnected", listUsernameDisconnected);
+            dictRes.Add("request", listSenderOfFriendRequests);
 
-        private string ListUsernameToJson(List<string> listUsername)
-        {
-            String jsonUsernames = "{"; 
-            if (listUsername.Count > 0){
-                foreach (String username in listUsername)
-                {
-                    jsonUsernames += "\"username\":\"" + username + "\",";
-                }
-                jsonUsernames = jsonUsernames.Remove(jsonUsernames.Length -1);
-            }
-            jsonUsernames += "}"; 
-            return jsonUsernames; 
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public string AuctionToJson(String cardId, String ownerId, string price, string quantity)
@@ -145,152 +100,103 @@ namespace DivalityBack.Services
             String cardName = _cardsCrudService.Get(cardId).Name;
             String ownerName = _usersCrudService.Get(ownerId).Username;
             
-            String jsonAuction = "";
-            jsonAuction += "{";
-            jsonAuction += "\"cardName\": \"" + cardName + "\",";
-            jsonAuction += "\"ownerName\": \"" + ownerName + "\",";
-            jsonAuction += "\"price\":\"" + price + "\","; 
-            jsonAuction += "\"quantity\":\"" + quantity + "\"";
-            jsonAuction += "}";
-            return jsonAuction;
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            
+            dictRes.Add("cardName", cardName);
+            dictRes.Add("ownerName", ownerName);
+            dictRes.Add("price", price);
+            dictRes.Add("quantity", quantity);
+
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;            
         }
 
 
         public string ListAuctionToJson(List<AuctionHouse> listAuctionHouse)    
         {
-            String jsonListAuctionHouse = "";
-
-            jsonListAuctionHouse += "{";
-            jsonListAuctionHouse += "\"type\":\"auctionHouse\",";
-            jsonListAuctionHouse += "\"shopData\":[";
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "auctionHouse");
+            
 
             //Regroupement des ventes de l'HdV par Owner, Card et Price
             var groupedAuctions = listAuctionHouse
                 .GroupBy(auction => new {auction.OwnerId, auction.CardId, auction.Price}).Select(a => new
                 {
-                    OwnerId = a.Key.OwnerId,
-                    CardId = a.Key.CardId,
+                    OwnerName = _usersCrudService.Get(a.Key.OwnerId).Username,
+                    CardName = _cardsCrudService.Get(a.Key.CardId).Name,
                     Price = a.Key.Price,
-                    Quantity = a
+                    Quantity = a.Count()
                 }).ToList();
             
-            foreach (var groupedAuction in groupedAuctions)
-            {
-                jsonListAuctionHouse += AuctionToJson(groupedAuction.CardId, groupedAuction.OwnerId, groupedAuction.Price.ToString(), groupedAuction.Quantity.Count().ToString()) + ",";
-            }
-            
-            jsonListAuctionHouse = jsonListAuctionHouse.Remove(jsonListAuctionHouse.Length - 1);
+            dictRes.Add("shopData", groupedAuctions);
 
-            jsonListAuctionHouse += "]}";
-
-            return jsonListAuctionHouse; 
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
         
         public string TeamsToJson(List<Team> teams)
         {
-            String jsonTeams = "";
-
-            jsonTeams += "{";
-            jsonTeams += "\"type\":\"teams\",";
-            jsonTeams += "\"teamsdata\": [";
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "teams");
             
+            List<Dictionary<String, Object>> listTeams = new List<Dictionary<string, object>>();
+
             foreach (Team team in teams)
             {
-                jsonTeams += "{";
-                jsonTeams += "\"name\" : \"" + team.Name + "\",";
-                jsonTeams += "\"compo\" : [";
-                foreach (string cardId in team.Compo)
-                {
-                    jsonTeams += "\"" + _cardsCrudService.Get(cardId).Name + "\",";
-                }
-
-                if (jsonTeams.EndsWith(","))
-                {
-                    jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
-                }
-                jsonTeams += "]";
-                jsonTeams += "},";
+                Dictionary<String, Object> dictTeam = new Dictionary<string, object>();
+                dictTeam.Add("name", team.Name);
+                dictTeam.Add("compo", _cardsCrudService.Get(team.Compo).Select(c => c.Name).ToList());
+                
+                listTeams.Add(dictTeam);
             }
-            if(jsonTeams.Substring(jsonTeams.Length - 1) == ","){
-                jsonTeams = jsonTeams.Remove(jsonTeams.Length - 1);
-            }
-            jsonTeams += "]"; 
-            jsonTeams += "}";
-
-            return jsonTeams;
+            dictRes.Add("teamsdata", listTeams);
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
-
-        public string TeamToJson(Team team)
-        {
-            String jsonTeam = "";
-
-            jsonTeam += "{";
-            jsonTeam += "\"type\":\"team\",";
-            jsonTeam += "\"name\":\"" + team.Name + "\",";
-            jsonTeam += "\"compo\": {";
-            foreach (string cardId in team.Compo)
-            {
-                jsonTeam += "\"card\":";
-                Card card = _cardsCrudService.Get(cardId);
-                jsonTeam += CardToJson(card) + ",";
-            }
-
-            jsonTeam = jsonTeam.Remove(jsonTeam.Length - 1);
-            jsonTeam += "}";
-            jsonTeam += "}";
-
-            return jsonTeam; 
-        }
-
+        
         public string DuelToJson(string username)
         {
-            String jsonDuel = "";
-
-            jsonDuel += "{";
-            jsonDuel += "\"type\":\"duel\",";
-            jsonDuel += "\"opponent\":\"" + username + "\"";
-            jsonDuel += "}";
-
-            return jsonDuel; 
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "duel");
+            
+            dictRes.Add("opponent", username);
+            
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public string DisciplesToJson(int disciples)
         {
-            String jsonDisciples = "";
-
-            jsonDisciples += "{";
-            jsonDisciples += "\"type\":\"disciples\",";
-            jsonDisciples += "\"disciples\":\"" + disciples + "\"";
-            jsonDisciples += "}";
-
-            return jsonDisciples;         
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "disciples");
+            
+            dictRes.Add("disciples", disciples);
+  
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public string GodListToJson(List<string> namesOfGods)
         {
-            string jsonGodList = "";
-
-            jsonGodList += "{";
-            jsonGodList += "\"type\":\"opponentPickedTeam\",";
-            jsonGodList += "\"opponentGods\": [";
-            for (int index = 0; index < 6; index++)
-            {
-                jsonGodList += "\"" + namesOfGods[index] + "\"";
-                if (index < 5) jsonGodList += ",";
-            }
-            jsonGodList += "]}";
             
-            return jsonGodList;
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "opponentPickedTeam");
+            
+            while (namesOfGods.Count < 6)
+            {
+                namesOfGods.Add("");
+            }
+            dictRes.Add("opponentGods", namesOfGods);
+            
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
+            
         }       
         
         public string AuctionsToJson(List<AuctionHouse> auctions)
         {
-            String jsonAuctions = "";
-
-            jsonAuctions += "{";
-
-            jsonAuctions += "\"type\" : \"auctions\",";
-            jsonAuctions += "\"auctionsData\" : [";
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "auctions");
             
             //Regroupement des ventes de l'HdV par Owner, Card et Price
             var groupedAuctions = auctions
@@ -301,97 +207,105 @@ namespace DivalityBack.Services
                     Price = a.Key.Price,
                     Quantity = a
                 }).ToList();
-            
-            foreach (var groupedAuction in groupedAuctions)
-            {
-                jsonAuctions += AuctionToJson(groupedAuction.CardId, groupedAuction.OwnerId, groupedAuction.Price.ToString(), groupedAuction.Quantity.Count().ToString()) + ",";
-            }
-            if (jsonAuctions.EndsWith(","))
-            {
-                jsonAuctions = jsonAuctions.Remove(jsonAuctions.Length - 1); 
-            }
-            jsonAuctions += "]";
-            jsonAuctions += "}";
 
-            return jsonAuctions;
+            dictRes.Add("auctionsData", groupedAuctions);
+
+              
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public string WinnerJson()
         {
-            string winnerJson = "{";
-            winnerJson += "\"type\":\"duelWinner\",";
-            winnerJson += "\"rewards\":\"300\"";
-            winnerJson += "}";
-            return winnerJson;
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "duelWinner");
+
+            dictRes.Add("rewards", "300");
+
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
         
         public string LooserJson()
         {
-            string looserJson = "{";
-            looserJson += "\"type\":\"duelLooser\",";
-            looserJson += "\"rewards\":\"150\"";
-            looserJson += "}";
-            return looserJson;
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "duelLooser");
+
+            dictRes.Add("rewards", "300");
+
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public static string UpdateDuelJson(List<GenericGod> godsAttacked, string attacker, int[][] attackPattern)
         {
-            string updateDuelJson = "{";
             
-            updateDuelJson += "\"type\":\"updatingDuelState\",";
-            updateDuelJson += "\"offensivePlayer\":\"" + attacker + "\",";
-            updateDuelJson += "\"updatedAttackedGods\": [";
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "updatingDuelState");
             
-            for (int index = 0; index < godsAttacked.Count; index++)
+            dictRes.Add("offensivePlayer", attacker);
+            List<Dictionary<String, String>> listUpdatedAttackedGods = new List<Dictionary<String, String>>(); 
+            
+            foreach (GenericGod god in godsAttacked)
             {
-                GenericGod god = godsAttacked[index];
-                updateDuelJson += "{\"god\": \"" + god.Name + "\", \"maxLife\": " + god.MaxLife + ", \"currentLife\": " + god.Life + "}";
-                if (index != godsAttacked.Count - 1) updateDuelJson += ",";
+                Dictionary<String, String> dictGod = new Dictionary<string, string>(); 
+                dictGod.Add("god", god.Name);
+                dictGod.Add("maxLife", god.MaxLife.ToString());
+                dictGod.Add("currentLife", god.Life.ToString());
+                listUpdatedAttackedGods.Add(dictGod);
             }
             
-            updateDuelJson += "],";
-            updateDuelJson += "\"attackPattern\": [";
-            
+            dictRes.Add("updatedAttackedGods", listUpdatedAttackedGods);
+
+            List<List<int>> listAttackPattern = new List<List<int>>();
+
             for (int index = 0; index < attackPattern.Length; index++)
             {
                 int row = attackPattern[index][0];
                 int col = attackPattern[index][1];
                 
-                updateDuelJson += "[" + row + "," + col + "]";
-                if (index != attackPattern.Length - 1) updateDuelJson += ",";
+                listAttackPattern.Add(new List<int>() {row, col});
             }
 
-            updateDuelJson += "]}";
-            
-            return updateDuelJson;
+            dictRes.Add("attackPattern", listAttackPattern);
+
+              
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
 
         public string StartDuelJson(Player firstPlayer, Player secondPlayer)
         {
-            string startDuelJson = "{";
-            startDuelJson += "\"type\":\"startDuel\",";
-            
+            Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
+            dictRes.Add("type", "startDuel");
+
+            List<Dictionary<String, Object>> listGods = new List<Dictionary<string, object>>(); 
             // first player initial state
-            startDuelJson += "\"" + firstPlayer.Username + "\": [";
             for (int index = 0; index < firstPlayer.GodTeam.AllGods.Length; index++)
             {
+                Dictionary<String, Object> dictGod = new Dictionary<string, object>();
                 GenericGod god = firstPlayer.GodTeam.AllGods[index];
-                startDuelJson += "{\"god\": \"" + god.Name + "\", \"maxLife\": " + god.Life + ", \"currentLife\": " + god.Life + "}";
-                if (index != firstPlayer.GodTeam.AllGods.Length - 1) startDuelJson += ",";
+                dictGod.Add("god", god.Name);
+                dictGod.Add("maxLife", god.MaxLife);
+                dictGod.Add("currentLife", god.Life);
+                listGods.Add(dictGod);
             }
-            startDuelJson += "],";
-            
+            dictRes.Add(firstPlayer.Username, listGods);        
+    
             // second player initial state
-            startDuelJson += "\"" + secondPlayer.Username + "\": [";
             for (int index = 0; index < secondPlayer.GodTeam.AllGods.Length; index++)
             {
+                Dictionary<String, Object> dictGod = new Dictionary<string, object>();
                 GenericGod god = secondPlayer.GodTeam.AllGods[index];
-                startDuelJson += "{\"god\": \"" + god.Name + "\", \"maxLife\": " + god.Life + ", \"currentLife\": " + god.Life + "}";
-                if (index != secondPlayer.GodTeam.AllGods.Length - 1) startDuelJson += ",";
+                dictGod.Add("god", god.Name);
+                dictGod.Add("maxLife", god.MaxLife);
+                dictGod.Add("currentLife", god.Life);
+                listGods.Add(dictGod);
             }
-            startDuelJson += "]}";
+            dictRes.Add(secondPlayer.Username, listGods);      
 
-            return startDuelJson;
+            string jsonString = JsonSerializer.Serialize(dictRes);
+            return jsonString;
         }
     }
 }
