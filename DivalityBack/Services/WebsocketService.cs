@@ -210,7 +210,8 @@ namespace DivalityBack.Services
             String cardName = msgJson.RootElement.GetProperty("cardName").ToString();
             String ownerName = msgJson.RootElement.GetProperty("ownerName").ToString();
             String price = msgJson.RootElement.GetProperty("price").ToString();
-            await _auctionHouseService.BuyCardInAuctionHouse(websocket, result, username, cardName, ownerName, price); 
+            String quantity = msgJson.RootElement.GetProperty("quantity").ToString();
+            await _auctionHouseService.BuyCardInAuctionHouse(websocket, result, username, cardName, ownerName, price, quantity); 
         }
 
         private async Task HandleSellAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

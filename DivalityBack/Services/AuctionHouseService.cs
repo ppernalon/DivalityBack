@@ -84,7 +84,7 @@ namespace DivalityBack.Services
             }
         }
 
-        public async Task BuyCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string ownerName, string price)
+        public async Task BuyCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string ownerName, string price, string quantity)
         {
             Card card = _cardsCrudService.GetCardByName(cardName);
             User user = _usersCrudService.GetByUsername(username);
@@ -92,26 +92,40 @@ namespace DivalityBack.Services
 
             if (!(user.Disciples < int.Parse(price)))
             {
-                AuctionHouse auction = _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice(card.Id, owner.Id, price);
-                _auctionHousesCrudService.Remove(auction);
+                List<AuctionHouse> auctions =
+                    _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice(card.Id, owner.Id, price);
+                if (int.Parse(quantity) <= auctions.Count)
+                {
 
-                owner.Disciples += int.Parse(price);
 
-                user.Disciples -= int.Parse(price);
-                user.Collection.Add(card.Id);
-                _usersCrudService.Update(user.Id, user);
-                _usersCrudService.Update(owner.Id, owner);
-                
-                await GetAuctionHouse(websocket, result);
+                    for (int i = 0; i < int.Parse(quantity); i++)
+                    {
+                        AuctionHouse auction = auctions[i];
+                        _auctionHousesCrudService.Remove(auction);
+                        owner.Disciples += int.Parse(price);
+                        user.Disciples -= int.Parse(price);
+                        user.Collection.Add(card.Id);
+                    }
 
+                    _usersCrudService.Update(user.Id, user);
+                    _usersCrudService.Update(owner.Id, owner);
+
+                    await GetAuctionHouse(websocket, result);
+                }
+                else
+                {
+                    string messageErreur = "La quantité demandée est supérieure à la quantité mise en vente";
+                    await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
+                        result.EndOfMessage, CancellationToken.None);
+                }
             }
             else
-            {
-                string messageErreur = "L'utilisateur ne possède pas assez de disciples";
-                await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
-                    result.EndOfMessage, CancellationToken.None); 
+                {
+                    string messageErreur = "L'utilisateur ne possède pas assez de disciples";
+                    await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
+                        result.EndOfMessage, CancellationToken.None);
+                }
             }
-        }
 
         public async Task GetAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, string username)
         {

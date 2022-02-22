@@ -38,11 +38,11 @@ namespace DivalityBack.Services.CRUD
         public void Remove(string id) =>
             _auctionHouses.DeleteOne(auctionHouse => auctionHouse.Id == id);
 
-        public AuctionHouse GetByCardIdAndOwnerIdAndPrice(string cardId, string ownerId, string price)
+        public List<AuctionHouse> GetByCardIdAndOwnerIdAndPrice(string cardId, string ownerId, string price)
         {
             return _auctionHouses.Find(auction =>
                 auction.CardId.Equals(cardId) && auction.OwnerId.Equals(ownerId) &&
-                auction.Price.Equals(int.Parse(price))).FirstOrDefault();
+                auction.Price.Equals(int.Parse(price))).ToList();
         }
 
         public List<AuctionHouse> GetByCardIdAndOwnerId(string cardId, string ownerId)
