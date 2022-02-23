@@ -205,7 +205,7 @@ namespace DivalityBack.Services
                     ownerId = a.Key.OwnerId,
                     cardId = a.Key.CardId,
                     price = a.Key.Price,
-                    quantity = a
+                    quantity = a.Count()
                 }).ToList();
 
             dictRes.Add("auctionsData", groupedAuctions);
