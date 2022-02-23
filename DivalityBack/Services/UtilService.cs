@@ -202,8 +202,8 @@ namespace DivalityBack.Services
             var groupedAuctions = auctions
                 .GroupBy(auction => new {auction.OwnerId, auction.CardId, auction.Price}).Select(a => new
                 {
-                    ownerId = a.Key.OwnerId,
-                    cardId = a.Key.CardId,
+                    ownerName = _usersCrudService.Get(a.Key.OwnerId).Username,
+                    cardName = _cardsCrudService.Get(a.Key.CardId).Name,
                     price = a.Key.Price,
                     quantity = a.Count()
                 }).ToList();
