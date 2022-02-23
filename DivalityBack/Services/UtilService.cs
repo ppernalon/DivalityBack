@@ -237,15 +237,15 @@ namespace DivalityBack.Services
             return jsonString;
         }
 
-        public static string UpdateDuelJson(List<GenericGod> godsAttacked, string attacker, int[][] attackPattern)
+        public static string UpdateDuelJson(List<GenericGod> godsAttacked, string attacker, int[][] attackPattern, int turn, int attackerPosition)
         {
-            
             Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
             dictRes.Add("type", "updatingDuelState");
-            
             dictRes.Add("offensivePlayer", attacker);
-            List<Dictionary<String, String>> listUpdatedAttackedGods = new List<Dictionary<String, String>>(); 
-            
+            dictRes.Add("turn", turn);
+            dictRes.Add("attackerPosition", attackerPosition);
+            List<Dictionary<String, String>> listUpdatedAttackedGods = new List<Dictionary<String, String>>();
+
             foreach (GenericGod god in godsAttacked)
             {
                 Dictionary<String, String> dictGod = new Dictionary<string, string>(); 

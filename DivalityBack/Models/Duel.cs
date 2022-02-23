@@ -111,27 +111,32 @@ namespace DivalityBack.Models
         {
             foreach (var GodAndPlayer in GodsBySpeed)
             {
-                TurnCount++;
-                
                 GenericGod attacker = GodAndPlayer.Key;
                 Player offensivePlayer = GodAndPlayer.Value;
 
                 if (attacker.isAlive()) // a dead god can't attack
                 {
+                    TurnCount++;
+
+                    int attackerPosition;
+                    
                     int[][] attackPattern;
                     GenericGod[] attackedGods;
+                    
                     if (offensivePlayer.isEqual(Player1)) // player 2 is attacked
                     {
                         attackedGods = Player2.GodTeam.AllGods;
                         attackPattern = godAttack(attacker, Player2);
+                        attackerPosition = Array.IndexOf(Player1.GodTeam.AllGods, attacker);
                     }
                     else // player 1 is attacked
                     {
                         attackedGods = Player1.GodTeam.AllGods;
                         attackPattern = godAttack(attacker, Player1);
+                        attackerPosition = Array.IndexOf(Player2.GodTeam.AllGods, attacker);
                     }
 
-                    string updateJson = UtilServices.UpdateDuelJson(attackedGods.ToList(), offensivePlayer.Username, attackPattern);
+                    string updateJson = UtilServices.UpdateDuelJson(attackedGods.ToList(), offensivePlayer.Username, attackPattern, TurnCount, attackerPosition);
                     byte[] updateBytes = Encoding.UTF8.GetBytes(updateJson);
                     
                     Player1.PlayerWebSocket.SendAsync(updateBytes, result.MessageType, result.EndOfMessage, CancellationToken.None);

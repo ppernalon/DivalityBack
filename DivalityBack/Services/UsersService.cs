@@ -736,6 +736,12 @@ namespace DivalityBack.Services
                 CancellationToken.None);
             await looserWebSocket.SendAsync(looserBytes, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);
+            
+            // on les enlève des dictionnaires pour revenir à l'état initial
+            mapInFightPlayersCouple.Remove(player1.Username);
+            mapInFightPlayersCouple.Remove(player2.Username);
+            mapPlayerCurrentGodTeam.Remove(player1.Username);
+            mapPlayerCurrentGodTeam.Remove(player2.Username);
         }
 
         public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result){
