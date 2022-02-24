@@ -86,10 +86,50 @@ namespace DivalityBack.Services
         {
             Dictionary<String, Object> dictRes = new Dictionary<string, Object>();
             dictRes.Add("type", "friends");
+
+            List<Dictionary<String, String>> listDictConnected = new List<Dictionary<string, string>>();
+            List<Dictionary<String, String>> listDictDisconnected = new List<Dictionary<string, string>>();
+            List<Dictionary<String, String>> listDictRequest = new List<Dictionary<string, string>>();
+
+            //Gestion des amis connectés
+            foreach (string username in listUsernameConnected)
+            {
+                User user = _usersCrudService.GetByUsername(username);
+                Dictionary<String, String> dictConnected = new Dictionary<string, string>();
+                
+                dictConnected.Add("username", username);
+                dictConnected.Add("victory", user.Victory.ToString());
+                dictConnected.Add("defeat", user.Defeat.ToString());
+                listDictConnected.Add(dictConnected);
+            }
             
-            dictRes.Add("connected", listUsernameConnected);
-            dictRes.Add("disconnected", listUsernameDisconnected);
-            dictRes.Add("request", listSenderOfFriendRequests);
+            //Gestion des amis déconnectés
+            foreach (string username in listUsernameDisconnected)
+            {
+                User user = _usersCrudService.GetByUsername(username);
+                Dictionary<String, String> dictDisconnected = new Dictionary<string, string>();
+                
+                dictDisconnected.Add("username", username);
+                dictDisconnected.Add("victory", user.Victory.ToString());
+                dictDisconnected.Add("defeat", user.Defeat.ToString());
+                listDictDisconnected.Add(dictDisconnected);
+            }
+            
+            //Gestion des requêtes d'ami
+            foreach (string username in listSenderOfFriendRequests)
+            {
+                User user = _usersCrudService.GetByUsername(username);
+                Dictionary<String, String> dictRequest = new Dictionary<string, string>();
+                
+                dictRequest.Add("username", username);
+                dictRequest.Add("victory", user.Victory.ToString());
+                dictRequest.Add("defeat", user.Defeat.ToString());
+                listDictRequest.Add(dictRequest);
+            }
+            
+            dictRes.Add("connected", listDictConnected);
+            dictRes.Add("disconnected", listDictDisconnected);
+            dictRes.Add("request", listDictRequest);
 
             string jsonString = JsonSerializer.Serialize(dictRes);
             return jsonString;
