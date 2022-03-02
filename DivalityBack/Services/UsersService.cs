@@ -10,10 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Models.Gods;
-using DivalityBack.Services;
 using DivalityBack.Services.CRUD;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
-using Microsoft.VisualBasic;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DivalityBack.Services
@@ -271,16 +268,27 @@ namespace DivalityBack.Services
                     FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
                     if (request == null)
                     {
-                        FriendRequest newRequest = new FriendRequest();
-                        newRequest.Sender = sender.Id;
-                        newRequest.Receiver = receiver.Id;
-
-                        _friendRequestsCrudService.Create(newRequest);
-
-                        if (mapActivePlayersWebsocket.ContainsKey(receiver.Username))
+                        //On vérifie que le joueur demandé en ami n'a pas déjà envoyé une demande
+                        request = _friendRequestsCrudService.FindBySenderAndReceiver(receiver.Id, sender.Id);
+                        //Si c'est le cas, on accepte automatiquement la demande déjà existante
+                        if (request != null)
                         {
-                            WebSocket webSocketReceiver = mapActivePlayersWebsocket[receiver.Username];
-                            await WarnUserOfFriendRequest(webSocketReceiver, result, receiver.Username);
+                           await AcceptFriendRequest(websocket, result, usernameReceiver, usernameSender);
+                        }
+                        else
+                        {
+
+                            FriendRequest newRequest = new FriendRequest();
+                            newRequest.Sender = sender.Id;
+                            newRequest.Receiver = receiver.Id;
+
+                            _friendRequestsCrudService.Create(newRequest);
+
+                            if (mapActivePlayersWebsocket.ContainsKey(receiver.Username))
+                            {
+                                WebSocket webSocketReceiver = mapActivePlayersWebsocket[receiver.Username];
+                                await WarnUserOfFriendRequest(webSocketReceiver, result, receiver.Username);
+                            }
                         }
                     }
                     else
@@ -462,9 +470,9 @@ namespace DivalityBack.Services
                 //On prévient tous les joueurs de leur opponent et on les ajoute dans la map InFight
                 foreach (List<User> pair in combinaisonKept)
                 {
-                   await WarnUsersOfDuel(pair, queue);
-                   mapInFightPlayersCouple.Add(pair[0].Username, pair[1].Username);
-                   mapInFightPlayersCouple.Add(pair[1].Username, pair[0].Username);
+                    await WarnUsersOfDuel(pair, queue);
+                    mapInFightPlayersCouple.Add(pair[0].Username, pair[1].Username);
+                    mapInFightPlayersCouple.Add(pair[1].Username, pair[0].Username);
                 }
 
                 //S'il reste un joueur sans match, on le replace dans la liste d'attente
@@ -626,7 +634,7 @@ namespace DivalityBack.Services
             }
             else
             {
-                await WarnUserNotFound(webSocket, result); 
+                await WarnUserNotFound(webSocket, result);
             }
         }
 
@@ -660,7 +668,7 @@ namespace DivalityBack.Services
         public async Task PickTeamForDuel(String username, int teamIndex, WebSocketReceiveResult result)
         {
             mapPlayerCurrentGodTeam.Add(username, teamIndex);
-            
+
             // Récupération de la liste des noms de dieux
             List<string> namesOfGods = getNamesOfGods(username, teamIndex);
 
@@ -669,7 +677,7 @@ namespace DivalityBack.Services
             String opponentUsername = mapInFightPlayersCouple[username];
             WebSocket opponentWebsocket = mapActivePlayersWebsocket[opponentUsername];
             await opponentWebsocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
-            
+
             // Lancement du duel si les deux joueurs ont choisi leur team
             if (mapPlayerCurrentGodTeam.Keys.Contains(opponentUsername))
             {
@@ -677,10 +685,10 @@ namespace DivalityBack.Services
                 int opponentTeamIndex = mapPlayerCurrentGodTeam[opponentUsername];
                 List<string> opponentNamesOfGods = getNamesOfGods(opponentUsername, opponentTeamIndex);
                 await StartDuel(
-                    namesOfGods, 
-                    opponentNamesOfGods, 
-                    username, 
-                    opponentUsername, 
+                    namesOfGods,
+                    opponentNamesOfGods,
+                    username,
+                    opponentUsername,
                     result
                 );
             }
@@ -701,15 +709,17 @@ namespace DivalityBack.Services
         }
 
         private async Task StartDuel(
-            List<string> namesOfGods1, 
-            List<string> namesOfGods2, 
-            string username1, 
+            List<string> namesOfGods1,
+            List<string> namesOfGods2,
+            string username1,
             string username2,
             WebSocketReceiveResult result
-        ) {
+        )
+        {
             // création de l'équipe de dieux et des joueurs
             List<GenericGod> godList1 = new List<GenericGod>();
-            List<GenericGod> godList2 = new List<GenericGod>();;
+            List<GenericGod> godList2 = new List<GenericGod>();
+            ;
 
             for (int index = 0; index < namesOfGods1.Count; index++)
             {
@@ -722,21 +732,21 @@ namespace DivalityBack.Services
 
             WebSocket ws1 = mapActivePlayersWebsocket[username1];
             WebSocket ws2 = mapActivePlayersWebsocket[username2];
-            
+
             Player player1 = new Player(godTeam1, username1, ws1);
             Player player2 = new Player(godTeam2, username2, ws2);
 
             // lancement du duel
             Duel duel = new Duel(player1, player2);
             duel.initDuel();
-            
+
             string startJson = _utilService.StartDuelJson(player1, player2);
             byte[] startBytes = Encoding.UTF8.GetBytes(startJson);
             await player1.PlayerWebSocket.SendAsync(startBytes, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);
             await player2.PlayerWebSocket.SendAsync(startBytes, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);
-            
+
             // boucle du duel
             while (player1.isAlive() && player2.isAlive())
             {
@@ -746,7 +756,7 @@ namespace DivalityBack.Services
             // avertissement du résultat
             string winnerJson = _utilService.WinnerJson();
             string looserJson = _utilService.LooserJson();
-            
+
             byte[] winnerBytes = Encoding.UTF8.GetBytes(winnerJson);
             byte[] looserBytes = Encoding.UTF8.GetBytes(looserJson);
 
@@ -757,7 +767,7 @@ namespace DivalityBack.Services
                 CancellationToken.None);
             await looserWebSocket.SendAsync(looserBytes, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);
-            
+
             // on les enlève des dictionnaires pour revenir à l'état initial
             mapInFightPlayersCouple.Remove(player1.Username);
             mapInFightPlayersCouple.Remove(player2.Username);
@@ -765,7 +775,8 @@ namespace DivalityBack.Services
             mapPlayerCurrentGodTeam.Remove(player2.Username);
         }
 
-        public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result){
+        public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result)
+        {
             byte[] bytes = Encoding.UTF8.GetBytes("Le joueur n'a pas pu être trouvé, veuillez réessayer");
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
