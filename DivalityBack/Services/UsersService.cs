@@ -274,6 +274,7 @@ namespace DivalityBack.Services
                         if (request != null)
                         {
                             await AcceptFriendRequest(websocket, result, usernameReceiver, usernameSender);
+                            await WarnUserRequestAutomaticallyAccepted(websocket, result, usernameSender); 
                         }
                         else
                         {
@@ -308,6 +309,11 @@ namespace DivalityBack.Services
                 await WarnUserOfUserNotFound(websocket, result);
             }
         }
+
+        private async Task WarnUserRequestAutomaticallyAccepted(WebSocket websocket, WebSocketReceiveResult result, string usernameSender)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Demande automatiquement acceptée");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
 
         private async Task WarnUserOfFriendRequestSent(WebSocket websocket, WebSocketReceiveResult result,
             string senderUsername)
