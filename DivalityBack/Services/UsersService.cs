@@ -391,8 +391,9 @@ namespace DivalityBack.Services
             FriendRequest request = _friendRequestsCrudService.FindBySenderAndReceiver(sender.Id, receiver.Id);
 
             _friendRequestsCrudService.Remove(request);
-
-            await WarnUserOfFriendRequest(websocket, result, usernameSender);
+            
+            //Romain - 02/03/2022 - Fix réponse envoyée au mauvais joueur
+            await WarnUserOfFriendRequest(websocket, result, usernameReceiver);
         }
 
         public async Task DeleteFriend(WebSocket websocket, WebSocketReceiveResult result, string username,
