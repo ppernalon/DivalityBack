@@ -606,13 +606,34 @@ namespace DivalityBack.Services
             }
         }
 
-        public void WaitForDuel(string username)
+        public async Task WaitForDuel(WebSocket webSocket, WebSocketReceiveResult result, string username)
         {
-            if (!(mapQueuePlayersWebsocket.Keys.Contains(username)) &&
-                mapActivePlayersWebsocket.Keys.Contains(username))
+            User user = _usersCRUDService.GetByUsername(username);
+            if (user != null)
             {
-                mapQueuePlayersWebsocket.Add(username, mapActivePlayersWebsocket[username]);
+                if (!user.Teams.Count.Equals(0))
+                {
+                    if (!(mapQueuePlayersWebsocket.Keys.Contains(username)) &&
+                        mapActivePlayersWebsocket.Keys.Contains(username))
+                    {
+                        mapQueuePlayersWebsocket.Add(username, mapActivePlayersWebsocket[username]);
+                    }
+                }
+                else
+                {
+                    await WarnUserNoTeams(webSocket, result);
+                }
             }
+            else
+            {
+                await WarnUserNotFound(webSocket, result); 
+            }
+        }
+
+        private async Task WarnUserNoTeams(WebSocket webSocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur ne possède pas d'équipe");
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         public void CancelWaitForDuel(string username)

@@ -157,7 +157,7 @@ namespace DivalityBack.Services
         private void HandleWaitForDuel(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
-            _usersService.WaitForDuel(username); 
+            _usersService.WaitForDuel(websocket, result, username); 
         }
 
         private async Task HandleDeleteFriend(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
