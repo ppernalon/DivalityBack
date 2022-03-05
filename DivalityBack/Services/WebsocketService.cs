@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -25,90 +26,113 @@ namespace DivalityBack.Services
         }
         
         public async Task HandleMessages(WebSocket websocket){
-            try {
-                using (var ms = new MemoryStream()) {
-                    while (websocket.State == WebSocketState.Open) {
+            try
+            {
+                using (var ms = new MemoryStream())
+                {
+                    while (websocket.State == WebSocketState.Open)
+                    {
                         WebSocketReceiveResult result;
-                        do {
+                        do
+                        {
                             var messageBuffer = WebSocket.CreateClientBuffer(1024, 16);
                             result = await websocket.ReceiveAsync(messageBuffer, CancellationToken.None);
                             ms.Write(messageBuffer.Array, messageBuffer.Offset, result.Count);
-                        }
-                        while (!result.EndOfMessage);
+                        } while (!result.EndOfMessage);
 
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             HandleDeconnection(websocket);
                             await websocket.CloseOutputAsync(
-                                WebSocketCloseStatus.NormalClosure, 
+                                WebSocketCloseStatus.NormalClosure,
                                 string.Empty,
                                 CancellationToken.None
                             );
                         }
-                        
-                        if (result.MessageType == WebSocketMessageType.Text) {
+
+                        if (result.MessageType == WebSocketMessageType.Text)
+                        {
                             JsonDocument msgJson = JsonDocument.Parse(ms.ToArray());
+                            try
+                            {
                             switch (@msgJson.RootElement.GetProperty("type").ToString().Trim())
                             {
                                 case "connection":
-                                    await HandleConnection(websocket, result, msgJson); 
+                                    await HandleConnection(websocket, result, msgJson);
                                     break;
-                                case "pray":
+                                    case "pray":
                                     await HandleGenerateCard(websocket, result, msgJson);
                                     break;
-                                case "collection":
+                                    case "collection":
                                     await HandleCollection(websocket, result, msgJson);
                                     break;
-                                case "auctionHouse":
+                                    case "auctionHouse":
                                     await HandleAuctionHouse(websocket, result, msgJson);
-                                    break; 
-                                case "sellAuctionHouse":
+                                    break;
+                                    case "sellAuctionHouse":
                                     await HandleSellAuctionHouse(websocket, result, msgJson);
-                                    break; 
-                                case "buyAuctionHouse":
+                                    break;
+                                    case "buyAuctionHouse":
                                     await HandleBuyAuctionHouse(websocket, result, msgJson);
                                     break;
-                                case "teams":
+                                    case "teams":
                                     await HandleTeams(websocket, result, msgJson);
-                                    break; 
-                                case "modificationTeam":
+                                    break;
+                                    case "modificationTeam":
                                     await HandleModificationTeam(websocket, result, msgJson);
                                     break;
-                                case "sendFriendRequest":
+                                    case "sendFriendRequest":
                                     await HandleSendFriendRequest(websocket, result, msgJson);
-                                    break; 
-                                case "acceptFriendRequest":
+                                    break;
+                                    case "acceptFriendRequest":
                                     await HandleAcceptFriendRequest(websocket, result, msgJson);
                                     break;
-                                case "refuseFriendRequest":
+                                    case "refuseFriendRequest":
                                     await HandleRefuseFriendRequest(websocket, result, msgJson);
                                     break;
-                                case "deleteFriend":
+                                    case "deleteFriend":
                                     await HandleDeleteFriend(websocket, result, msgJson);
                                     break;
-                                case "waitForDuel":
+                                    case "waitForDuel":
                                     HandleWaitForDuel(websocket, result, msgJson);
                                     break;
-                                case "cancelWaitForDuel":
+                                    case "cancelWaitForDuel":
                                     HandleCancelWaitForDuel(websocket, result, msgJson);
-                                    break; 
-                                case "disciples":
+                                    break;
+                                    case "disciples":
                                     await HandleDisciples(websocket, result, msgJson);
                                     break;
-                                case  "pickTeamForDuel":
+                                    case "pickTeamForDuel":
                                     await PickTeamForDuel(result, msgJson);
                                     break;
-                                case "auctionsByUsername":
+                                    case "auctionsByUsername":
                                     await HandleAuctionsByUsername(websocket, result, msgJson);
-                                    break; 
-                                case "cancelAuction":
-                                    await HandleCancelAuction(websocket, result, msgJson);
-                                    break; 
-                                default:
-                                    await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
                                     break;
+                                    case "cancelAuction":
+                                    await HandleCancelAuction(websocket, result, msgJson);
+                                    break;
+                                    case "challengeFriend":
+                                    await HandleChallengeFriend(websocket, result, msgJson);
+                                    break;
+                                    case "cancelChallenge":
+                                    await HandleCancelChallenge(websocket, result, msgJson);
+                                    break;
+                                    case "refuseChallenge":
+                                    await HandleRefuseChallenge(websocket, result, msgJson);
+                                    break;
+                                    default:
+                                    await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true,
+                                        CancellationToken.None);
+                                    break;
+                                }
+                            }
+                            catch (KeyNotFoundException e)
+                            {
+                                Console.WriteLine("ERREUR WS: Message incorrect");
+                                Console.WriteLine("Message reçu : " + JsonSerializer.Serialize(msgJson));
                             }
                         }
+
                         ms.SetLength(0);
                         ms.Seek(0, SeekOrigin.Begin);
                         ms.Position = 0;
@@ -119,9 +143,34 @@ namespace DivalityBack.Services
                         HandleDeconnection(websocket);
                     }
                 }
-            } catch (InvalidOperationException e) {
+            }
+            catch (InvalidOperationException e)
+            {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+           
+        }
+
+        private async Task HandleRefuseChallenge(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String usernameChallenged = msgJson.RootElement.GetProperty("usernameToChallenge").ToString();
+            await _usersService.RefuseChallenge(websocket, result, username, usernameChallenged); 
+        }
+
+        private async Task HandleCancelChallenge(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String usernameToChallenge = msgJson.RootElement.GetProperty("usernameToChallenge").ToString();
+            await _usersService.CancelChallenge(websocket, result, username, usernameToChallenge);
+
+        }
+
+        private async Task HandleChallengeFriend(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            String usernameToChallenge = msgJson.RootElement.GetProperty("usernameToChallenge").ToString();
+            await _usersService.ChallengeFriend(websocket, result, username, usernameToChallenge);
         }
 
         private async Task HandleCancelAuction(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

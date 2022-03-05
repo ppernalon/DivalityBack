@@ -347,5 +347,32 @@ namespace DivalityBack.Services
             string jsonString = JsonSerializer.Serialize(dictRes);
             return jsonString;
         }
+
+        public String ChallengeToJson(string username)
+        {
+            Dictionary<String, Object> dictChallenge = new Dictionary<string, object>();
+            dictChallenge.Add("type", "challenge");
+            dictChallenge.Add("username", username);
+            string jsonString = JsonSerializer.Serialize(dictChallenge);
+            return jsonString; 
+        }
+
+        public String ChallengeCancelledToJson(string username)
+        {
+            Dictionary<String, Object> dictChallengeCancelled = new Dictionary<string, object>();
+            dictChallengeCancelled.Add("type", "challengeCancelled");
+            dictChallengeCancelled.Add("username", username);
+            string jsonString = JsonSerializer.Serialize(dictChallengeCancelled);
+            return jsonString; 
+        }
+
+        public String ChallengeRefusedToJson(string usernameChallenged)
+        {
+            Dictionary<String, Object> dictChallengeCancelled = new Dictionary<string, object>();
+            dictChallengeCancelled.Add("type", "challengeRefused");
+            dictChallengeCancelled.Add("usernameChallenged", usernameChallenged);
+            string jsonString = JsonSerializer.Serialize(dictChallengeCancelled);
+            return jsonString;
+        }
     }
 }

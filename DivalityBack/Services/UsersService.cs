@@ -796,6 +796,92 @@ namespace DivalityBack.Services
             byte[] bytes = Encoding.UTF8.GetBytes("Le joueur n'a pas pu être trouvé, veuillez réessayer");
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
+
+        public async Task ChallengeFriend(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameToChallenge)
+        {
+            //On vérifie que le joueur est connecté
+            if (!mapActivePlayersWebsocket.ContainsKey(usernameToChallenge))
+            {
+                await WarnUserNotConnected(websocket, result);
+            }
+            //On verifie que le joueur n'est pas dans la file d'attente ou en combat
+            else if (mapInFightPlayersCouple.ContainsKey(usernameToChallenge) || mapQueuePlayersWebsocket.ContainsKey(usernameToChallenge))
+            {
+                await WarnUserAlreadyInDuel(websocket, result);
+            }
+            else
+            {
+                WebSocket wsFriend = mapActivePlayersWebsocket[usernameToChallenge];
+                await WarnFriendOfChallenge(wsFriend, result, username);
+                await WarnOfFriendChallenged(websocket, result); 
+            }
+        }
+
+        private async Task WarnOfFriendChallenged(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur a été défié");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+        }
+
+        private async Task WarnUserAlreadyInDuel(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur est déjà en combat");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        private async Task WarnFriendOfChallenge(WebSocket webSocket, WebSocketReceiveResult result, string username)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeToJson(username));
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        public async Task WarnUserNotConnected(WebSocket webSocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur n'est pas connecté");
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        public async Task CancelChallenge(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameToChallenge)
+        {
+            WebSocket wsFriend = mapActivePlayersWebsocket[usernameToChallenge];
+            await WarnFriendOfChallengeCancelled(wsFriend, result, username);
+            await WarnOfFriendChallengedCancelled(websocket, result);
+        }
+
+        private async Task WarnOfFriendChallengedCancelled(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Challenge cancelled");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
+
+        private async Task WarnFriendOfChallengeCancelled(WebSocket webSocket, WebSocketReceiveResult result, string username)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeCancelledToJson(username));
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        public async Task RefuseChallenge(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
+        {
+            if (mapActivePlayersWebsocket.ContainsKey(username))
+            {
+                WebSocket ws = mapActivePlayersWebsocket[username];
+                await WarnFriendOfChallengeRefused(ws, result, username, usernameChallenged);
+                
+            }
+            await WarnOfChallengeRefused(websocket, result, username, usernameChallenged); 
+        }
+
+        private async Task WarnFriendOfChallengeRefused(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeRefusedToJson(usernameChallenged));
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);       
+        }
+        
+        private async Task WarnOfChallengeRefused(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Challenge refused");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        
+        }     
     }
 }
 
