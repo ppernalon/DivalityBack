@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Models.Gods;
 using DivalityBack.Services.CRUD;
+using MongoDB.Driver.Core.Authentication;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DivalityBack.Services
@@ -842,10 +843,10 @@ namespace DivalityBack.Services
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
-        public async Task CancelChallenge(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameToChallenge)
+        public async Task CancelChallenge(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
         {
-            WebSocket wsFriend = mapActivePlayersWebsocket[usernameToChallenge];
-            await WarnFriendOfChallengeCancelled(wsFriend, result, username);
+            WebSocket wsFriend = mapActivePlayersWebsocket[usernameChallenged];
+            await WarnFriendOfChallengeCancelled(wsFriend, result, username, usernameChallenged);
             await WarnOfFriendChallengedCancelled(websocket, result);
         }
 
@@ -854,9 +855,9 @@ namespace DivalityBack.Services
             byte[] bytes = Encoding.UTF8.GetBytes("Challenge cancelled");
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
 
-        private async Task WarnFriendOfChallengeCancelled(WebSocket webSocket, WebSocketReceiveResult result, string username)
+        private async Task WarnFriendOfChallengeCancelled(WebSocket webSocket, WebSocketReceiveResult result, string username, String usernameChallenge)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeCancelledToJson(username));
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeCancelledToJson(username, usernameChallenge));
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -873,7 +874,7 @@ namespace DivalityBack.Services
 
         private async Task WarnFriendOfChallengeRefused(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeRefusedToJson(usernameChallenged));
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeRefusedToJson(username, usernameChallenged));
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);       
         }
         
@@ -881,7 +882,30 @@ namespace DivalityBack.Services
         {
             byte[] bytes = Encoding.UTF8.GetBytes("Challenge refused");
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        
-        }     
+        }
+
+        public async Task AcceptChallenge(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
+        {
+            mapInFightPlayersCouple.Add(username, usernameChallenged);
+            mapInFightPlayersCouple.Add(usernameChallenged, username);
+
+            WebSocket ws = mapActivePlayersWebsocket[username];
+
+            await WarnFriendOfChallengeAccepted(ws, result, username, usernameChallenged);
+            await WarnChallengeAccepted(websocket, result);
+        }
+
+        private async Task WarnFriendOfChallengeAccepted(WebSocket webSocket, WebSocketReceiveResult result, String username, String usernameChallenged)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.ChallengeAcceptedToJson(username, usernameChallenged));
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+        
+        private async Task WarnChallengeAccepted(WebSocket webSocket, WebSocketReceiveResult result)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes("Challenge accepted");
+            await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
     }
 }
 
