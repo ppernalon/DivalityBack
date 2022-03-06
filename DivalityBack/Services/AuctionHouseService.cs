@@ -90,7 +90,7 @@ namespace DivalityBack.Services
             User user = _usersCrudService.GetByUsername(username);
             User owner = _usersCrudService.GetByUsername(ownerName);
 
-            if (!(user.Disciples < int.Parse(price)))
+            if (!(user.Disciples < int.Parse(price) * int.Parse(quantity)))
             {
                 List<AuctionHouse> auctions =
                     _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice(card.Id, owner.Id, price);
