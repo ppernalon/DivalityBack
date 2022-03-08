@@ -332,6 +332,7 @@ namespace DivalityBack.Services
             }
             dictRes.Add(firstPlayer.Username, listGods);        
     
+            listGods = new List<Dictionary<string, object>>();
             // second player initial state
             for (int index = 0; index < secondPlayer.GodTeam.AllGods.Length; index++)
             {
