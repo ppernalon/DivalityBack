@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Models.Gods;
 using DivalityBack.Services.CRUD;
-using MongoDB.Driver.Core.Authentication;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DivalityBack.Services

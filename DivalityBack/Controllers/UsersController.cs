@@ -33,6 +33,27 @@ namespace DivalityBack.Controllers
             return Ok();
         }
 
+        [HttpPost("changePassword")]
+        public ActionResult<User> ChangePassword([FromBody] JsonElement userJson)
+        {
+            User user = _usersCRUDService.GetByUsername(userJson.GetProperty("username").ToString());
+            if (user == null)
+            {
+                return NoContent();
+            }
+
+            user = _usersCRUDService.GetByUsernameAndPassword(userJson.GetProperty("username").ToString(),
+                _usersService.HashPassword(userJson.GetProperty("oldPassword").ToString()));
+            if (user == null)
+            {
+                return Unauthorized("Mot de passe incorrect");
+            }
+
+            user.Password = _usersService.HashPassword(userJson.GetProperty("newPassword").ToString());
+            _usersCRUDService.Update(user.Id, user);
+            return Ok();
+        }
+
         [HttpGet("signin/{username}/{password}")]
         public ActionResult<JsonDocument> GetByUsername([FromRoute] String username, [FromRoute] String password)
         { 
