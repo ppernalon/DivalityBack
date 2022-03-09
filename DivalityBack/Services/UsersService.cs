@@ -906,6 +906,31 @@ namespace DivalityBack.Services
             byte[] bytes = Encoding.UTF8.GetBytes("Challenge accepted");
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
+
+        public async Task GetRanking(WebSocket websocket, WebSocketReceiveResult result)
+        {
+            List<Dictionary<String, Object>> ranking = new List<Dictionary<string, object>>();
+            List<User> users = _usersCRUDService.Get();
+            // On trie les users en fonction de leur winrate et en cas d'égalité en fonction du nombre de victoire
+            List<User> sortedUsers = users.OrderByDescending(u =>((float)u.Victory/(u.Victory + u.Defeat + 1))).ThenByDescending(u => u.Victory).ToList();
+            
+            foreach (var user in sortedUsers)
+            {
+                ranking.Add(new Dictionary<string, object>());
+                ranking[ranking.Count - 1].Add("username",user.Username);
+                ranking[ranking.Count - 1].Add("victory", user.Victory);
+                ranking[ranking.Count - 1].Add("defeat", user.Defeat);
+                ranking[ranking.Count - 1].Add("ranking", sortedUsers.IndexOf(user) + 1);
+            }
+
+            await WarnRanking(websocket, result, ranking);
+        }
+
+        private async Task WarnRanking(WebSocket websocket, WebSocketReceiveResult result, List<Dictionary<string, object>> ranking)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.RankingToJson(ranking));
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
     }
 }
 

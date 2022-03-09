@@ -387,5 +387,14 @@ namespace DivalityBack.Services
             string jsonString = JsonSerializer.Serialize(dictChallengeCancelled);
             return jsonString;
         }
+
+        public String RankingToJson(List<Dictionary<string, object>> ranking)
+        {
+            Dictionary<String, Object> dictRanking = new Dictionary<string, object>();
+            dictRanking.Add("type", "ranking");
+            dictRanking.Add("dataRanking", ranking);
+            string jsonString = JsonSerializer.Serialize(dictRanking);
+            return jsonString; 
+        }
     }
 }
