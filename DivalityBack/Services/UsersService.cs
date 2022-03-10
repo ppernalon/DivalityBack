@@ -930,6 +930,26 @@ namespace DivalityBack.Services
             byte[] bytes = Encoding.UTF8.GetBytes(_utilService.RankingToJson(ranking));
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
+
+        public async Task GetInfoWinRate(WebSocket websocket, WebSocketReceiveResult result, string username)
+        {
+            User user = _usersCRUDService.GetByUsername(username);
+            if (user == null)
+            {
+                await WarnUserNotFound(websocket, result); 
+            }
+            else
+            {
+                String jsonInfoWinRate = _utilService.GetInfoWinRate(user);
+                await WarnUserInfoPlayer(websocket, result, jsonInfoWinRate); 
+            }
+        }
+
+        private async Task WarnUserInfoPlayer(WebSocket websocket, WebSocketReceiveResult result, string jsonInfoPlayer)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonInfoPlayer);
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
     }
 }
 

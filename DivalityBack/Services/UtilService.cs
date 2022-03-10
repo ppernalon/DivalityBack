@@ -396,5 +396,16 @@ namespace DivalityBack.Services
             string jsonString = JsonSerializer.Serialize(dictRanking);
             return jsonString; 
         }
+
+        public string GetInfoWinRate(User user)
+        {
+            Dictionary<String, Object> dictInfoWinRate = new Dictionary<string, object>();
+            dictInfoWinRate.Add("type","infoWinRate");
+            dictInfoWinRate.Add("username", user.Username);
+            dictInfoWinRate.Add("victory",user.Victory);
+            dictInfoWinRate.Add("defeat", user.Defeat);
+            string jsonString = JsonSerializer.Serialize(dictInfoWinRate);
+            return jsonString;
+        }
     }
 }

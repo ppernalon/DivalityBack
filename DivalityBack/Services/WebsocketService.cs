@@ -128,6 +128,9 @@ namespace DivalityBack.Services
                                     case "ranking":
                                         await HandleRanking(websocket, result, msgJson);
                                         break; 
+                                    case "infoWinRate":
+                                        await HandleInfoWinRate(websocket, result, msgJson);
+                                        break; 
                                     default:
                                         await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true,
                                             CancellationToken.None);
@@ -156,6 +159,12 @@ namespace DivalityBack.Services
             {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleInfoWinRate(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            await _usersService.GetInfoWinRate(websocket, result, username); 
         }
 
         private async Task HandleRanking(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
