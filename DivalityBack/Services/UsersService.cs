@@ -28,7 +28,7 @@ namespace DivalityBack.Services
         public Dictionary<String, WebSocket> mapQueuePlayersWebsocket = new Dictionary<String, WebSocket>();
         public Dictionary<String, String> mapInFightPlayersCouple = new Dictionary<String, String>();
         public Dictionary<String, int> mapPlayerCurrentGodTeam = new Dictionary<String, int>();
-
+        public Dictionary<WebSocket, DateTime> mapWsLastMessage = new Dictionary<WebSocket, DateTime>(); 
         public UsersService(BackgroundWorkerQueue backgroundWorkerQueue, UsersCRUDService usersCRUDService,
             CardsCRUDService cardsCrudService, FriendRequestsCRUDService friendRequestsCrudService,
             CardsService cardsService, UtilServices utilService)
@@ -449,8 +449,23 @@ namespace DivalityBack.Services
                 {
                     await Task.Delay(5000);
                     await Matchmaking();
+                    await TimeoutInactiveUsers();
                 }
             });
+        }
+
+        private async Task TimeoutInactiveUsers()
+        {
+            //Pour chaque WS active
+            foreach (var wsDate in mapWsLastMessage)
+            {
+                //Si le dernier message date d'il y a 20 minutes ou plus
+                if(wsDate.Value.CompareTo(DateTime.Now.AddMinutes(-20)) < 0)
+                {
+                    //On passe la WS à Closed 
+                    await wsDate.Key.CloseAsync(WebSocketCloseStatus.NormalClosure, "Timeout", CancellationToken.None); 
+                }
+            }
         }
 
         private async Task Matchmaking()

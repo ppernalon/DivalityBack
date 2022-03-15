@@ -45,15 +45,20 @@ namespace DivalityBack.Services
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             HandleDeconnection(websocket);
-                            await websocket.CloseOutputAsync(
-                                WebSocketCloseStatus.NormalClosure,
-                                string.Empty,
-                                CancellationToken.None
-                            );
                         }
 
                         if (result.MessageType == WebSocketMessageType.Text)
                         {
+                            //On update la map qui recense la date du dernier message reçu par chaque WS active
+                            if (_usersService.mapWsLastMessage.ContainsKey(websocket))
+                            {
+                                _usersService.mapWsLastMessage[websocket] = DateTime.Now;
+                            }
+                            else
+                            {
+                                _usersService.mapWsLastMessage.Add(websocket, DateTime.Now);
+                            }
+                            
                             JsonDocument msgJson = JsonDocument.Parse(ms.ToArray());
                             try
                             {
@@ -367,6 +372,9 @@ namespace DivalityBack.Services
                 {
                     _usersService.mapQueuePlayersWebsocket.Remove(keyValuePair.Key);
                 }
+                //On enlève les WS qui ont été supprimées 
+                _usersService.mapWsLastMessage = new Dictionary<WebSocket, DateTime>(_usersService.mapWsLastMessage.Where(kvp => _usersService.mapActivePlayersWebsocket.Values.Contains(kvp.Key))); 
+
             }
         }
 
