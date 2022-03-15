@@ -12,7 +12,8 @@ namespace DivalityBack.Services
 {
     public class CardsService
     {
-        private readonly CardsCRUDService _cardsCrudService; 
+        private readonly CardsCRUDService _cardsCrudService;
+        private readonly UtilServices _utilServices; 
         
         private Dictionary<String, int> mapRarityPurcentage = new Dictionary<String,int>()
         {
@@ -23,9 +24,10 @@ namespace DivalityBack.Services
 
         public int priceOfCard = 10; 
         
-        public CardsService(CardsCRUDService cardsCrudService)
+        public CardsService(CardsCRUDService cardsCrudService, UtilServices utilServices)
         {
-            _cardsCrudService = cardsCrudService; 
+            _cardsCrudService = cardsCrudService;
+            _utilServices = utilServices; 
         }
 
         public String GenerateRarity()
@@ -64,6 +66,26 @@ namespace DivalityBack.Services
         public async Task WarnCardNotFound(WebSocket websocket, WebSocketReceiveResult result)
         {
             byte[] bytes = Encoding.UTF8.GetBytes("La carte n'a pas pu être trouvée, veuillez réessayer");
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        public async Task GetCard(WebSocket websocket, WebSocketReceiveResult result, string cardName)
+        {
+            Card card = _cardsCrudService.GetCardByName(cardName);
+            if (card == null)
+            {
+                await WarnCardNotFound(websocket, result);
+            }
+            else
+            {
+                String jsonCard = _utilServices.CardToJson(card);
+                await WarnCard(websocket, result, jsonCard); 
+            }
+        }
+
+        private async Task WarnCard(WebSocket websocket, WebSocketReceiveResult result, string jsonCard)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonCard);
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
     }

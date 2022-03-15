@@ -131,6 +131,9 @@ namespace DivalityBack.Services
                                     case "infoWinRate":
                                         await HandleInfoWinRate(websocket, result, msgJson);
                                         break; 
+                                    case "card" :
+                                        await HandleGetCard(websocket, result, msgJson);
+                                        break; 
                                     default:
                                         await websocket.SendAsync(Encoding.UTF8.GetBytes("Erreur WS : Message inconnu"), WebSocketMessageType.Text, true,
                                             CancellationToken.None);
@@ -159,6 +162,12 @@ namespace DivalityBack.Services
             {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandleGetCard(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String cardName = msgJson.RootElement.GetProperty("cardName").ToString();
+            await _cardsService.GetCard(websocket, result, cardName); 
         }
 
         private async Task HandleInfoWinRate(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

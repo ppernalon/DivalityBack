@@ -75,6 +75,7 @@ namespace DivalityBack.Services
             dictRes.Add("isLimited", card.isLimited);
             dictRes.Add("distributed", card.Distributed);
             dictRes.Add("available", card.Available);
+            dictRes.Add("description", card.Description);
 
             
             string jsonString = JsonSerializer.Serialize(dictRes);

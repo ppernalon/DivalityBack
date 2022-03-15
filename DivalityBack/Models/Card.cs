@@ -25,5 +25,6 @@ namespace DivalityBack.Models
         public bool isLimited { get; set; }
         public int Distributed { get; set; }
         public int Available { get; set; }
+        public string Description { get; set; }
     }
 }
