@@ -132,7 +132,7 @@ namespace DivalityBack.Services
                                         await HandleInfoWinRate(websocket, result, msgJson);
                                         break; 
                                     default:
-                                        await websocket.SendAsync(ms.ToArray(), WebSocketMessageType.Text, true,
+                                        await websocket.SendAsync(Encoding.UTF8.GetBytes("Erreur WS : Message inconnu"), WebSocketMessageType.Text, true,
                                             CancellationToken.None);
                                         break;
                                 }
@@ -164,6 +164,7 @@ namespace DivalityBack.Services
         private async Task HandleInfoWinRate(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
+            Console.WriteLine("ok");
             await _usersService.GetInfoWinRate(websocket, result, username); 
         }
 
