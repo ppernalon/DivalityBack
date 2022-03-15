@@ -164,7 +164,6 @@ namespace DivalityBack.Services
         private async Task HandleInfoWinRate(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
         {
             String username = msgJson.RootElement.GetProperty("username").ToString();
-            Console.WriteLine("ok");
             await _usersService.GetInfoWinRate(websocket, result, username); 
         }
 
