@@ -274,7 +274,7 @@ namespace DivalityBack.Services
                         if (request != null)
                         {
                             await AcceptFriendRequest(websocket, result, usernameReceiver, usernameSender);
-                            await WarnUserRequestAutomaticallyAccepted(websocket, result, usernameSender); 
+                            await WarnUserRequestAutomaticallyAccepted(websocket, result, usernameSender);
                         }
                         else
                         {
