@@ -114,14 +114,14 @@ namespace DivalityBack.Services
                 }
                 else
                 {
-                    string messageErreur = "La quantité demandée est supérieure à la quantité mise en vente";
+                    string messageErreur = _utilServices.NotEnoughCardToJson();
                     await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
                         result.EndOfMessage, CancellationToken.None);
                 }
             }
             else
                 {
-                    string messageErreur = "L'utilisateur ne possède pas assez de disciples";
+                    string messageErreur = _utilServices.NotEnoughDisciplesToJson();
                     await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
                         result.EndOfMessage, CancellationToken.None);
                 }
