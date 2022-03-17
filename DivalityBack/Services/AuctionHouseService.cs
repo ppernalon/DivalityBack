@@ -78,8 +78,8 @@ namespace DivalityBack.Services
             }
             else
             {
-                string messageErreur = "L'utilisateur ne possède pas assez d'exemplaires de cette carte";
-                await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
+                string messageErreur = _utilServices.NotEnoughCardToJson();
+                await websocket.SendAsync(Encoding.UTF8.GetBytes(_utilServices.NotEnoughCardToJson()), result.MessageType,
                     result.EndOfMessage, CancellationToken.None); 
             }
         }

@@ -408,5 +408,143 @@ namespace DivalityBack.Services
             string jsonString = JsonSerializer.Serialize(dictInfoWinRate);
             return jsonString;
         }
+
+        public string UserNoTeamToJson()
+        {
+            Dictionary<String, Object> dictUserNoTeam = new Dictionary<string, object>();
+            dictUserNoTeam.Add("type", "noTeam");
+            dictUserNoTeam.Add("info", "noTeam");
+            string jsonString = JsonSerializer.Serialize(dictUserNoTeam);
+            return jsonString;
+        }
+
+        public string UserNotFoundToJson()
+        {
+            Dictionary<String, Object> dictUserNotFound = new Dictionary<string, object>();
+            dictUserNotFound.Add("type", "userNotFound");
+            dictUserNotFound.Add("info", "userNotFound");
+            string jsonString = JsonSerializer.Serialize(dictUserNotFound);
+            return jsonString;
+        }
+
+
+        public string FriendChallengedToJson()
+        {
+            Dictionary<String, Object> dictFriendChallenged = new Dictionary<string, object>();
+            dictFriendChallenged.Add("type", "friendChallenged");
+            dictFriendChallenged.Add("info", "friendChallenged");
+            string jsonString = JsonSerializer.Serialize(dictFriendChallenged);
+            return jsonString;
+        }
+
+        public string UserAlreadyInDuelToJson()
+        {
+            Dictionary<String, Object> dictUserAlreadyInDuel = new Dictionary<string, object>();
+            dictUserAlreadyInDuel.Add("type", "userAlreadyInDuel");
+            dictUserAlreadyInDuel.Add("info", "userAlreadyInDuel");
+            string jsonString = JsonSerializer.Serialize(dictUserAlreadyInDuel);
+            return jsonString;
+        }
+
+
+        public string MessageChallengeAcceptedToJson()
+        {
+            Dictionary<String, Object> dictMessageChallengeAccepted = new Dictionary<string, object>();
+            dictMessageChallengeAccepted.Add("type", "challengeAccepted");
+            dictMessageChallengeAccepted.Add("info", "challengeAccepted");
+            string jsonString = JsonSerializer.Serialize(dictMessageChallengeAccepted);
+            return jsonString;
+        }
+
+        public string MessageChallengeRefusedToJson()
+        {
+            Dictionary<String, Object> dictMessageChallengeRefused = new Dictionary<string, object>();
+            dictMessageChallengeRefused.Add("type", "challengeRefused");
+            dictMessageChallengeRefused.Add("info", "challengeRefused");
+            string jsonString = JsonSerializer.Serialize(dictMessageChallengeRefused);
+            return jsonString;
+        }
+
+        public string MessageChallengeCanceledToJson()
+        {
+            Dictionary<String, Object> dictMessageChallengeCanceled = new Dictionary<string, object>();
+            dictMessageChallengeCanceled.Add("type", "challengeCanceled");
+            dictMessageChallengeCanceled.Add("info", "challengeCanceled");
+            string jsonString = JsonSerializer.Serialize(dictMessageChallengeCanceled);
+            return jsonString;
+        }
+
+        public string UserNotConnectedToJson()
+        {
+            Dictionary<String, Object> dictUserNotConnected = new Dictionary<string, object>();
+            dictUserNotConnected.Add("type", "userNotConnected");
+            dictUserNotConnected.Add("info", "userNotConnected");
+            string jsonString = JsonSerializer.Serialize(dictUserNotConnected);
+            return jsonString;
+        }
+
+        public string NotEnoughCardToJson()
+        {
+            Dictionary<String, Object> dictNotEnoughCard = new Dictionary<string, object>();
+            dictNotEnoughCard.Add("type", "notEnoughCard");
+            dictNotEnoughCard.Add("info", "notEnoughCard");
+            string jsonString = JsonSerializer.Serialize(dictNotEnoughCard);
+            return jsonString;
+        }
+
+        public string RequestAutomaticallyAcceptedToJson()
+        {
+            Dictionary<String, Object> dictRequestAutomaticallyAccepted = new Dictionary<string, object>();
+            dictRequestAutomaticallyAccepted.Add("type", "requestAutomaticallyAccepted");
+            dictRequestAutomaticallyAccepted.Add("info", "requestAutomaticallyAccepted");
+            string jsonString = JsonSerializer.Serialize(dictRequestAutomaticallyAccepted);
+            return jsonString;
+        }
+
+
+        public string RequestSentToJson()
+        {
+            Dictionary<String, Object> dictRequestSent = new Dictionary<string, object>();
+            dictRequestSent.Add("type", "requestSent");
+            dictRequestSent.Add("info", "requestSent");
+            string jsonString = JsonSerializer.Serialize(dictRequestSent);
+            return jsonString;
+        }
+
+        public string AlreadyFriendToJson()
+        {
+            Dictionary<String, Object> dictAlreadyFriend = new Dictionary<string, object>();
+            dictAlreadyFriend.Add("type", "alreadyFriend");
+            dictAlreadyFriend.Add("info", "alreadyFriend");
+            string jsonString = JsonSerializer.Serialize(dictAlreadyFriend);
+            return jsonString;
+        }
+
+        public string RequestAlreadySentToJson()
+        {
+            Dictionary<String, Object> dictRequestAlreadySent = new Dictionary<string, object>();
+            dictRequestAlreadySent.Add("type", "requestAlreadySent");
+            dictRequestAlreadySent.Add("info", "requestAlreadySent");
+            string jsonString = JsonSerializer.Serialize(dictRequestAlreadySent);
+            return jsonString;
+        }
+
+        public string UserAlreadyConnectedToJson()
+        {
+            Dictionary<String, Object> dictUserAlreadyConnected = new Dictionary<string, object>();
+            dictUserAlreadyConnected.Add("type", "userAlreadyConnected");
+            dictUserAlreadyConnected.Add("info", "userAlreadyConnected");
+            string jsonString = JsonSerializer.Serialize(dictUserAlreadyConnected);
+            return jsonString;
+        }
+
+        public string CardNotFoundToJson()
+        {
+            Dictionary<String, Object> dictCardNotFound = new Dictionary<string, object>();
+            dictCardNotFound.Add("type", "cardNotFound");
+            dictCardNotFound.Add("info", "cardNotFound");
+            string jsonString = JsonSerializer.Serialize(dictCardNotFound);
+            return jsonString;
+        }
     }
 }

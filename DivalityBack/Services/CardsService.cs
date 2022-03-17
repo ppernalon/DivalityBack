@@ -65,7 +65,7 @@ namespace DivalityBack.Services
 
         public async Task WarnCardNotFound(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("La carte n'a pas pu être trouvée, veuillez réessayer");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilServices.CardNotFoundToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 

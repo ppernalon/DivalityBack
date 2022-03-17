@@ -312,34 +312,34 @@ namespace DivalityBack.Services
 
         private async Task WarnUserRequestAutomaticallyAccepted(WebSocket websocket, WebSocketReceiveResult result, string usernameSender)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Demande automatiquement acceptée");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.RequestAutomaticallyAcceptedToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
 
         private async Task WarnUserOfFriendRequestSent(WebSocket websocket, WebSocketReceiveResult result,
             string senderUsername)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("La demande a bien été effectuée");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.RequestSentToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
         private async Task WarnUserAlreadyFriend(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Vous êtes déjà ami avec ce joueur");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.AlreadyFriendToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
         private async Task WarnUserOfUserNotFound(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Joueur introuvable");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.UserNotFoundToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
         private async Task WarnUserOfFriendRequestAlreadyExisting(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Vous avez déjà envoyé une requête d'ami à cette personne");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.RequestAlreadySentToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -437,7 +437,7 @@ namespace DivalityBack.Services
         [ExcludeFromCodeCoverage]
         public async Task WarnUseAlreadyConnected(WebSocket webSocket, WebSocketReceiveResult result, string username)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Le compte " + username + " est déjà connecté");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.UserAlreadyConnectedToJson());
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -674,7 +674,7 @@ namespace DivalityBack.Services
 
         private async Task WarnUserNoTeams(WebSocket webSocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur ne possède pas d'équipe");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.UserNoTeamToJson());
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -811,7 +811,7 @@ namespace DivalityBack.Services
 
         public async Task WarnUserNotFound(WebSocket webSocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur n'a pas pu être trouvé, veuillez réessayer");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.UserNotFoundToJson());
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -837,14 +837,14 @@ namespace DivalityBack.Services
 
         private async Task WarnOfFriendChallenged(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur a été défié");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.FriendChallengedToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
 
         }
 
         private async Task WarnUserAlreadyInDuel(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur est déjà en combat");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.UserAlreadyInDuelToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -856,7 +856,7 @@ namespace DivalityBack.Services
 
         public async Task WarnUserNotConnected(WebSocket webSocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Le joueur n'est pas connecté");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.UserNotConnectedToJson());
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
@@ -869,7 +869,7 @@ namespace DivalityBack.Services
 
         private async Task WarnOfFriendChallengedCancelled(WebSocket websocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Challenge cancelled");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.MessageChallengeCanceledToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        }
 
         private async Task WarnFriendOfChallengeCancelled(WebSocket webSocket, WebSocketReceiveResult result, string username, String usernameChallenge)
@@ -897,7 +897,7 @@ namespace DivalityBack.Services
         
         private async Task WarnOfChallengeRefused(WebSocket websocket, WebSocketReceiveResult result, string username, string usernameChallenged)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Challenge refused");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.MessageChallengeRefusedToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);        
         }
 
@@ -920,7 +920,7 @@ namespace DivalityBack.Services
         
         private async Task WarnChallengeAccepted(WebSocket webSocket, WebSocketReceiveResult result)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes("Challenge accepted");
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.MessageChallengeAcceptedToJson());
             await webSocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
 
