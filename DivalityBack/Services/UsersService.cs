@@ -113,7 +113,7 @@ namespace DivalityBack.Services
         [ExcludeFromCodeCoverage]
         private async Task WarnUserNotEnoughDisciples(WebSocket webSocket, WebSocketReceiveResult result)
         {
-            byte[] byteNotEnoughDisciples = Encoding.UTF8.GetBytes("L'utilisateur ne possède pas assez de disciples");
+            byte[] byteNotEnoughDisciples = Encoding.UTF8.GetBytes(_utilService.NotEnoughDisciplesToJson());
             await webSocket.SendAsync(byteNotEnoughDisciples, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);
         }

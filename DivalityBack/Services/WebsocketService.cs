@@ -17,13 +17,15 @@ namespace DivalityBack.Services
         private readonly UsersService _usersService;
         private readonly CardsService _cardsService;
         private readonly AuctionHouseService _auctionHouseService;
+        private readonly UtilServices _utilServices; 
 
         public WebsocketService(UsersService usersService, CardsService cardsService,
-            AuctionHouseService auctionHouseService)
+            AuctionHouseService auctionHouseService, UtilServices utilServices)
         {
             _usersService = usersService;
             _cardsService = cardsService;
             _auctionHouseService = auctionHouseService;
+            _utilServices = utilServices; 
         }
 
         public async Task HandleMessages(WebSocket websocket)
@@ -140,7 +142,7 @@ namespace DivalityBack.Services
                                         await HandleGetCard(websocket, result, msgJson);
                                         break; 
                                     default:
-                                        await websocket.SendAsync(Encoding.UTF8.GetBytes("Erreur WS : Message inconnu"), WebSocketMessageType.Text, true,
+                                        await websocket.SendAsync(Encoding.UTF8.GetBytes(_utilServices.ErrorWebsocketToJson()), WebSocketMessageType.Text, true,
                                             CancellationToken.None);
                                         break;
                                 }

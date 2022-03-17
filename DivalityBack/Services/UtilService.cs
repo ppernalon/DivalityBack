@@ -546,5 +546,23 @@ namespace DivalityBack.Services
             string jsonString = JsonSerializer.Serialize(dictCardNotFound);
             return jsonString;
         }
+
+        public string NotEnoughDisciplesToJson()
+        {
+            Dictionary<String, Object> dictNotEnoughDisciples = new Dictionary<string, object>();
+            dictNotEnoughDisciples.Add("type", "notEnoughDisciples");
+            dictNotEnoughDisciples.Add("info", "notEnoughDisciples");
+            string jsonString = JsonSerializer.Serialize(dictNotEnoughDisciples);
+            return jsonString;
+        }
+
+        public string ErrorWebsocketToJson()
+        {
+            Dictionary<String, Object> dictErrorWebsocket = new Dictionary<string, object>();
+            dictErrorWebsocket.Add("type", "errorWebsocket");
+            dictErrorWebsocket.Add("info", "errorWebsocket");
+            string jsonString = JsonSerializer.Serialize(dictErrorWebsocket);
+            return jsonString;
+        }
     }
 }
