@@ -141,6 +141,9 @@ namespace DivalityBack.Services
                                     case "card" :
                                         await HandleGetCard(websocket, result, msgJson);
                                         break; 
+                                     case "ping":
+                                         await HandlePing(websocket, result, msgJson);
+                                         break; 
                                     default:
                                         await websocket.SendAsync(Encoding.UTF8.GetBytes(_utilServices.ErrorWebsocketToJson()), WebSocketMessageType.Text, true,
                                             CancellationToken.None);
@@ -169,6 +172,12 @@ namespace DivalityBack.Services
             {
                 Console.Write("ERREUR WS: " + e.Message);
             }
+        }
+
+        private async Task HandlePing(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)
+        {
+            String username = msgJson.RootElement.GetProperty("username").ToString();
+            await _usersService.Pong(websocket, result, username);
         }
 
         private async Task HandleGetCard(WebSocket websocket, WebSocketReceiveResult result, JsonDocument msgJson)

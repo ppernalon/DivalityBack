@@ -564,5 +564,13 @@ namespace DivalityBack.Services
             string jsonString = JsonSerializer.Serialize(dictErrorWebsocket);
             return jsonString;
         }
+
+        public string PongToJson()
+        {
+            Dictionary<String, Object> dictPong = new Dictionary<string, object>();
+            dictPong.Add("type", "pong");
+            string jsonString = JsonSerializer.Serialize(dictPong);
+            return jsonString;
+        }
     }
 }

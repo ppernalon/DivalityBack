@@ -459,8 +459,8 @@ namespace DivalityBack.Services
             //Pour chaque WS active
             foreach (var wsDate in mapWsLastMessage)
             {
-                //Si le dernier message date d'il y a 20 minutes ou plus
-                if(wsDate.Value.CompareTo(DateTime.Now.AddMinutes(-20)) < 0)
+                //Si le dernier message date d'il y a 15 secondes  ou plus
+                if(wsDate.Value.CompareTo(DateTime.Now.AddSeconds(-15)) < 0)
                 {
                     //On passe la WS à Closed 
                     await wsDate.Key.CloseAsync(WebSocketCloseStatus.NormalClosure, "Timeout", CancellationToken.None); 
@@ -966,6 +966,12 @@ namespace DivalityBack.Services
         private async Task WarnUserInfoPlayer(WebSocket websocket, WebSocketReceiveResult result, string jsonInfoPlayer)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(jsonInfoPlayer);
+            await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+
+        public async Task Pong(WebSocket websocket, WebSocketReceiveResult result, string username)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(_utilService.PongToJson());
             await websocket.SendAsync(bytes, result.MessageType, result.EndOfMessage, CancellationToken.None);
         }
     }
