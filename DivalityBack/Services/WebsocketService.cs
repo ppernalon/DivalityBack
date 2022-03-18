@@ -60,7 +60,6 @@ namespace DivalityBack.Services
                             {
                                 _usersService.mapWsLastMessage.Add(websocket, DateTime.Now);
                             }
-                            
                             JsonDocument msgJson = JsonDocument.Parse(ms.ToArray());
                             try
                             {
@@ -134,18 +133,20 @@ namespace DivalityBack.Services
                                         break;
                                     case "ranking":
                                         await HandleRanking(websocket, result, msgJson);
-                                        break; 
+                                        break;
                                     case "infoWinRate":
                                         await HandleInfoWinRate(websocket, result, msgJson);
-                                        break; 
-                                    case "card" :
+                                        break;
+                                    case "card":
                                         await HandleGetCard(websocket, result, msgJson);
-                                        break; 
-                                     case "ping":
-                                         await HandlePing(websocket, result, msgJson);
-                                         break; 
+                                        break;
+                                    case "ping":
+                                        await HandlePing(websocket, result, msgJson);
+                                        break;
                                     default:
-                                        await websocket.SendAsync(Encoding.UTF8.GetBytes(_utilServices.ErrorWebsocketToJson()), WebSocketMessageType.Text, true,
+                                        await websocket.SendAsync(
+                                            Encoding.UTF8.GetBytes(_utilServices.ErrorWebsocketToJson()),
+                                            WebSocketMessageType.Text, true,
                                             CancellationToken.None);
                                         break;
                                 }
@@ -168,9 +169,14 @@ namespace DivalityBack.Services
                     }
                 }
             }
-            catch (InvalidOperationException e)
+            catch (WebSocketException e)
             {
-                Console.Write("ERREUR WS: " + e.Message);
+                Console.WriteLine("ERREUR WS : " + e.Message);
+                
+                if (e.ErrorCode.Equals(997)) //ErrorCode d'une handshake mal ferméee
+                {
+                    HandleDeconnection(websocket);
+                }
             }
         }
 
