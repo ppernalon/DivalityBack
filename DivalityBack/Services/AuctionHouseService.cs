@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DivalityBack.Models;
 using DivalityBack.Services.CRUD;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace DivalityBack.Services
 {
@@ -84,48 +85,56 @@ namespace DivalityBack.Services
             }
         }
 
-        public async Task BuyCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username, string cardName, string ownerName, string price, string quantity)
+        public async Task BuyCardInAuctionHouse(WebSocket websocket, WebSocketReceiveResult result, string username,
+            string cardName, string ownerName, string price, string quantity)
         {
             Card card = _cardsCrudService.GetCardByName(cardName);
             User user = _usersCrudService.GetByUsername(username);
             User owner = _usersCrudService.GetByUsername(ownerName);
 
-            if (!(user.Disciples < int.Parse(price) * int.Parse(quantity)))
+            if (!user.Username.Equals(owner.Username))
             {
-                List<AuctionHouse> auctions =
-                    _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice(card.Id, owner.Id, price);
-                if (int.Parse(quantity) <= auctions.Count)
+                if (!(user.Disciples < int.Parse(price) * int.Parse(quantity)))
                 {
-
-
-                    for (int i = 0; i < int.Parse(quantity); i++)
+                    List<AuctionHouse> auctions =
+                        _auctionHousesCrudService.GetByCardIdAndOwnerIdAndPrice(card.Id, owner.Id, price);
+                    if (int.Parse(quantity) <= auctions.Count)
                     {
-                        AuctionHouse auction = auctions[i];
-                        _auctionHousesCrudService.Remove(auction);
-                        owner.Disciples += int.Parse(price);
-                        user.Disciples -= int.Parse(price);
-                        user.Collection.Add(card.Id);
+
+
+                        for (int i = 0; i < int.Parse(quantity); i++)
+                        {
+                            AuctionHouse auction = auctions[i];
+                            _auctionHousesCrudService.Remove(auction);
+                            owner.Disciples += int.Parse(price);
+                            user.Disciples -= int.Parse(price);
+                            user.Collection.Add(card.Id);
+                        }
+
+                        _usersCrudService.Update(user.Id, user);
+                        _usersCrudService.Update(owner.Id, owner);
+
+                        await GetAuctionHouse(websocket, result);
                     }
-
-                    _usersCrudService.Update(user.Id, user);
-                    _usersCrudService.Update(owner.Id, owner);
-
-                    await GetAuctionHouse(websocket, result);
+                    else
+                    {
+                        string messageErreur = _utilServices.NotEnoughCardToJson();
+                        await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
+                            result.EndOfMessage, CancellationToken.None);
+                    }
                 }
                 else
-                {
-                    string messageErreur = _utilServices.NotEnoughCardToJson();
-                    await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
-                        result.EndOfMessage, CancellationToken.None);
-                }
-            }
-            else
                 {
                     string messageErreur = _utilServices.NotEnoughDisciplesToJson();
                     await websocket.SendAsync(Encoding.UTF8.GetBytes(messageErreur), result.MessageType,
                         result.EndOfMessage, CancellationToken.None);
                 }
             }
+            else
+            {
+                await CancelAuction(websocket, result, username, cardName, price, quantity);
+            }
+        }
 
         public async Task GetAuctionsByUsername(WebSocket websocket, WebSocketReceiveResult result, string username)
         {
