@@ -65,21 +65,44 @@ namespace DivalityBack.Services
                 {
                     //On enlève les cartes de la collection
                     user.Collection.Remove(card.Id);
-                    
+
                     //On rajoute les ventes dans l'HdV
                     AuctionHouse auction = new AuctionHouse();
                     auction.Price = int.Parse(price);
                     auction.CardId = card.Id;
                     auction.OwnerId = user.Id;
-                    _auctionHousesCrudService.Create(auction); 
+                    _auctionHousesCrudService.Create(auction);
                 }
-                
-                _usersCrudService.Update(user.Id, user);
-                await GetAuctionHouse(websocket, result);
+                //On supprime également les cartes mises en vente des équipes si besoin
+
+                //Si la quantité mise en vente est plus grande que les cartes libres dans la collection
+                //On enlève les cartes des équipes pour les mettre en vente dans l'HdV
+                int quantityInTeams = 0;
+                foreach (Team team in user.Teams)
+                {
+                    quantityInTeams += team.Compo.Where(c => c.Equals(card.Id)).Count();
+                }
+
+                int quantityToRemoveFromTeams = int.Parse(quantity) + quantityInTeams - quantityInCollection;
+                if (quantityToRemoveFromTeams > 0)
+                {
+                    foreach (Team team in user.Teams)
+                    {
+                        int quantityInTeam = team.Compo.Where(c => c.Equals(card.Id)).Count();
+                        while (quantityToRemoveFromTeams > 0 && quantityInTeam > 0)
+                        {
+                            team.Compo.Remove(card.Id);
+                            quantityToRemoveFromTeams -= 1;
+                            quantityInTeam -= 1; 
+                        }
+                    } 
+                }
+
+            _usersCrudService.Update(user.Id, user);
+            await GetAuctionHouse(websocket, result);
             }
             else
             {
-                string messageErreur = _utilServices.NotEnoughCardToJson();
                 await websocket.SendAsync(Encoding.UTF8.GetBytes(_utilServices.NotEnoughCardToJson()), result.MessageType,
                     result.EndOfMessage, CancellationToken.None); 
             }
