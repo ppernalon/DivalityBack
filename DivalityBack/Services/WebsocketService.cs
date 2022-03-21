@@ -171,12 +171,9 @@ namespace DivalityBack.Services
             }
             catch (WebSocketException e)
             {
-                Console.WriteLine("ERREUR WS : " + e.Message);
                 
-                if (e.ErrorCode.Equals(997)) //ErrorCode d'une handshake mal ferméee
-                {
-                    HandleDeconnection(websocket);
-                }
+                Console.WriteLine("ERREUR WS : " + e.Message);
+                HandleDeconnection(websocket);
             }
         }
 
@@ -380,7 +377,8 @@ namespace DivalityBack.Services
             foreach (var keyValuePair in _usersService.mapActivePlayersWebsocket)
             {
                 if (keyValuePair.Value.State == WebSocketState.CloseReceived ||
-                    keyValuePair.Value.State == WebSocketState.Closed)
+                    keyValuePair.Value.State == WebSocketState.Closed || 
+                    keyValuePair.Value.State == WebSocketState.Aborted)
                 {
                     _usersService.mapActivePlayersWebsocket.Remove(keyValuePair.Key);
                 }
