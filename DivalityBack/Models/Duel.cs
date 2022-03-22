@@ -44,7 +44,7 @@ namespace DivalityBack.Models
                 }
                 else if (index1 < 6 && index2 == 6)
                 {
-                    sortedGods.Add(godsBySpeed1[index2], Player1);
+                    sortedGods.Add(godsBySpeed1[index1], Player1);
                     index1++;
                 }
                 else
