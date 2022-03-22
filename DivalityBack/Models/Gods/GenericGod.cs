@@ -311,26 +311,63 @@ namespace DivalityBack.Models.Gods
             switch (name.ToLower())
             {
                 // egyptian
+                case "amon":
+                    return new Amon();
                 case "anubis":
                     return new Anubis();
                 case "bastet":
                     return new Bastet();
+                case "hathor":
+                case "hator":
+                    return new Hator();
                 case "horus":
                     return new Horus();
+                case "isis":
+                    return new Isis();
                 case "osiris":
                     return new Osiris();
+                case "ptah":
+                    return new Ptah();
+                case "ra":
+                    return new Ra();
+                
                 
                 //greek
+                case "ares":
+                    return new Ares();
+                case "artemis":
+                    return new Artemis();
                 case "athena":
                     return new Athena();
+                case "demeter":
+                    return new Demeter();
                 case "hades":
                     return new Hades();
+                case "hephaitos":
+                case "hephaistos":
+                    return new Hephaistos();
+                case "hera":
+                    return new Hera();
+                case "hestia":
+                    return new Hestia();
                 case "poseidon":
                     return new Poseidon();
                 case "zeus":
                     return new Zeus();
                 
                 // nordic
+                case "baldr":
+                    return new Baldr();
+                case "freyr":
+                    return new Freyr();
+                case "frigg":
+                    return new Frigg();
+                case "loki":
+                    return new Loki();
+                case "njor":
+                    return new Njor();
+                case "skadi":
+                    return new Skadi();
                 case "odin":
                     return new Odin();
                 case "hel":
