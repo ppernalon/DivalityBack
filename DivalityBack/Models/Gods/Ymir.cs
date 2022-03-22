@@ -7,7 +7,7 @@
             Name = "Ymir";
             Life = 200;
             MaxLife = 200;
-            Armor = 50;
+            Armor = 35;
             Power = 20;
             Speed = 5;
             GlobalAllyEffect = new EffectOnGod(0, 10, 0, 0);

@@ -794,8 +794,19 @@ namespace DivalityBack.Services
             byte[] winnerBytes = Encoding.UTF8.GetBytes(winnerJson);
             byte[] looserBytes = Encoding.UTF8.GetBytes(looserJson);
 
-            WebSocket winnerWebSocket = duel.winner().PlayerWebSocket;
-            WebSocket looserWebSocket = duel.looser().PlayerWebSocket;
+            Player winner = duel.winner();
+            Player looser = duel.looser();
+
+            User winnerUser = _usersCRUDService.GetByUsername(winner.Username);
+            winnerUser.Disciples += 300;
+            _usersCRUDService.Update(winnerUser.Id, winnerUser);
+            
+            User looserUser = _usersCRUDService.GetByUsername(looser.Username);
+            looserUser.Disciples += 150;
+            _usersCRUDService.Update(looserUser.Id, looserUser);
+
+            WebSocket winnerWebSocket = winner.PlayerWebSocket;
+            WebSocket looserWebSocket = looser.PlayerWebSocket;
 
             await winnerWebSocket.SendAsync(winnerBytes, result.MessageType, result.EndOfMessage,
                 CancellationToken.None);
