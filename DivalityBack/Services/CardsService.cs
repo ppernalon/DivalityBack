@@ -35,13 +35,13 @@ namespace DivalityBack.Services
             int randomNumberRarity = new Random().Next(1, 101);
             if (randomNumberRarity <= mapRarityPurcentage["commune"])
             {
-                return "Commune";
+                return "commune";
             }
             if (randomNumberRarity <= mapRarityPurcentage["rare"])
             {
-                return "Rare";
+                return "rare";
             }
-            return "Légendaire";
+            return "legendaire";
         }
 
         public Card GenerateNewCard(string pantheon)
